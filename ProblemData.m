@@ -4,5 +4,4 @@ Loads;
 Geometry;
 Approximation;
 Case = [];  % here  we are gathering info to present
-Dvec=[const,H,W,L/n]; % gathering all necessary data
     

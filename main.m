@@ -22,7 +22,8 @@ Pointpic=0; % Picture of integration points in the cross-section
 % ########## Problem's data ###############################################
 ProblemData; % all information is collected here  
 % ########### Start the program ###########################################
-for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])     
+for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])    
+    Dvec=[const,H,W,L/n]; % gathering all necessary data 
     clear P P0 xloc u0 uu ee bc f1 K ff ffcs Kc Kcs;    % clear previous mesh definitions
     %########## Creates finite element mesh for a simple beam-type structure #############  
     CreateFEMesh;
