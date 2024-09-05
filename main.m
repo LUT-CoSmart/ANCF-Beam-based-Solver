@@ -1,6 +1,5 @@
 clc,clear,close all;
 format long
-addpath('SupportFunctions');
 % ############ Visualization ##############################################
 Ffigplot=0; %  Displacement
 % ########### Element type & data #########################################
@@ -16,7 +15,7 @@ BC=0;       % 0 - reduced, 1 - full
 steps = 10; % sub-loading steps
 App = 0;    % 0 - standart, 1 and higher - via Green's formula (n is number of appr.)
 n_xi = 3;   % number integration point in xi direction
-sol = 1;    % 0 - standart, 1- AceGen
+sol = 0;    % 0 - Matla Finite difference, 1- AceGen
 h=10^(-9);  % finite difference scheme step
 Pointpic=0; % Picture of integration points in the cross-section
 % ########## Problem's data ###############################################

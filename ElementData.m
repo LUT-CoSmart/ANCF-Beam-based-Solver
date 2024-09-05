@@ -1,5 +1,5 @@
 % Define element properties
-addpath('ElementTensors');
+addpath('ElementTensors\Matlab','ElementTensors\AceGen');
 if Element == 3243
     ElemType='3D two noded 24 dofs ANCF beam';  
     ElemNodes=2;

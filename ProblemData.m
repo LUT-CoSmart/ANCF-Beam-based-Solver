@@ -1,4 +1,5 @@
 % File includes data for all problems
+addpath('SupportFunctions');
 Materials;
 Loads;
 Geometry;
