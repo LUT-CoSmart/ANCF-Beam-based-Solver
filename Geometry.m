@@ -17,4 +17,6 @@ else
 end    
 W=max_x-min_x;
 H=max_y-min_y;
-
+% rotation
+twist_angle = 0; % Twist around X axis in degrees
+ro = 0;          % Distance till the rotatoin center

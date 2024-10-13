@@ -1,5 +1,4 @@
 % Define element properties
-addpath('ElementTensors\Matlab','ElementTensors\AceGen');
 if Element == 3243
     ElemType='3D two noded 24 dofs ANCF beam';  
     ElemNodes=2;
@@ -33,5 +32,21 @@ elseif Element == 34103
 else    
     fprint('Choose write element type!!!!')
 end 
-
-    
+% Access to element tensors and force functions
+if sol_acegen == true
+   % addpath('ElementTensors\Matlab','ElementTensors\AceGen');
+else
+   if disp_based == false
+      addpath('TensorDerivations\Matlab\ElementTensors\Position');  
+   else
+       if small_deformation == false
+           addpath('TensorDerivations\Matlab\ElementTensors\Displacement\Finite');
+       else
+           addpath('TensorDerivations\Matlab\ElementTensors\Displacement\Small');
+       end
+   end
+end   
+PosDofs = []; % identefication of positional DoFs within the chosen element 
+for i = 1:ElemNodes
+    PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+3];
+end    

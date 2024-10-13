@@ -1,7 +1,7 @@
 % Creates boundary conditions
 % create global vector of nodal coordinates
 for jj=1:nn
-   ee((jj-1)*DofsAtNode+1:jj*DofsAtNode)=P0(jj,:); 
+   q((jj-1)*DofsAtNode+1:jj*DofsAtNode)=P0(jj,:); 
 end
 % Define vector of linear constraints
 bc = logical(ones(1,nx));

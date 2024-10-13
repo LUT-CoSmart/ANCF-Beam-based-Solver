@@ -6,13 +6,8 @@ if App==0
       return;
    elseif Area == 1
       fac=1;
-      if Element ==3243
-         num=2;
-      elseif Element == 34103
-         num=4;
-      else
-         num=3;
-      end 
+      ElementName = num2str(Element);             % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
+      num = str2double(ElementName(2));           % Number of point in axial direction, usually it equals to number of nodes
       [xi,wxi] = gauleg2(-1,1,num);
       pcirc(:,1)=repmat(xi',1,num);
       pcirc(:,2)=reshape(repmat(xi,1,num)',num^2,1);
