@@ -1,5 +1,4 @@
 % Geometrical setup
-addpath('CrossSections');
 L=1; % Length
 if Area==1 % if Approximation~=0 it will be substituted
     rec;

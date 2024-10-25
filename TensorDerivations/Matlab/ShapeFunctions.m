@@ -1,5 +1,5 @@
 L_Nodes = linspace(0,L,Nodes);
-AAA = sym(zeros(length(basis)));  % this matrix must always be square! 
+AAA = sym(zeros(length(basis))); 
 for i = 0:length(required_derivatives)
     der_Basis = basis;
     if i ~=0

@@ -1,5 +1,4 @@
 % Gathering integration points
-addpath('GaussPoints');
 if App==0
    if (Area == 0) || (Area == 3) || (Area == 4)
       disp('****** The area type is not recognized ******');
