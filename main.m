@@ -21,7 +21,7 @@ n_xi = 3;   % number integration point in xi direction
 h=10^(-9);  % finite difference scheme step
 Pointpic=0; % Picture of integration points in the cross-section
 % ########## Problem's data ###############################################
-ProblemData; % all information is collected here  
+ProblemData; % all information is collected here 
 ConnectPackages;
 % ########### Start the program ###########################################
 for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])        

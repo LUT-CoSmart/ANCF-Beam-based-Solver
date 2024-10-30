@@ -6,7 +6,7 @@ if Case == 1 % elongation load
    Fz=zeros(1,length(Fx));
    BC=0;       % 0 - reduced, 1 - full 
 elseif Case == 2 % bending load
-   Fy_max = 5e5*0.5^8;   
+   Fy_max = 100; %5e5*0.5^8;   
    Fy=Fy_max/steps:Fy_max/steps:Fy_max; 
    Fx=zeros(1,length(Fy));
    Fz=zeros(1,length(Fy));

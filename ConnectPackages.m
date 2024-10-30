@@ -1,5 +1,6 @@
 %% Connect packages
 % Support functions
+ElementName = string(Element);
 addpath('SupportFunctions');
 % For Geometry approximation
 addpath('MeshFunctions')
@@ -8,7 +9,8 @@ addpath('GaussPoints');
 % Inner Force calculation
 addpath('InnerForceFunctions');
 if sol_acegen
-   addpath('TensorDerivations/AceGen');
+   path = 'TensorDerivations/AceGen/' + ElementName; 
+   addpath(path);
 else
    addpath('MaterialsSecondKirhhoff');  % functions to calculate the 2nd Kirhhoff tensot in Matlab
    if disp_based
@@ -19,7 +21,11 @@ else
       end
    else
       addpath('TensorDerivations\Matlab\ElementTensors\Position');  
-   end      
+   end
+   if Fibers
+      addpath('TensorDerivations/Matlab/FiberVectors');
+   end    
 end  
+
 
 
