@@ -1,4 +1,5 @@
 % Geometrical setup
+addpath('CrossSections');
 L=2; % Length
 if Area==1 % if Approximation~=0 it will be substituted
     rec;

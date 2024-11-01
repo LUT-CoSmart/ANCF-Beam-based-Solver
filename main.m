@@ -1,5 +1,6 @@
 clc,clear,close all;
 format long
+ConnectPackages;
 % ############ Visualization ##############################################
 Ffigplot=0; %  Displacement
 % ########## Calculation way ##############################################
@@ -22,7 +23,7 @@ h=10^(-9);  % finite difference scheme step
 Pointpic=0; % Picture of integration points in the cross-section
 % ########## Problem's data ###############################################
 ProblemData; % all information is collected here 
-ConnectPackages;
+ConnectInnerEnergyFunctions;
 % ########### Start the program ###########################################
 for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])        
     clear P0f P0 P00 xloc u0 uu ee bc K ff ffc Kc;    % clear previous mesh definitions

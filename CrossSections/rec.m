@@ -16,6 +16,7 @@ curve4=[x' y'];
 % collect all original data
 data_1=[curve1;curve2;curve3;curve4];
 
+
 max_x=max(data_1(:,1));
 min_x=min(data_1(:,1));
 max_y=max(data_1(:,2));
