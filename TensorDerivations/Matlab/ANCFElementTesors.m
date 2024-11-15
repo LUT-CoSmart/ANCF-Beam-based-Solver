@@ -1,8 +1,9 @@
 clc, clear, close all;
-disp_based = false;         % what field the tensors are based on: displacemetn (true), position (false)
-small_deformation = false;  % appoximation theory: infinite small (true), finite (false)
+write_files = false;        % Do we need to write any file?
+disp_based = false;         % What field the tensors are based on: displacemetn (true), position (false)
+small_deformation = false;  % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3333;                                % Available: 3243, 3333, 3353, 3363, 34X3 (34103)
+Element=3363;                                % Available: 3243, 3333, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);              % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));          % Number of nodes            
 Dim = str2double(ElementName(end));          % Problem dimensionality     
@@ -33,6 +34,7 @@ switch Element % Find the corresponding basis set to the element
         error('Unsupported element type!');        
 end
 ShapeFunctions;
+N_xi   % The presentation of shape functions in isoparametric coordinates
 % ################## Element's initial cofiguration #######################
 q0 = [];   % Element's DoF vector (all Dofs) in the initial configuration
 q0f = []; % Element's DoF vector (all Dofs) in the initial fibers' configuration for the length reshaping
@@ -89,15 +91,17 @@ end
 % ################## Function for fibers' transformation ##################
 % Here it is assumed that fibers are mesured in brick sample, which makes
 % the identification of their direction easier.
-% Another assumption is that, firstly the element pre-deformed, than the
+% Another assumption is: firstly the element is pre-deformed, than the
 % fibers are pre-twisted around x axis in counter-clockwise direction. 
 r0f = Nm_xi*q0f;                       % Position vector in the initial configuration
 F0f = jacobian(r0f,xi_vec);            % Gradient of "fibers" in the pre-deformed configuration  
-F_fibers = simplify(F0f * F_brick);    % Total fiber reshape from rectangular brick to the intial pre-deformed configuration 
+F_fibers = simplify(F0f * F_brick_inv);% Total fiber reshape from rectangular brick to the intial pre-deformed configuration 
 a0_fib=F_fibers*a0;                    % Reshaping the fibers
 a0_fib=a0_fib/norm(a0_fib);            % Normalization, such as the length can change 
 % ################## Saving functions #####################################
-matlabFunction(Nm_xi, 'file', fullfile('ShapeFunctions','Shape_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
-matlabFunction(a0_fib, 'file', fullfile('FiberVectors','a0_fib_' + string(Element)), 'vars', {a0,q0pos,phi,Phi,L,H,W,xi,eta,zeta});
-matlabFunction(F, 'file', fullfile(dir_name,'F_' +  string(Element)), 'vars', {q,u,q0pos,phi,L,H,W,xi,eta,zeta});
-matlabFunction(dEde, 'file', fullfile(dir_name,'dEde_' + string(Element)), 'vars', {q,u,q0pos,phi,L,H,W,xi,eta,zeta});
+if write_files == true
+    matlabFunction(Nm_xi, 'file', fullfile('ShapeFunctions','Shape_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
+    matlabFunction(a0_fib, 'file', fullfile('FiberVectors','a0_fib_' + string(Element)), 'vars', {a0,q0pos,phi,Phi,L,H,W,xi,eta,zeta});
+    matlabFunction(F, 'file', fullfile(dir_name,'F_' +  string(Element)), 'vars', {q,u,q0pos,phi,L,H,W,xi,eta,zeta});
+    matlabFunction(dEde, 'file', fullfile(dir_name,'dEde_' + string(Element)), 'vars', {q,u,q0pos,phi,L,H,W,xi,eta,zeta});
+end

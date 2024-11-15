@@ -1,17 +1,17 @@
 %**************************************************************
 %* AceGen    8.101 Windows (28 Feb 24)                        *
-%*           Co. J. Korelc  2020           13 Oct 24 20:47:49 *
+%*           Co. J. Korelc  2020           15 Nov 24 16:49:33 *
 %**************************************************************
 % User     : Limited evaluation version
-% Notebook : ANCF_3333_KS
-% Evaluation time                 : 3 s     Mode  : Debug
+% Notebook : ANCF3333KS
+% Evaluation time                 : 8 s     Mode  : Debug
 % Number of formulae              : 233     Method: Automatic
-% Subroutine                      : ANCF3333KScont size: 6394
+% Subroutine                      : ANCF3333KS size: 6394
 % Total size of Mathematica  code : 6394 subexpressions
-% Total size of Matlab code      : 21525 bytes 
+% Total size of Matlab code      : 21529 bytes 
 
 %*********************** F U N C T I O N **************************
-function[q0,uu,D,K,F,GINT,nintpt]=ANCF3333KS(q0,uu,D,K,F,GINT,nintpt);
+function[q0f,q0,uu,D,K,F,GINT,nintpt]=ANCF3333KS(q0f,q0,uu,D,K,F,GINT,nintpt);
 persistent v;
 if size(v)<691
   v=zeros(691,'double');

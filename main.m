@@ -4,15 +4,15 @@ ConnectPackages;
 % ############ Visualization ##############################################
 Ffigplot=0; %  Displacement
 % ########## Calculation way ##############################################
-sol_acegen = false; % false - Matlab Finite difference, true - AceGen
+sol_acegen = true; % false - Matlab Finite difference, true - AceGen
 disp_based = false; % Tensors-based field: displacement (true), position (false)
 small_deformation = false; % appoximation theory: infinite small (true), finite (false)
 % ########### Element type & data #########################################
-Element=3333; % Elements. There are 3243, 3333, 3353, 3363, 34X3 (34103)
+Element=3363; % Elements. There are 3243, 3333, 3353, 3363, 34X3 (34103)
 ElementData;  
 nmesh=1; % Element numbers 
 % ########## Problem's data ###############################################
-Material=0; % Materials. Neo-Hookean (1), 2 - and 5 - contants Mooney-Rivlin (2, 5), GOH (0), K.-S. (3).
+Material=0; % Material models: GOH (0), Neo-Hookean (1), 2- and 5- contant Mooney-Rivlin (2, 5),  K.-S. (3).
 Case=1;     % 0 - no load, 1 - elongation load, 2 - bending load 
 Area=1;     % 0 - tendon, 1 - rectangular, 2 - circular, 3 - "C" cross-section, 4 - flower 
 % ########## Integration way ##############################################
