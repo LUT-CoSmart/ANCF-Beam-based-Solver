@@ -1,18 +1,14 @@
 clc,clear,close all;
-format long
-ConnectPackages;
-% ############ Visualization ##############################################
-Ffigplot=0; %  Displacement
 % ########## Calculation way ##############################################
-sol_acegen = true; % false - Matlab Finite difference, true - AceGen
+sol_acegen = false; % false - Matlab Finite difference, true - AceGen
 disp_based = false; % Tensors-based field: displacement (true), position (false)
 small_deformation = false; % appoximation theory: infinite small (true), finite (false)
 % ########### Element type & data #########################################
-Element=3363; % Elements. There are 3243, 3333, 3353, 3363, 34X3 (34103)
+Element=3243; % Elements. There are 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementData;  
 nmesh=1; % Element numbers 
 % ########## Problem's data ###############################################
-Material=0; % Material models: GOH (0), Neo-Hookean (1), 2- and 5- contant Mooney-Rivlin (2, 5),  K.-S. (3).
+Material=1; % Material models: GOH (0), Neo-Hookean (1), 2- and 5- contant Mooney-Rivlin (2, 5),  K.-S. (3).
 Case=1;     % 0 - no load, 1 - elongation load, 2 - bending load 
 Area=1;     % 0 - tendon, 1 - rectangular, 2 - circular, 3 - "C" cross-section, 4 - flower 
 % ########## Integration way ##############################################
@@ -21,9 +17,9 @@ App = 0;    % 0 - standart, 1 and higher - via Green's formula (n is number of a
 n_xi = 3;   % number integration point in xi direction
 h=10^(-9);  % finite difference scheme step
 Pointpic=0; % Picture of integration points in the cross-section
-% ########## Problem's data ###############################################
-ProblemData; % all information is collected here 
-ConnectInnerEnergyFunctions;
+% ########## Add all required functions & data ############################
+ConnectPackages;  % all information is collected here 
+Results = [];  
 % ########### Start the program ###########################################
 for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])        
     clear P0f P0 P00 xloc u0 uu ee bc K ff ffc Kc;    % clear previous mesh definitions
@@ -61,8 +57,8 @@ for n = nmesh % Loop over all defined meshes: nmesh=[1 ....])
         end           
         %Pick nodal displacements from result vector
         [ux, uy, uz]=Displ(DofsAtNode,u,nn); 
-        Case = [Case; n nx ux uy uz];
+        Results = [Results; n nx ux uy uz];
     end
 end
-% % POST PROCESSING ###############################################
+% POST PROCESSING ###############################################
 PostProcessing 

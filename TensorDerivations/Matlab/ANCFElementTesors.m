@@ -1,13 +1,14 @@
 clc, clear, close all;
-write_files = false;        % Do we need to write any file?
-disp_based = false;         % What field the tensors are based on: displacemetn (true), position (false)
+Call_shapeFunctions = false;% To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
+write_files = true;         % Do we need to write any file?
+disp_based = true;         % What field the tensors are based on: displacemetn (true), position (false)
 small_deformation = false;  % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3363;                                % Available: 3243, 3333, 3353, 3363, 34X3 (34103)
-ElementName = num2str(Element);              % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
-Nodes = str2double(ElementName(2));          % Number of nodes            
-Dim = str2double(ElementName(end));          % Problem dimensionality     
-VecAtNode = str2double(ElementName(3:end-1));% Vector functions per node  
+Element=3343;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
+Nodes = str2double(ElementName(2));           % Number of nodes            
+Dim = str2double(ElementName(end));           % Problem dimensionality     
+VecAtNode = str2double(ElementName(3:end-1)); % Vector functions per node  
 % ################## Symbolic variables ###################################
 syms x y z real;                              % Physical coordinates       
 syms xi eta zeta real;                        % Binormalized coordinates   
@@ -27,6 +28,7 @@ BasicFunctions;
 switch Element % Find the corresponding basis set to the element
     case 3243,  basis = basis_3243;  required_derivatives = {'x', 'y', 'z'};
     case 3333,  basis = basis_3333;  required_derivatives = {'y', 'z'};      
+    case 3343,  basis = basis_3343;  required_derivatives = {'y', 'z', 'yz'};              
     case 3353,  basis = basis_3353;  required_derivatives = {'y', 'z', 'yy', 'zz'};
     case 3363,  basis = basis_3363;  required_derivatives = {'y', 'z', 'yz', 'yy', 'zz'};
     case 34103, basis = basis_34103; required_derivatives = {'y', 'z', 'yz', 'yy', 'zz', 'yyz', 'yzz', 'yyy', 'zzz'};
@@ -34,7 +36,6 @@ switch Element % Find the corresponding basis set to the element
         error('Unsupported element type!');        
 end
 ShapeFunctions;
-N_xi   % The presentation of shape functions in isoparametric coordinates
 % ################## Element's initial cofiguration #######################
 q0 = [];   % Element's DoF vector (all Dofs) in the initial configuration
 q0f = []; % Element's DoF vector (all Dofs) in the initial fibers' configuration for the length reshaping
@@ -89,10 +90,10 @@ for ii=1:Dim
     end
 end
 % ################## Function for fibers' transformation ##################
-% Here it is assumed that fibers are mesured in brick sample, which makes
-% the identification of their direction easier.
-% Another assumption is: firstly the element is pre-deformed, than the
-% fibers are pre-twisted around x axis in counter-clockwise direction. 
+% Here it is assumed that fibers are mesured in a straght brick sample, 
+% which makes the identification of their direction easier.
+% Another assumption is: the element is firstly pre-deformed,
+% than the fibers are pre-twisted around x axis in counter-clockwise direction. 
 r0f = Nm_xi*q0f;                       % Position vector in the initial configuration
 F0f = jacobian(r0f,xi_vec);            % Gradient of "fibers" in the pre-deformed configuration  
 F_fibers = simplify(F0f * F_brick_inv);% Total fiber reshape from rectangular brick to the intial pre-deformed configuration 

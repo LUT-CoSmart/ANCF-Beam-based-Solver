@@ -1,43 +1,22 @@
 % Define element properties
 if Element == 3243
-    ElemType='3D two noded 24 dofs ANCF beam';  
-    ElemNodes=2;
-    DofsAtNode=12;
-    ElemDofs=ElemNodes*DofsAtNode;
-    DIM=3;
-    Slope_x = true;  % Does the elemetn include slope/derivative along x axis  
-elseif Element == 3333
-    ElemType='3D three noded 27 dofs ANCF beam';  
-    ElemNodes=3;
-    DofsAtNode=9;
-    ElemDofs=ElemNodes*DofsAtNode;
-    DIM=3;
+    Slope_x = true;  % Does the element include slope/derivative along x axis  
+elseif Element == 3333 
+    Slope_x = false;
+elseif Element == 3343
     Slope_x = false;
 elseif Element == 3353
-    ElemType='3D three noded 45 dofs ANCF beam';  
-    ElemNodes=3;
-    DofsAtNode=15;
-    ElemDofs=ElemNodes*DofsAtNode;
-    DIM=3;     
     Slope_x = false;
 elseif Element == 3363
-    ElemType='3D three noded 54 dofs ANCF beam';  
-    ElemNodes=3;
-    DofsAtNode=18;
-    ElemDofs=ElemNodes*DofsAtNode;
-    DIM=3;  
     Slope_x = false;
 elseif Element == 34103
-    ElemType='3D four noded 120 dofs ANCF beam';  
-    ElemNodes=4;
-    DofsAtNode=30;
-    ElemDofs=ElemNodes*DofsAtNode;
-    DIM=3; 
     Slope_x = false;
 else    
     fprint('Choose write element type!!!!')
 end 
-PosDofs = []; % identefication of positional DoFs within the chosen element 
-for i = 1:ElemNodes
-    PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+3];
-end    
+ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
+ElemNodes = str2double(ElementName(2));       % Number of nodes            
+DIM = str2double(ElementName(end));           % Problem dimensionality     
+VecAtNode = str2double(ElementName(3:end-1)); % Vector functions per node
+DofsAtNode = DIM * VecAtNode;                 % Number of Dofs in each element node
+ElemDofs=ElemNodes*DofsAtNode;                % Total number of Dofs in the chosen element

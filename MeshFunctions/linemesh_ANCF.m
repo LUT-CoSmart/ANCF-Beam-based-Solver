@@ -1,4 +1,4 @@
-function [P0f,P0,nloc,phim,Phim,Ln] = linemesh_ANCF(Element,Slope_x,ElemNodes,n,L,phi,ro,Phi)                                      
+function [P0f,P0,nloc,phim,Phim,Ln] = linemesh_ANCF(HigherOrderTerms,Slope_x,ElemNodes,n,L,phi,ro,Phi)                                      
 nodes=n*(ElemNodes-1)+1; % number of nodes
 if phi ~= 0
     phik=geospace(0,phi,nodes,1)'; % outer twist
@@ -15,9 +15,8 @@ xk=geospace(0,L,nodes,1)';
 yk=ro*cosd(phik);
 zk=ro*sind(phik);
 % Basicaly we have dependecy phik = phi/L * xk;
-[Ln,drdx] = SplineLineAlongX(xk,yk,zk,n); % Calculating elements' lengths and x slopes
+[Ln,drdx] = SplineLineAlongX(xk,yk,zk,n); % Calculating elements' lengths and x-slopes
 nullmat = zeros(nodes,3);
-
 drdy=nullmat;
 drdz=nullmat;
 drdyf=nullmat;
@@ -40,19 +39,13 @@ for i=1:nodes
     drdyf(i,:)=(Af*drdyk)';
     drdzf(i,:)=(Af*drdzk)';       
 end
-% Figuring out the usage of drdx in the chosen element
-ElementName = num2str(Element);
-VecAtNode =str2double(ElementName(3:end-1)); % Vector functions per node
-if Slope_x
-   length_rx = 3;
-else
-   length_rx = 0;
-   drdx = [];
+HigherOrderTerms_all = zeros(nodes,HigherOrderTerms); % Assumption that dimension is 3                                                      
+% Figuring out the usage of x-slope in the chosen element
+if Slope_x == false   
+   drdx = []; % It is defined above, but some elements may not use it 
 end   
-HigherOrderTerms = zeros(nodes,3*VecAtNode-(3+length_rx+3+3)); % Assumption that dimension is 3
-                                                               % Number = Dim * VecAtNodes - (pos + slopes' lengths)
-P0  = [xk yk zk drdx drdy drdz HigherOrderTerms];
-P0f = [xk yk zk drdx drdyf drdzf HigherOrderTerms];
+P0  = [xk yk zk drdx drdy drdz HigherOrderTerms_all];
+P0f = [xk yk zk drdx drdyf drdzf HigherOrderTerms_all]; % attention to y- and z-slopes
 % generate element and angles connectivity
 nloc = [];
 phim = [];

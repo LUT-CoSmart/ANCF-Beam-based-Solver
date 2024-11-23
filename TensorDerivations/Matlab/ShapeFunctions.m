@@ -23,3 +23,6 @@ for i=1:length(basis)
         Nm_xi(j,k)=N_xi(i);   
     end    
 end
+if Call_shapeFunctions == true
+   N_xi   % The presentation of shape functions in isoparametric coordinates 
+end    

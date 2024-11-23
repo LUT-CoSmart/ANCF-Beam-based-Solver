@@ -1,5 +1,15 @@
+PosDofs = []; % identefication of positional DoFs within the chosen element 
+for i = 1:ElemNodes
+    PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+3];
+end   
+if Slope_x 
+    length_rx = DIM;
+else 
+    length_rx = 0;
+end    
+HigherOrderTerms = DIM*VecAtNode-(DIM+length_rx+DIM+DIM); 
 % Creates mesh for an intially straight beam structure
-[P0,P0f,nloc,phim,Phim,Ln] = linemesh_ANCF(Element,Slope_x,ElemNodes,n,L,twist_angle,ro,fiber_twist);
+[P0,P0f,nloc,phim,Phim,Ln] = linemesh_ANCF(HigherOrderTerms,Slope_x,ElemNodes,n,L,twist_angle,ro,fiber_twist);
 xloc=xlocAllANCF(ElemNodes,DofsAtNode,nloc);
 % get number of nodes (nn), number of elements (nl) and total number of DOFs (nx)
 [nn,~] = size(P0);
