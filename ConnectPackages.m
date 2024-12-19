@@ -12,8 +12,7 @@ Loads;
 Geometry;
 Approximation;
 %% Connect to inner energy functions
-% this document allows, based on the chosen options, choose the right folder 
-% for computing inner energy.
+% Choose the right folder for computing inner energy
 ElementName = string(Element);
 % Inner Force calculation
 addpath('InnerForceFunctions');

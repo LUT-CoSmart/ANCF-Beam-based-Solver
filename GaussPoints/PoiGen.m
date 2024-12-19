@@ -4,6 +4,8 @@ function [pcirc,wcirc]=PoiGen(data,nu2,n,pic)
 % pic - do you want to see, how points are distributed on the canvas; 
 %% ksi-line (doesn't matter wich one)
 ksi=@(eta) eta-eta; % all points inside of the cross-section
+p = min([n+1,max(cellfun(@numel, data)/2)-1]); % spline degree approximation, chooses between number min numbers of knots-1 (cellfun calculates altogether x and y, therefore, /2)
+% and approximation degree +1  (+1 because spapi required at least to be 2)  
 %% starting the program
 for i=1:nu2
     x=data{i}(:,1);
@@ -16,14 +18,6 @@ for i=1:nu2
         t(j+1)=t(j)+norm(P(j+1,:)-P(j,:));
     end
     %% approximation 
-    p=2;
-    %p=m-1; % degree of "spline"
-%     if m-1>2
-%         p=3;
-%     else
-%         p=2;
-%     end    
-    %p=2; % better for bending and elong ten
     S1 = spapi(optknt(t',p),t,x);
     S2 = spapi(optknt(t',p),t,y);
     % premitive of y function 
