@@ -34,7 +34,7 @@ for i=1:steps
     imax=20;                      % Maximum number of iterations for Newton's method 
     for ii=1:imax    
         tic; 
-        [K,ff,Fext] = Kt(q,q0,q0f,u,phim,Phim,F_applied,xloc,nx,nn,nl,MaterialName,Fibers,Dvec,detF0,Gint,Nint,sol_acegen,Element,ElemDofs,DofsAtNode,PosDofs,h);
+        [K,ff,Fext] = Kt(q,q0,q0f,u,phim,Phim,F_applied,xloc,nx,nn,nl,MaterialName,Fibers,Dvec,fac,detF0,Gint,Nint,sol_acegen,Element,ElemDofs,DofsAtNode,PosDofs,h);
         Kc = K(bc,bc);            % Eliminate linear constraints from stiffness matrix
         ffc=ff(bc);               % Eliminate linear constraints from force vector
         deltaf=ffc/norm(Fext(bc));% Compute residual
