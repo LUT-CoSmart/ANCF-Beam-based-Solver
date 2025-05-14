@@ -10,7 +10,7 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
        addpath("CrossSections") 
        run(CSName); 
        Deg=input('Input Approximation degree (1 or above): ');      % Approximation degree for Green's formula        
-       [data, nu2] = Adjustment(data_1);
+       [data, nu2] = Binormalization(data_1);
        [pcirc,wcirc]=PoiGen(data,nu2,Deg);
        prefac = 1;
 
