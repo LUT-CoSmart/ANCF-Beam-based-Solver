@@ -1,4 +1,5 @@
-function [pcirc,wcirc]=PoiGen(data,nu2,n,pic)
+function [pcirc,wcirc]=PoiGen(data,nu2,n)
+
 % Area - points to of the area to deal with;
 % n  - how accurate you want to have, the more the better!;
 % pic - do you want to see, how points are distributed on the canvas; 
@@ -54,24 +55,6 @@ end
 point_all=[];
 for i=1:nu2
     point_all=[point_all; point{i}];
-end
-%% Drawing
-if pic==1
-    for j=1:length(point_all) 
-        xx=point_all(j,2);
-        yy=point_all(j,3);
-        plot(xx,yy,'.k')
-        hold on
-        text(xx,yy,num2str(j),'Color','k')
-    end
-    %% For draw use x1 (not to spoit storage data)
-    x1=-1.0:0.1:1.0;
-    grid on;
-    xlim([-1.1 1.1]);
-    ylim([-1.1 1.1]);
-    plot(ksi(x1),x1,'-k','LineWidth',2);   
-    set(gca,'Fontsize',14);
-    set(gca,'FontName','Times New Roman');
 end
 
 pcirc(:,2)=point_all(:,2);

@@ -15,8 +15,8 @@ C_dash = J_inv23*C;
 Cinv = C^(-1);
 
 I1=trace(C_dash);
-A0 = a0(:) * a0(:).';
-I4=trace(C_dash*A0);  % double contraction operaiton ":";
+
+A0 = a0' * a0; % a0 is a row-vector
 % full form of A0
 % A0 = zeros(3);
 % for i = 1:3 
@@ -25,6 +25,7 @@ I4=trace(C_dash*A0);  % double contraction operaiton ":";
 %     end
 % end
 
+I4=trace(C_dash*A0');  % double contraction operaiton ":";
 % full form of I4
 % I4 = 0;
 % for k = 1:3
@@ -32,6 +33,9 @@ I4=trace(C_dash*A0);  % double contraction operaiton ":";
 %         I4 = I4+C_dash(k,l)*A0(l,k);
 %     end
 % end
+
+% Delta function
+delt = @(i,j) double(i == j);
 
 %4order tensor P
 for i = 1:3 
