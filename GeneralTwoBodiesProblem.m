@@ -151,7 +151,7 @@ for i=1:steps
         elseif ii==imax 
             fprintf('The solution is not found. The maximum number of iterations is reached. Total CPU-time: %d\n', ii);
         else     
-            fprintf('Convergence: %10.4f, Displacements norm: %10.5f, Total gap: %10.7f\n', norm(abs(deltaf)), norm(u_bc), Gap);
+            fprintf('Iteration: %d, Convergence: %10.4f, Displacements norm: %10.5f, Total gap: %10.7f\n', ii,  norm(abs(deltaf)), norm(u_bc), Gap);
         end  
     end
 

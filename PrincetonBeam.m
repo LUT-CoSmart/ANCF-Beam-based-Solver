@@ -60,7 +60,7 @@ for angle = angleSet
             elseif ii==imax 
                 fprintf('The solution is not found. The maximum number of iterations is reached. Total CPU-time: %d\n', ii);
             else     
-                fprintf('Convergence: %10.4f, Displacements norm: %10.5f\n', norm(abs(deltaf)), norm(u_bc));
+                fprintf('Iteration: %d, Convergence: %10.4f, Displacements norm: %10.5f\n', ii, norm(abs(deltaf)), norm(u_bc));
             end                
         end           
     

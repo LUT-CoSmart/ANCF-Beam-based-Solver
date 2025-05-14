@@ -15,6 +15,7 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
            case {"C", "Tendon"}
                 ApproximationScheme = "Poigen";
                 disp("For chosen area the approximation scheme switched to Poigen")
+                
                 if CSName == "C"
                    Body.Length.X = 1; 
                    Body.Length.Y = 0.1; % Extension in y-axis
