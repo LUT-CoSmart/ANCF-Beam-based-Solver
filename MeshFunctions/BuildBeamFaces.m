@@ -31,18 +31,29 @@ function Body = BuildBeamFaces(Body)
 
 
                 % side surfaces
-                % dt = delaunayTriangulation(pointCS);  % creating nice triangulation to avoid collinearity for ending
-                % 
-                % startLayer = 1:NpointCS; % first cross-section
-                % endLayer = (CSNumber-1)*NpointCS + (1:NpointCS); % last cross-section
-                % 
-                % facesStart = startLayer(dt.ConnectivityList);
-                % facesEnd = endLayer(dt.ConnectivityList);
-                % 
-                % facesStart = facesStart(:, [1 3 2]); % flip normal, it has to be inwards 
-                % faces = [faces; facesStart; facesEnd];
+                % All of it due to complex CS (like Tendon)
+                edges = [(1:NpointCS)' [2:NpointCS 1]'];  % closed loop of edges
+                dt = delaunayTriangulation(pointCS, edges); % creating nice triangulation to avoid collinearity for ending
+                pgon = polyshape(pointCS); % polyshape from boundary points
 
-              
+                tri = dt.ConnectivityList;
+                centroids = (pointCS(tri(:,1), :) + pointCS(tri(:,2), :) + pointCS(tri(:,3), :)) / 3;               
+                in = isinterior(pgon, centroids(:,1), centroids(:,2)); % only triangles inside
+                tri = tri(in, :);  % filtered triangles, leaving only inside the polygon
+
+
+                startLayer = 1:NpointCS;
+                endLayer   = (CSNumber - 1) * NpointCS + (1:NpointCS);
+
+                facesStart = startLayer(tri);
+                facesEnd   = endLayer(tri);
+
+                facesStart = facesStart(:, [1 3 2]);  % inward at start
+                facesEnd   = facesEnd(:, [1 2 3]);    % inward at end (adjust if needed)
+
+                faces = [faces; facesStart; facesEnd];
+
+
             otherwise                  
                 error('****** Unkown Integration type for %s ******', Body.Name);
         end

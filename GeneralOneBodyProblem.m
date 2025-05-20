@@ -50,6 +50,8 @@ Boundary.Position.Y = 0;
 Boundary.Position.Z = 0;
 Boundary.Type = "full"; % there are several types: full, reduced, positions, none
 
+visualization(Body,Body.q0,'red',false);
+
 % ########## Visualization of initial situation ###########################
 Results = [];  
 % % %####################### Solving ######################################## 
