@@ -26,6 +26,7 @@ visualization(Body,Body.q0,'cyan',false); % initial situation
 angleSet = 0:5:90; 
 steps = 1;  % sub-loading steps
 for angle = angleSet
+    fprintf("Considered angle %d\n", angle);
     titertot=0;  
     %START NEWTON'S METHOD   
     for i=1:steps
@@ -53,15 +54,11 @@ for angle = angleSet
             Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
             titer=toc;
             titertot=titertot+titer;   
-            if  all(abs(deltaf) < Re) || (norm(u_bc)<Re^2) 
-                fprintf('Convergence: %10.4f, Displacements norm: %10.4f\n', norm(abs(deltaf)), norm(u_bc));
-                fprintf('Solution is found on %d iteration, Total CPU-time: %f\n', ii, titertot);                
-                break
-            elseif ii==imax 
-                fprintf('The solution is not found. The maximum number of iterations is reached. Total CPU-time: %d\n', ii);
-            else     
-                fprintf('Iteration: %d, Convergence: %10.4f, Displacements norm: %10.5f\n', ii, norm(abs(deltaf)), norm(u_bc));
-            end                
+           
+            
+            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
+                break;  
+            end 
         end           
     
         %Pick nodal displacements from result vector

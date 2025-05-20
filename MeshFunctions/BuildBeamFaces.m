@@ -31,16 +31,16 @@ function Body = BuildBeamFaces(Body)
 
 
                 % side surfaces
-                dt = delaunayTriangulation(pointCS);  % creating nice triangulation to avoid collinearity for ending
-                        
-                startLayer = 1:NpointCS; % first cross-section
-                endLayer = (CSNumber-1)*NpointCS + (1:NpointCS); % last cross-section
-                    
-                facesStart = startLayer(dt.ConnectivityList);
-                facesEnd = endLayer(dt.ConnectivityList);
-                
-                facesStart = facesStart(:, [1 3 2]); % flip normal, it has to be inwards 
-                faces = [faces; facesStart; facesEnd];
+                % dt = delaunayTriangulation(pointCS);  % creating nice triangulation to avoid collinearity for ending
+                % 
+                % startLayer = 1:NpointCS; % first cross-section
+                % endLayer = (CSNumber-1)*NpointCS + (1:NpointCS); % last cross-section
+                % 
+                % facesStart = startLayer(dt.ConnectivityList);
+                % facesEnd = endLayer(dt.ConnectivityList);
+                % 
+                % facesStart = facesStart(:, [1 3 2]); % flip normal, it has to be inwards 
+                % faces = [faces; facesStart; facesEnd];
 
               
             otherwise                  

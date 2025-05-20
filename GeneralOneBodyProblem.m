@@ -9,7 +9,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 Body = Materials(Body,"GOH"); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
 % ########### Complicate geometry #########################################
 % Shift
 Body.Shift.X = 0;
@@ -28,13 +28,13 @@ Body.Twist.ro = 0;
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e8;  % Elongation
+Force.Maginutude.X = 1e1;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 
@@ -53,7 +53,7 @@ Boundary.Type = "full"; % there are several types: full, reduced, positions, non
 % ########## Visualization of initial situation ###########################
 Results = [];  
 % % %####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+steps = 1;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
@@ -84,15 +84,11 @@ for i=1:steps
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         titer=toc;
         titertot=titertot+titer;   
-        if  all(abs(deltaf) < Re) || (norm(u_bc)<Re^2) 
-            fprintf('Convergence: %10.4f, Displacements norm: %10.4f\n', norm(abs(deltaf)), norm(u_bc));
-            fprintf('Solution is found on %d iteration, Total CPU-time: %f\n', ii, titertot);            
-            break
-        elseif ii==imax 
-            fprintf('The solution is not found. The maximum number of iterations is reached. Total CPU-time: %d\n', ii);
-        else     
-            fprintf('Iteration: %d, Convergence: %10.4f, Displacements norm: %10.5f\n', ii, norm(abs(deltaf)), norm(u_bc));
-        end              
+        
+        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
+            break;  
+        end 
+
     end           
 
       

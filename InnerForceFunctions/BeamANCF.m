@@ -1,5 +1,6 @@
 function [K_loc,Fe] = BeamANCF(Body,k)
-        
+     
+    sqrtEps = sqrt(eps);
     xloc = Body.xloc;
     ElementDofs = Body.ElementDofs;
     K_loc = zeros(ElementDofs,ElementDofs);  % initialization of local stiffness matrix
@@ -16,7 +17,7 @@ function [K_loc,Fe] = BeamANCF(Body,k)
     switch Body.FiniteDiference
 
            case "Matlab"
-                 h = 10^(-8);
+                 h1 = 10^(-8);
                  
                  Fibers = Body.Fibers;
                  detF0 = Body.detF0;
@@ -27,11 +28,16 @@ function [K_loc,Fe] = BeamANCF(Body,k)
                  I_vec=K_loc(:,1);    % initialization of the disturbance vector
                  Fe=Fe_fun(MaterialName,Fe0,uk,qk,qk0,phik,Phik,Fibers,Dvec,ElementName,ElementDofs,PosDofs,Gint,Nint,detF0); 
                  for jj = 1:ElementDofs    % cycle over all 
+
+                     h = max(  [sqrtEps * abs(uk(jj)), sqrtEps * abs(qk(jj)), h1] );
+                     
                      I_vec(jj)=h;         % disturbance of one coordinate    
                      ukh=uk-I_vec;        % displacement vector disturbance
                      qkh=qk-I_vec;        % positoin vector disturbance 
                      % in the force functions, only one out u and q used, therefore, there is no problem to variate both of them  
                      Feh=Fe_fun(MaterialName,Fe0,ukh,qkh,qk0,phik,Phik,Fibers,Dvec,ElementName,ElementDofs,PosDofs,Gint,Nint,detF0);
+                     
+                     
                      K_loc(:,jj)=(Fe-Feh)/h; 
                      I_vec(jj)=0;
                  end 

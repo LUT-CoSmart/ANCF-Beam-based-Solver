@@ -8,36 +8,39 @@ Body1.Name = "Body1";
 Body2.Name = "Body2";
 % ########### Problem data ################################################
 % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
-Body1 = DefineElement(Body1,"Beam","ANCF",3343,"None");  
-Body2 = DefineElement(Body2,"Beam","ANCF",3343,"None");  
+Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");  
+Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"KS"); 
-Body2 = Materials(Body2,"KS"); 
+Body1 = Materials(Body1,"GOH"); 
+Body2 = Materials(Body2,"GOH"); 
 % Geometry
-Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body1.Length.Z = Body1.Length.Z;
+Body1 = Geometry(Body1,"Middle_cross_section1_1","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
 
-Body2 = Geometry(Body2,"Rectangular","Standard");  % Itegration Scheme: Poigen, Standard
-Body2.Length.X = Body2.Length.X;
+Body2 = Geometry(Body2,"Middle_cross_section2_1","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
 % Shift of Body1
-Body1.Shift.X = Body1.Length.X/2;
-Body1.Shift.Y = Body1.Length.Y;
-Body1.Shift.Z = 3/4*Body1.Length.X;
+Body1.Shift.X = 0;
+Body1.Shift.Y = Body1.CSCenterY;
+Body1.Shift.Z = Body1.CSCenterZ;
+
+Body2.Shift.X = 0;
+Body2.Shift.Y = Body2.CSCenterY;
+Body2.Shift.Z = Body2.CSCenterZ;
+
 
 % Rotation (in degrees)
 Body1.Rotation.X = 0;
-Body1.Rotation.Y = 90;
+Body1.Rotation.Y = 0;
 Body1.Rotation.Z = 0;
 
-Body2.Rotation.X = 45;
+Body2.Rotation.X = 0;
 Body2.Rotation.Y = 0;
 Body2.Rotation.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 2;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 2;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -54,31 +57,49 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -5e8;  
+%Force1.Maginutude.Y = -5e8;  
+Force1.Maginutude.X = 0;  % Elongation
+Force1.Maginutude.Y = 0;  
+Force1.Maginutude.Z = 0;  
+
 Force1.Position.X = Body1.Length.X;  % Elongation
+Force1.Position.Y = 0;  
+Force1.Position.Z = 0; 
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
-Boundary1.Position = [];
+%Boundary1.Position = [];
+Boundary1.Position.X = 0;  
+Boundary1.Position.Y = 0;
+Boundary1.Position.Z = 0;
+
 Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
 
 % Body2
-Force2.Maginutude = [];
+Force2.Maginutude.X = 500;  % Elongation
+Force2.Maginutude.Y = 0;  
+Force2.Maginutude.Z = 0;  
+
 Force2.Position.X = Body2.Length.X;  % Elongation
+Force2.Position.Y = 0;  
+Force2.Position.Z = 0; 
 
 % Boundaries
-Boundary2.Position = [];
+%Boundary2.Position = [];
+Boundary2.Position.X = 0;  
+Boundary2.Position.Y = 0;
+Boundary2.Position.Z = 0;
+
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e10;
-Body1.ContactRole = "master"; % Options: "master", "slave"
+ContactVariable = 1e2;
+Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
 % figure;
 % hold on
-% axis equal 
 % xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
 % ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 % zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
@@ -86,23 +107,25 @@ Body2.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 
 % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 15;  % sub-loading steps
 titertot=0;  
-Re=10^(-3);                   % Stopping criterion for residual
-imax=15;                      % Maximum number of iterations for Newton's method 
+Re=10^(-4);                   % Stopping criterion for residual
+imax=20;                      % Maximum number of iterations for Newton's method 
+RegType = "Tikhonov";               % Regularization type: off, penalty, Tikhonov
 Results1 = [];
 Results2 = [];
+
 
 % profile on -historysize 2e9   % 20 million calls
 %START NEWTON'S METHOD   
 for i=1:steps
 
     % Update forces of Body1 
-    Subforce1 = SubLoading(Force1, i, steps, "quadratic"); 
-    
+    Subforce1 = SubLoading(Force1, i, steps, "cubic"); 
+
     % Update forces of Body2
-    Subforce2 = SubLoading(Force2, i, steps, "quadratic"); 
-    
+    Subforce2 = SubLoading(Force2, i, steps, "cubic"); 
+
     % Application of Boundary conditions
     Body1 = CreateBC(Body1, Subforce1, Boundary1);
     Body2 = CreateBC(Body2, Subforce2, Boundary2);
@@ -115,7 +138,7 @@ for i=1:steps
         tic;
 
         % Contact forces
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable);
+        [Kc,Fc,Gap] = Contact2(Body1,Body2,ContactType,ContactVariable);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);
@@ -128,13 +151,14 @@ for i=1:steps
 
         K = Kc + Ke;
         ff =  Fe - Fext + Fc;
-
+        
         % Calculations
         K_bc = K(bc,bc); 
         ff_bc = ff(bc);
         deltaf=ff_bc/norm(Fext(bc)); 
-        u_bc=-K_bc\ff_bc;      
-    
+ 
+        u_bc = Regularization(K_bc,ff_bc,RegType);  
+
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);
@@ -165,8 +189,8 @@ end
 % profile off       % Stop profiling (optional)
 % POST PROCESSING ###############################################
 hold on
-xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+ xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+        ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+        zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
 visualization(Body2,Body2.q,'none',true);

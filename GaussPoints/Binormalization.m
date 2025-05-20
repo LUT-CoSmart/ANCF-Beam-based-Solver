@@ -1,4 +1,4 @@
-function [data, nu2] = Adjustment(data_1)
+function [data, nu2, CenterX, CenterY, CSSizeX, CSSizeY] = Binormalization(data_1)
 
     data_1_ver =  vertcat(data_1{:});
 
@@ -10,7 +10,12 @@ function [data, nu2] = Adjustment(data_1)
     max_y = maxPerColumn(2);
     min_y = minPerColumn(2);
 
-    
+    CenterX = (min_x+max_x)/2;
+    CenterY = (min_y+max_y)/2;
+
+    CSSizeX = max_x - min_x;
+    CSSizeY = max_y - min_y;
+
     nu2=length(data_1);
     data = cell(nu2,1);
     for i = 1:nu2
