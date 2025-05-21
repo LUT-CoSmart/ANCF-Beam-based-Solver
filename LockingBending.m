@@ -7,14 +7,14 @@ Body.Name = "Body";
 CaseName =  string(mfilename);
 CaseSubtype = "Large"; % there are two options: Large & Small
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+Body = DefineElement(Body,"Beam","ANCF",3243,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 4;
+ElementNumber = 32;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);

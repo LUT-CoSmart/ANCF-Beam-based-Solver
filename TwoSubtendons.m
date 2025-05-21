@@ -93,7 +93,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e2;
+ContactVariable = 1e3;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 

@@ -2,7 +2,7 @@ function Body = SurfaceBeamApprox(Body)
     
     % Here are parameters to approximate Body surfaces in all directions
     Netazeta = 5; % used in standard CS (for Oval x4 multiplied)
-    Nxi = 4;  % used in PoiGen & Standard
+    Nxi = 7;  % used in PoiGen & Standard
 
     ApproximationScheme = Body.IntegrationType;
     CSName = Body.CSName;

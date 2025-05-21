@@ -10,6 +10,8 @@ function Subforce = SubLoading(Force,currentStep, Nsteps, type)
                 Loadstep = (currentStep/Nsteps)^2;
            case "cubic"
                 Loadstep = (currentStep/Nsteps)^3;    
+           case "quartic"  
+                Loadstep = (currentStep/Nsteps)^4;    
            otherwise
                 error('Unknown loading type')                 
     end  

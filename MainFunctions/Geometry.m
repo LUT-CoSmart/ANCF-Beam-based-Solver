@@ -3,7 +3,7 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
         
     switch CSName
            case "Rectangular"
-                Body.Length.X = 2; % Body length
+                Body.Length.X = 1; % Body length
                 Body.Length.Y = 0.5;
                 Body.Length.Z = 0.5;
 

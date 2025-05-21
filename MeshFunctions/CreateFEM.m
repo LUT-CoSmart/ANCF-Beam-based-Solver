@@ -7,7 +7,11 @@ function Body = CreateFEM(Body,ElementNumber)
     DIM = Body.DIM;
     PosDofs = []; % Identification of positional DoFs within the chosen element 
     for i = 1:Body.ElementNodes
-        PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+DIM];
+        if Body.Slope_x
+            PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+2*DIM];
+        else   
+            PosDofs = [PosDofs (i-1)*DofsAtNode+1:(i-1)*DofsAtNode+DIM];
+        end    
     end   
     Body.PosDofs = PosDofs;
 
