@@ -75,7 +75,7 @@ Boundary1.Position.Z = 0;
 Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
 
 % Body2
-Force2.Maginutude.X = 500;  % Elongation
+Force2.Maginutude.X = 1e4;  % Elongation
 Force2.Maginutude.Y = 0;  
 Force2.Maginutude.Z = 0;  
 
@@ -93,7 +93,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e3;
+ContactVariable = 1e5;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
@@ -107,7 +107,7 @@ Body2.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 
 % %####################### Solving ######################################## 
-steps = 15;  % sub-loading steps
+steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 

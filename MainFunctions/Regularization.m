@@ -38,14 +38,14 @@ function [u,K] = Regularization(K,f,RegType)
         end
         
         if compute            
-            % K = sparse(K_reg);
-            % f = sparse(f_reg);
-            u = - K_reg \ f_reg ;
+            K = sparse(K_reg);
+            f = sparse(f_reg);
+            % u = - K_reg \ f_reg ;
 
-            % tol = 1e-10;
-            % maxit = 500;
-            % [u, ~] = pcg(K, f, tol, maxit);
-            % u = -u;
+            tol = 1e-10;
+            maxit = 500;
+            [u, ~] = pcg(K, f, tol, maxit);
+            u = -u;
         else
             u = [];
         end
