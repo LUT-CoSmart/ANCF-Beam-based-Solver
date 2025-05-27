@@ -25,7 +25,7 @@ Body.Rotation.Z = 0;
 Body.Twist.angle = 0; % in degrees
 Body.Twist.ro = 0;
 % ########## Create FE Model ##############################################
-ElementNumber = 3;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
@@ -62,7 +62,7 @@ RegType = "Tikhonov"; % Regularization type: off, penalty, Tikhonov
 %START NEWTON'S METHOD   
 for i=1:steps
 
-    % Update forces, supported loading types: linear, exponential, quadratic, cubic;
+    % Update forces, supported loading types: linear, exponential, quadratic, cubic, quartic;
     Subforce = SubLoading(Force, i, steps, "cubic");
 
     % Application of Boundary conditions

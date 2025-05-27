@@ -14,9 +14,9 @@ Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");
 Body1 = Materials(Body1,"GOH"); 
 Body2 = Materials(Body2,"GOH"); 
 % Geometry
-Body1 = Geometry(Body1,"Middle_cross_section1_1","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body1 = Geometry(Body1,"Middle_cross_section2_1","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
 
-Body2 = Geometry(Body2,"Middle_cross_section2_1","Poigen");  % Itegration Scheme: Poigen, Standard
+Body2 = Geometry(Body2,"Middle_cross_section1_1","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
@@ -75,7 +75,7 @@ Boundary1.Position.Z = 0;
 Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
 
 % Body2
-Force2.Maginutude.X = 1e4;  % Elongation
+Force2.Maginutude.X = 1e3;  % Elongation
 Force2.Maginutude.Y = 0;  
 Force2.Maginutude.Z = 0;  
 
@@ -138,7 +138,7 @@ for i=1:steps
         tic;
 
         % Contact forces
-        [Kc,Fc,Gap] = Contact2(Body1,Body2,ContactType,ContactVariable);
+        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);

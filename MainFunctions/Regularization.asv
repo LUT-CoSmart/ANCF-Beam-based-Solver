@@ -4,9 +4,11 @@ function [u,K_reg] = Regularization(K,f,RegType)
             RegType = f;
             compute = false;
 
-        elseif nargin == 3            
+        elseif nargin == 3 
+            lambda = sqrt(eps) * norm(K, 'fro');
+            K = sparse(K);
+            f = sparse(f);
             compute = true;
-
         else
             error('Incorrect number of inputs in Regularization function');
         end
@@ -19,8 +21,9 @@ function [u,K_reg] = Regularization(K,f,RegType)
                     
                case {"penalty", "Tikhonov"}
     
-                   lambda = sqrt(eps) * norm(K, 'fro');
-                   I = eye(size(K,2));
+                   
+                   % I = eye(size(K));
+                    I = speye(size(K,2));
 
                    if RegType == "penalty"
                       K_reg = K + lambda * I;
@@ -37,9 +40,9 @@ function [u,K_reg] = Regularization(K,f,RegType)
         end
         
         if compute  
-             
-            if ~issparse(K_reg), K_reg = sparse(K_reg); end
-            if ~issparse(f_reg), f_reg = sparse(f_reg); end
+        
+            % K_reg = sparse(K_reg);
+            % f_reg = sparse(f_reg);
 
             % u = - K_reg \ f_reg ;
 
