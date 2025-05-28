@@ -1,6 +1,6 @@
 function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap)
     
-     if  nargin < 10 % Gap is optional
+     if  nargin < 9 % Gap is optional
          Gap= NaN;
      end   
         
