@@ -111,8 +111,8 @@ steps = 5;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "penaltyKf";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "penaltyKf";
+SolutionRegType = "Tikhonov";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+ContactRegType = "penaltyK";
 Results1 = [];
 Results2 = [];
 

@@ -1,13 +1,10 @@
-function [u,K_reg] = Regularization(K,f,RegType)
+function [u,K_reg] = Regularization(K,f,RegType,compute)
         
-        if nargin == 2
-            RegType = f;
-            compute = false;
-
-        elseif nargin == 3            
+        if nargin == 3
             compute = true;
-
-        else
+        end
+        
+        if  nargin < 3   
             error('Incorrect number of inputs in Regularization function');
         end
 
@@ -17,21 +14,31 @@ function [u,K_reg] = Regularization(K,f,RegType)
                   K_reg = K;
                   f_reg = f;  
                     
-               case {"penalty", "Tikhonov"}
-    
-                   lambda = sqrt(eps) * norm(K, 'fro');
+               case {"penaltyKf", "penaltyK", "Tikhonov" }
+                                         
                    I = eye(size(K,2));
 
-                   if RegType == "penalty"
+                   if RegType == "penaltyKf"
+                       
+                      lambda = sqrt(eps) * norm(K, 2) / norm(f, 2);
                       K_reg = K + lambda * I;
                       f_reg = f;
-                      
+                    
+                   elseif RegType == "penaltyK"
+                       
+                      lambda = sqrt(eps) * norm(K, 'fro'); 
+                      K_reg = K + lambda * I;
+                      f_reg = f;
+
                    elseif RegType == "Tikhonov"
+                      lambda = sqrt(eps) * norm(K, 'fro'); 
                       K_reg = K' * K + lambda * I;
                       f_reg = K' * f;
-               
-                   end    
+                   
+
+                  end    
     
+
                otherwise
                     error('****** The regularization type is not recognized ******');    
         end
@@ -41,11 +48,11 @@ function [u,K_reg] = Regularization(K,f,RegType)
             if ~issparse(K_reg), K_reg = sparse(K_reg); end
             if ~issparse(f_reg), f_reg = sparse(f_reg); end
 
-            % u = - K_reg \ f_reg ;
-
-            tol = 1e-10;
+            tol = sqrt(eps);
             maxit = 500;
-            [u, ~] = pcg(K_reg, f_reg, tol, maxit);
+            
+            x0 = zeros(length(f_reg),1);
+            [u, ~] = pcg(K_reg, f_reg, tol, maxit, [], [], x0);
             u = -u;
         else
             u = [];

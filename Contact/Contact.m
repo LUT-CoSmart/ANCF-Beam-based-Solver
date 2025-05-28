@@ -1,4 +1,4 @@
-function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable)
+function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
 
     if ContactType == "None"
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
@@ -58,7 +58,7 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable)
        end
        Body1.q = q1_backup; % restore
        Body2.q = q2_backup; % restore
-       [~,Kc] = Regularization(Kc,"penalty");
+       [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
     end      
 
     

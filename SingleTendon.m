@@ -53,12 +53,11 @@ Boundary.Type = "full"; % there are several types: full, reduced, positions, non
 % ########## Visualization of initial situation ###########################
 Results = [];  
 % % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 3;  % sub-loading steps
 titertot=0;  
-Re=10^(-4);           % Stopping criterion for residual
-imax=30;              % Maximum number of iterations for Newton's method 
-
-RegType = "Tikhonov"; % Regularization type: off, penalty, Tikhonov
+Re=10^(-4);            % Stopping criterion for residual
+imax=30;               % Maximum number of iterations for Newton's method 
+RegType = "penaltyKf"; % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 %START NEWTON'S METHOD   
 for i=1:steps
 
@@ -67,8 +66,8 @@ for i=1:steps
 
     % Application of Boundary conditions
     Body = CreateBC(Body, Subforce, Boundary);
-    Fext = Body.Fext;
-                    
+    Fext = Body.Fext;   
+   
     for ii=1:imax    
         tic; 
                                 
@@ -79,6 +78,7 @@ for i=1:steps
 
         ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
         deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
+        
         
         u_bc = Regularization(K_bc,ff_bc,RegType);   
 
