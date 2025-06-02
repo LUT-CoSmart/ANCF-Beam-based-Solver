@@ -21,8 +21,9 @@ Body = AddTensors(Body);
 Results = [];  
 visualization(Body,Body.q0,'cyan',false); % initial situation
 % %####################### Solving ######################################## 
-steps = 4;  % sub-loading steps
-titertot=0;  
+steps = 20;  % sub-loading steps
+titertot=0; 
+SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 %START NEWTON'S METHOD   
 for i=1:steps
     % Update forces
@@ -42,6 +43,9 @@ for i=1:steps
         ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
         deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
         u_bc = -K_bc\ff_bc;             % Compute displacements
+        
+        % u_bc = Regularization(K_bc,ff_bc,SolutionRegType);  
+        
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         

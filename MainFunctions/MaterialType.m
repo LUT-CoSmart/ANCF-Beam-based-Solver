@@ -7,7 +7,7 @@ function  Body = MaterialType(Body,MaterialName,param)
     if ismember(MaterialName,compressibleMaterials)
        Body.d = [];
     else
-       Body.d = 10^(-14); 
+       Body.d = 10^(-12); 
     end 
 
     % Define fibers
