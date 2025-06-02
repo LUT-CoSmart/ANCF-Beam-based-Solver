@@ -50,7 +50,7 @@ function [u,K_reg] = Regularization(K,f,RegType,compute)
 
             tol = sqrt(eps);
             maxit = 500;
-            
+
             x0 = zeros(length(f_reg),1);
             [u, ~] = pcg(K_reg, f_reg, tol, maxit, [], [], x0);
             u = -u;

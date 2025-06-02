@@ -13,7 +13,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -41,10 +41,9 @@ for i=1:steps
         ff =  Fe - Fext;
 
         ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
-        deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
-        u_bc = -K_bc\ff_bc;             % Compute displacements
+        deltaf=ff_bc/norm(Fext(Body.bc));% Compute residua
         
-        % u_bc = Regularization(K_bc,ff_bc,SolutionRegType);  
+        u_bc = Regularization(K_bc,ff_bc,SolutionRegType);  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions

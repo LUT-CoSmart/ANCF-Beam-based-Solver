@@ -11,19 +11,20 @@ Body = DefineElement(Body,"Beam","ANCF",3243,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 32;
+ElementNumber = 10;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
-% ########## Visualization of initial situation ###########################
-Results = [];  
-% visualization(Body,Body.q0,'cyan',false); % initial situation
 % %####################### Solving ######################################## 
 steps = 2;  % sub-loading steps
 titertot=0;  
+SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+Results = [];  
+
+
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -44,7 +45,7 @@ for i=1:steps
 
         ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
         deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
-        u_bc = -K_bc\ff_bc;             % Compute displacements
+        u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         titer=toc;

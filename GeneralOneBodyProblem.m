@@ -34,7 +34,7 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e1;  % Elongation
+Force.Maginutude.X = 1e6;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 
@@ -55,11 +55,11 @@ visualization(Body,Body.q0,'red',false);
 % ########## Visualization of initial situation ###########################
 Results = [];  
 % % %####################### Solving ######################################## 
-steps = 1;  % sub-loading steps
+steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-
+SolutionRegType = "penaltyKf";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 %START NEWTON'S METHOD   
 for i=1:steps
 
@@ -81,7 +81,9 @@ for i=1:steps
 
         ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
         deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
-        u_bc = -K_bc\ff_bc;             % Compute displacements
+
+        u_bc = Regularization(K_bc,ff_bc,SolutionRegType);  % Compute displacements
+
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         titer=toc;

@@ -89,19 +89,20 @@ Body2.ContactRole = "master";
 steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
-imax=15;                      % Maximum number of iterations for Newton's method 
+imax=20;                      % Maximum number of iterations for Newton's method 
+SolutionRegType = "Tikhonov";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+ContactRegType = "penaltyK";
 Results1 = [];
 Results2 = [];
 
-% profile on -historysize 2e9   % 20 million calls
 %START NEWTON'S METHOD   
 for i=1:steps
 
     % Update forces of Body1 
-    Subforce1 = SubLoading(Force1, i, steps, "quadratic"); 
+    Subforce1 = SubLoading(Force1, i, steps, "cubic"); 
     
     % Update forces of Body2
-    Subforce2 = SubLoading(Force2, i, steps, "quadratic"); 
+    Subforce2 = SubLoading(Force2, i, steps, "cubic"); 
     
     % Application of Boundary conditions
     Body1 = CreateBC(Body1, Subforce1, Boundary1);
@@ -111,11 +112,12 @@ for i=1:steps
     Fext2 = Body2.Fext;
     
     bc = [Body1.bc Body2.bc];
+
     for ii=1:imax
         tic;
 
         % Contact forces
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable);
+        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);
@@ -133,8 +135,9 @@ for i=1:steps
         K_bc = K(bc,bc); 
         ff_bc = ff(bc);
         deltaf=ff_bc/norm(Fext(bc)); 
-        u_bc=-K_bc\ff_bc;      
-    
+       
+        u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
+
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);
@@ -161,8 +164,7 @@ for i=1:steps
     uf2 = Body2.u(DofID2);
     Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
 end    
-% profile viewer    % Open profiling report GUI
-% profile off       % Stop profiling (optional)
+
 % POST PROCESSING ###############################################
 hold on
 xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])

@@ -53,10 +53,10 @@ Boundary.Type = "full"; % there are several types: full, reduced, positions, non
 % ########## Visualization of initial situation ###########################
 Results = [];  
 % % %####################### Solving ######################################## 
-steps = 3;  % sub-loading steps
+steps = 5;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);            % Stopping criterion for residual
-imax=30;               % Maximum number of iterations for Newton's method 
+imax=20;               % Maximum number of iterations for Newton's method 
 RegType = "penaltyKf"; % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 %START NEWTON'S METHOD   
 for i=1:steps
