@@ -1,7 +1,7 @@
 function PostProcessing(Body,Results,visDeformed,visInitial)
     disp('***********************************************')
     fprintf('Static test for %s, Element %s \n', Body.ElementType, Body.ElementName)
-    fprintf('Deformaytions = %s \n', Body.DeformationType)
+    fprintf('Deformations = %s \n', Body.DeformationType)
     fprintf('n & DOFs & ux & uy & uz \n')
     for k=1:size(Results,1) 
       fprintf('%d & %d & %10.8f & %10.8f & %10.8f  \n',Results(k,1:5))

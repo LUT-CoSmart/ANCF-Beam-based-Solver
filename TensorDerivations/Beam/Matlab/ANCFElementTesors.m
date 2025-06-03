@@ -1,10 +1,10 @@
 clc, clear, close all;
 Call_shapeFunctions = false;% To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
 write_files = true;         % Do we need to write any file?
-disp_based = true;         % What field the tensors are based on: displacement (true), position (false)
+disp_based = true;          % What field the tensors are based on: displacement (true), position (false)
 small_deformation = false;  % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3243;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Element=3333;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));           % Number of nodes            
 Dim = str2double(ElementName(end));           % Problem dimensionality     
@@ -23,7 +23,6 @@ a0 = sym('a0', [Dim 1],'real');               % Fibres' direction vector
 Phi = sym('Phi', [Nodes 1], 'real');          % Pre-twist of fiber vector around x axis of element's slopes 
 F_brick_inv = [2/L 0 0; 0 2/H 0; 0 0 2/W];    % Gradient of brick (dF_00/d_xi)^-1 used for fibers adjustments
 % ################## Basic functions for element ########################## 
-% TODO: find a smarter way of derivation "basic functions-element" relation 
 BasicFunctions;
 switch Element % Find the corresponding basis set to the element
     case 3243,  basis = basis_3243;  required_derivatives = {'x', 'y', 'z'};
@@ -65,12 +64,13 @@ for i=1:Nodes
 end
 
 % % ################## Position vectors & tensors ###########################
+I = eye(3);                                          % identity tensor
 r0 = Nm_xi*q0;                                       % Position vector in the initial configuration
-F0 = simplify(jacobian(r0,xi_vec));
+F0 = jacobian(r0,xi_vec);
 if disp_based == true
     uh = Nm_xi*u;                                    % Displacement vector in the actual configuration
-    nabla_u = simplify(jacobian(uh,xi_vec))*F0^(-1); % gradient of displacement
-    F = eye(3) + nabla_u;                            % deformation gradient via the displacement field
+    nabla_u = jacobian(uh,xi_vec)*F0^(-1); % gradient of displacement
+    F = I + nabla_u;                            % deformation gradient via the displacement field
     if small_deformation == true
         dir_name = 'Displacement/Small';
         E = 0.5*(nabla_u+nabla_u');                  % Green strain tensor based on infinite displacement field  
@@ -82,8 +82,8 @@ if disp_based == true
 else
     r = Nm_xi*q;                                     % Position vector in the actual configuration
     dir_name = 'Position'; 
-    F = simplify(jacobian(r,xi_vec))*F0^(-1);        % deformation gradient via the position field
-    E = 0.5*( F.'*F-eye(3) );                        % Green strain tensor based on position field    
+    F = jacobian(r,xi_vec)*F0^(-1);                  % deformation gradient via the position field
+    E = 0.5*( F'*F - I );                            % Green strain tensor based on position field    
     variable = q;
 end
 for ii=1:Dim

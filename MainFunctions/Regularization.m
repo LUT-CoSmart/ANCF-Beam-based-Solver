@@ -45,15 +45,24 @@ function [u,K_reg] = Regularization(K,f,RegType,compute)
         
         if compute  
              
-            if ~issparse(K_reg), K_reg = sparse(K_reg); end
-            if ~issparse(f_reg), f_reg = sparse(f_reg); end
+            % if ~issparse(K_reg), K_reg = sparse(K_reg); end
+            % if ~issparse(f_reg), f_reg = sparse(f_reg); end
 
-            tol = sqrt(eps);
-            maxit = 500;
+            if RegType ~= "off"                
+    
+                tol = sqrt(eps);
+                maxit = 500;
+    
+                x0 = zeros(length(f_reg),1);
+                [u, ~] = pcg(K_reg, f_reg, tol, maxit, [], [], x0);
+                u = -u;
+                
+            else
 
-            x0 = zeros(length(f_reg),1);
-            [u, ~] = pcg(K_reg, f_reg, tol, maxit, [], [], x0);
-            u = -u;
+                u = - K_reg\ f_reg;
+
+            end   
+
         else
             u = [];
         end
