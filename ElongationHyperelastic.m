@@ -10,10 +10,10 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 4;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -24,7 +24,8 @@ visualization(Body,Body.q0,'cyan',false); % initial situation
 steps = 15;  % sub-loading steps
 titertot=0; 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-%START NEWTON'S METHOD   
+%START NEWTON'S METHOD 
+% mpiprofile on
 for i=1:steps
     % Update forces
     Subforce = SubLoading(Force, i, steps, "linear"); 

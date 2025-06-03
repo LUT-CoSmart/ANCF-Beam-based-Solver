@@ -9,6 +9,9 @@ switch Body.FiniteDiference
    case "AceGen"   
         disp("For chosen finite difference scheme, deformations are ony finite and displacement-based") 
         path = path + '\' + Body.ElementName;
+        if ~isfolder(path)
+           error('This element is not yet implemnetewd in AceGen');
+        end
         Body.DeformationType = "Finite";
         Body.SolutionBase = "Displacement";
 
