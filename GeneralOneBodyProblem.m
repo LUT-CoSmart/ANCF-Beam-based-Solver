@@ -7,7 +7,7 @@ Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,"GOH"); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body = Materials(Body,"Neo"); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
 Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
 % ########### Complicate geometry #########################################
@@ -50,10 +50,10 @@ Boundary.Position.Y = 0;
 Boundary.Position.Z = 0;
 Boundary.Type = "full"; % there are several types: full, reduced, positions, none
 
-visualization(Body,Body.q0,'red',false);
-
+Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 % ########## Visualization of initial situation ###########################
 Results = [];  
+visualization(Body,Body.q0,'red',false);
 % % %####################### Solving ######################################## 
 steps = 10;  % sub-loading steps
 titertot=0;  
@@ -64,13 +64,9 @@ SolutionRegType = "penaltyKf";      % Regularization type: off, penaltyK, penalt
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Subforce = SubLoading(Force, i, steps, "exponential"); 
+    Body = SubLoading(Body, i, steps, "exponential"); 
 
-    % Application of Boundary conditions
-    Body = CreateBC(Body, Subforce, Boundary);
-    Fext = Body.Fext;
-      
-              
+    Fext = Body.Fext;    
     for ii=1:imax    
         tic; 
                                 
@@ -99,8 +95,7 @@ for i=1:steps
 
     %Pick nodal displacements from result vector
     xlocName = 'xloc' + Body.ElementType;
-    DofID = feval(xlocName,Body.DofsAtNode,Body.fextInd,1:3);
-    uf = Body.u(DofID); 
+    uf = Body.u(Body.fextInd); 
 
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
 end

@@ -20,18 +20,7 @@ function Body = CreateFEM(Body,ElementNumber)
 
     % gathering physical and geometrical element data in one vector
     Body.Dvec=[Body.const,Body.Length.Y,Body.Length.Z,Body.Length.Ln];
-        
-    % adding shape function name
-    ShapeName = 'Shape_' + string(Body.ElementName);
-    Body.Shape = str2func(ShapeName);    
-
-    ShapeNameXi = 'Shape_xi_' + string(Body.ElementName);
-    ShapeNameEta = 'Shape_eta_' + string(Body.ElementName);
-    ShapeNameZeta = 'Shape_zeta_' + string(Body.ElementName);
-    Body.ShapeXi = str2func(ShapeNameXi); 
-    Body.ShapeEta = str2func(ShapeNameEta);
-    Body.ShapeZeta = str2func(ShapeNameZeta);
-
+           
     % creating surface data for contact and visualization
     functionName = "Surface" + Body.ElementType + "Approx"; 
     Body = feval(functionName,Body);

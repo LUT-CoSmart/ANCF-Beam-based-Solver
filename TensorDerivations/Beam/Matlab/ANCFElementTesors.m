@@ -1,10 +1,10 @@
 clc, clear, close all;
-Call_shapeFunctions = false;% To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
-write_files = true;         % Do we need to write any file?
-disp_based = true;          % What field the tensors are based on: displacement (true), position (false)
-small_deformation = false;  % Appoximation theory: infinite small (true), finite (false)
+Call_shapeFunctions = false;   % To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
+write_files = true;            % Do we need to write any file?
+disp_based = true;            % What field the tensors are based on: displacement (true), position (false)
+small_deformation = true;     % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3333;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Element=3343;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));           % Number of nodes            
 Dim = str2double(ElementName(end));           % Problem dimensionality     
@@ -72,16 +72,16 @@ if disp_based == true
     nabla_u = jacobian(uh,xi_vec)*F0^(-1); % gradient of displacement
     F = I + nabla_u;                            % deformation gradient via the displacement field
     if small_deformation == true
-        dir_name = 'Displacement/Small';
+        dir_name = "Displacement/Small/" + ElementName;
         E = 0.5*(nabla_u+nabla_u');                  % Green strain tensor based on infinite displacement field  
     else       
-        dir_name = 'Displacement/Finite';
+        dir_name = "Displacement/Finite/" + ElementName;
         E = 0.5*(nabla_u+nabla_u'+nabla_u'*nabla_u); % Green strain tensor based on finite displacement field  
     end
     variable = u;
 else
     r = Nm_xi*q;                                     % Position vector in the actual configuration
-    dir_name = 'Position'; 
+    dir_name = "Position/" + ElementName; 
     F = jacobian(r,xi_vec)*F0^(-1);                  % deformation gradient via the position field
     E = 0.5*( F'*F - I );                            % Green strain tensor based on position field    
     variable = q;
@@ -107,12 +107,24 @@ a0_fib=a0_fib/norm(a0_fib);            % Normalization, such as the length can c
 
 % ################## Saving functions #####################################
 if write_files == true
-    matlabFunction(Nm_xi, 'file', fullfile('ShapeFunctions','Shape_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
-    matlabFunction(Nm_xi_xi, 'file', fullfile('ShapeFunctions','Shape_xi_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
-    matlabFunction(Nm_xi_eta, 'file', fullfile('ShapeFunctions','Shape_eta_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
-    matlabFunction(Nm_xi_zeta, 'file', fullfile('ShapeFunctions','Shape_zeta_' + string(Element)), 'vars', {L,H,W,xi,eta,zeta});
-    
-    matlabFunction(a0_fib, 'file', fullfile('FiberVectors','a0_fib_' + string(Element)), 'vars', {a0,q0posAndrx,phi,Phi,L,H,W,xi,eta,zeta});
-    matlabFunction(F, 'file', fullfile(dir_name,'F_' +  string(Element)), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
-    matlabFunction(dEde, 'file', fullfile(dir_name,'dEde_' + string(Element)), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
+               
+    dir_name_2 = "ShapeFunctions/" + ElementName;
+
+    if ~isfolder(dir_name_2)
+        mkdir(dir_name_2);
+    end
+
+    matlabFunction(Nm_xi, 'file', fullfile(dir_name_2,'Shape_'), 'vars', {L,H,W,xi,eta,zeta});
+    matlabFunction(Nm_xi_xi, 'file', fullfile(dir_name_2,'Shape_xi_'), 'vars', {L,H,W,xi,eta,zeta});
+    matlabFunction(Nm_xi_eta, 'file', fullfile(dir_name_2,'Shape_eta_'), 'vars', {L,H,W,xi,eta,zeta});
+    matlabFunction(Nm_xi_zeta, 'file', fullfile(dir_name_2,'Shape_zeta_'), 'vars', {L,H,W,xi,eta,zeta});
+
+
+    if ~isfolder(dir_name)
+        mkdir(dir_name);
+    end
+
+    matlabFunction(a0_fib, 'file', fullfile(dir_name,'a0_fib'), 'vars', {a0,q0posAndrx,phi,Phi,L,H,W,xi,eta,zeta});
+    matlabFunction(F, 'file', fullfile(dir_name,'F'), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
+    matlabFunction(dEde, 'file', fullfile(dir_name,'dEde'), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
 end

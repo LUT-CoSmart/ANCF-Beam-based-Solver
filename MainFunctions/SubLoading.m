@@ -1,5 +1,8 @@
-function Subforce = SubLoading(Force,currentStep, Nsteps, type)
-
+function Body = SubLoading(Body, currentStep, Nsteps, type)
+    
+    Fext = Body.Fext;
+    fextInd = Body.fextInd;
+    
     switch type
            case "linear"
                 Loadstep =  currentStep/Nsteps;
@@ -16,30 +19,12 @@ function Subforce = SubLoading(Force,currentStep, Nsteps, type)
                 error('Unknown loading type')                 
     end  
     
-    % Force check
-    if ~isfield(Force.Maginutude, 'X')
-       Force.Maginutude.X = 0;
-    end
-    if ~isfield(Force.Maginutude, 'Y')
-       Force.Maginutude.Y = 0;
-    end
-    if ~isfield(Force.Maginutude, 'Z')
-       Force.Maginutude.Z = 0;
-    end 
+    
+    Subforce.Maginutude.X = Body.ForceVectorInit(1) * Loadstep;
+    Subforce.Maginutude.Y = Body.ForceVectorInit(2) * Loadstep;
+    Subforce.Maginutude.Z = Body.ForceVectorInit(3) * Loadstep;
 
-    % Force position check
-    if ~isfield(Force.Position, 'X')
-       Force.Position.X = 0;
-    end
-    if ~isfield(Force.Position, 'Y')
-       Force.Position.Y = 0;
-    end
-    if ~isfield(Force.Position, 'Z')
-       Force.Position.Z = 0;
-    end 
+    ForceVector = [Subforce.Maginutude.X; Subforce.Maginutude.Y; Subforce.Maginutude.Z];
+    Fext(fextInd) = ForceVector;
 
-
-    Subforce.Maginutude.X = Force.Maginutude.X * Loadstep;
-    Subforce.Maginutude.Y = Force.Maginutude.Y * Loadstep;
-    Subforce.Maginutude.Z = Force.Maginutude.Z * Loadstep;
-    Subforce.Position = Force.Position;
+    Body.Fext = Fext;

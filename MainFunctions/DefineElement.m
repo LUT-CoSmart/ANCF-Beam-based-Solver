@@ -7,7 +7,7 @@ function Body = DefineElement(Body,ElementType,SubType,ElementName,Modification)
         switch SubType
                case "ANCF"  
                     if Modification == "None" 
-                       Body = ElementDataANCFBeam(Body,ElementType,SubType,ElementName);
+                       Body = ANCFBeam(Body,ElementType,SubType,ElementName);
                     else
                        error('****** The modification is not available for the this Element Type (%s) and subtype (%s) ******',ElementType, SubType);  
                     end

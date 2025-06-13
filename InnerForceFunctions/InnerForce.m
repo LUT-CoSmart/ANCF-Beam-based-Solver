@@ -17,24 +17,17 @@ function [K,Fint] = InnerForce(Body)
         Fint=zeros(TotalDofs,1); 
         ElementDofs = Body.ElementDofs;
         functionName = Body.ElementType + Body.SubType;  
-        % for ii = 1:Body.ElementNumber               
-        %     [K_loc,Fe] = feval(functionName,Body,ii);
-        % 
-        %     for jj = 1:ElementDofs
-    	%         ind01 = xloc(ii,jj); %Index 01
-        %         for kk = 1:ElementDofs
-        %             ind02 = xloc(ii,kk); % Index 02
-        %             K(ind01,ind02) = K(ind01,ind02)+K_loc(jj,kk);
-        %         end
-        %         Fint(ind01) = Fint(ind01)+Fe(jj); %%% sign infron of F
-        %      end %End of Assembly pp
-        % end
-        
+
         ElementNumber = Body.ElementNumber;
         K_local_cell = cell(ElementNumber,1);
         F_local_cell = cell(ElementNumber,1);
-        parfor ii = 1:ElementNumber      
-            [K_loc, Fe] = feval(functionName, Body, ii);
+        for ii = 1:ElementNumber  % parfor doesn't work yet, so == for  
+            if functionName == "BeamANCF"
+                [K_loc, Fe] = BeamANCF(Body, ii);
+            else
+                error('Inner function is not defined')
+            end    
+            
             K_local_cell{ii} = K_loc;
             F_local_cell{ii} = Fe;
         end

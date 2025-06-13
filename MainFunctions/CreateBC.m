@@ -60,10 +60,23 @@ function Body = CreateBC(Body, Force, Boundary) % Creates boundary conditions
     Fext = zeros(TotalDofs,1); % Initialize vector of ext forces
     NodalForce = FindNodalIDLocally(Body,Force.Position);
     fextInd = feval(xlocName,DofsAtNode,NodalForce,1:3);
-      
-    ForceVector = [Force.Maginutude.X; Force.Maginutude.Y; Force.Maginutude.Z];
-    Fext(fextInd) = ForceVector;
-
-    Body.Fext = Fext;
-    Body.fextInd = NodalForce;
      
+     % Force check
+    if ~isfield(Force.Maginutude, 'X')
+       Force.Maginutude.X = 0;
+    end
+    if ~isfield(Force.Maginutude, 'Y')
+       Force.Maginutude.Y = 0;
+    end
+    if ~isfield(Force.Maginutude, 'Z')
+       Force.Maginutude.Z = 0;
+    end 
+    
+    ForceVector = [Force.Maginutude.X; Force.Maginutude.Y; Force.Maginutude.Z];
+    
+    % 
+    Fext(fextInd) = ForceVector;
+    Body.Fext = Fext;
+    Body.fextInd = fextInd;
+    
+    Body.ForceVectorInit = ForceVector;    

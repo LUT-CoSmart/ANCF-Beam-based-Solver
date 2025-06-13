@@ -6,15 +6,18 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
     num = Body.ElementNodes;
         
     if ApproximationScheme == "Poigen"
-
        addpath("CrossSections") 
        run(CSName); 
        Deg=input('Input Approximation degree (1 or above): ');      % Approximation degree for Green's formula    
-
-       [data, nu2, Body.CSCenterZ, Body.CSCenterY, Body.Length.Z, Body.Length.Y] = Binormalization(data_1);
+    
+           
+       if  (CSName == "Rectangular") || (CSName== "Oval") 
+           [data, nu2, Body.CSCenterZ] = Binormalization(data_1); 
+       else
+           [data, nu2, Body.CSCenterZ, Body.CSCenterY, Body.Length.Z, Body.Length.Y] = Binormalization(data_1);              
+       end
        [pcirc,wcirc]=PoiGen(data,nu2,Deg);
-       prefac = 1;
-
+       prefac = 1;  
     elseif ApproximationScheme == "Standard"
 
            if CSName == "Rectangular"

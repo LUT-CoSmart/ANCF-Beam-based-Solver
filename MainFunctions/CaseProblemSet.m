@@ -24,7 +24,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 Body.Length.X = 1; 
                 Body.Length.Y = 0.1;
                 Body.Length.Z = 0.1;
-                MaterialName = "Neo";
+                MaterialName = "Neo";                
                 param.mu= 9 * 1e5;
                 Force.Maginutude.X = 9500;
                 Force.Position.X = Body.Length.X; 
@@ -54,8 +54,11 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 error('****** Case is not recognized ******');         
     end
     
-    Body = MaterialType(Body,MaterialName,param);
-    
+    compressiblility= {'KS'};
+    fibers= {'GOH'};
 
+    Body = MaterialType(Body,MaterialName,param, compressiblility, fibers);
+   
     addpath('GaussPoints');
     Body = GausPointsApprox(Body,CSName,ApproximationScheme);
+   

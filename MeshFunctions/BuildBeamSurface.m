@@ -2,7 +2,6 @@ function SurfacePoints = BuildBeamSurface(Body,q)
 
         
         xloc = Body.xloc;
-        Shape = Body.Shape;
         L = Body.Length.Ln;
         H = Body.Length.Y;
         W = Body.Length.Z;
@@ -16,7 +15,7 @@ function SurfacePoints = BuildBeamSurface(Body,q)
             zeta = IsoData(i,3);
             Element = IsoData(i,4);
             qk = q(xloc(Element ,:));
-            r = Shape(L,H,W,xi,eta,zeta)*qk;
+            r = Shape_(L,H,W,xi,eta,zeta)*qk;
             SurfacePoints(i,:) = r';
         end
         

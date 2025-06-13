@@ -1,26 +1,23 @@
-function  Body = MaterialType(Body,MaterialName,param)
-    % Material parameters
-    compressibleMaterials = {'KS'};
-    fiberMaterials = {'GOH'};
+function  Body = MaterialType(Body,MaterialName,param, compressiblility, fibers)
 
     % Define "bulk" module 
-    if ismember(MaterialName,compressibleMaterials)
-       d = [];
+    if nargin < 4 || ~ismember(MaterialName, compressiblility)
+        d = 1e-11;
     else
-       d = 10^(-12); 
-    end 
+        d = [];
+    end
 
     % Define fibers
-    if ismember(MaterialName,fiberMaterials)
-       a0 = [1 0 0];   % fiber direction 
-       Body.FiberTwist = 0; % inner (fiber) pre-twist
-       Body.Fibers = true;
-    else  % material isotrtopic
-       a0 = [];
+    if nargin < 5 || ~ismember(MaterialName, fibers) % material isotrtopic
+       param.a0 = [];
        Body.Fibers = false;
+    else       
+       Body.Fibers = true;
     end
-    
+
     Body.MaterialName = MaterialName;
-    Body.const = [cell2mat(struct2cell(param))', a0, d];
+    Body.const = [cell2mat(struct2cell(param))', d];
 
+   
 
+    
