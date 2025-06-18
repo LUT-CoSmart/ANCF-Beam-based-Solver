@@ -1,22 +1,19 @@
 clc,clear,close all;
 format long
 
-addpath("MainFunctions");
-addpath("MeshFunctions")
-addpath("Postprocessing");
-addpath('InnerForceFunctions');
+addpath("MainFunctions","MeshFunctions",'InnerForceFunctions',"Postprocessing");
 
 Body.Name = "Body";
 CaseName =  string(mfilename);
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-[Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
+[Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Poigen");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -30,11 +27,8 @@ titertot=0;
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
-% 
-% origFolder = pwd;
-% cd InnerForceFunctions;
-% codegen InnerForce -args {Body} -config:mex
-% cd(origFolder);
+
+CreateMex;
 
 %START NEWTON'S METHOD
 for i=1:steps
@@ -48,7 +42,7 @@ for i=1:steps
     for ii=1:imax    
         tic; 
 
-        [K,Fe] = InnerForce(Body);
+        [K,Fe] = InnerForce_mex(Body);
 
         K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
         ff =  Fe - Fext;

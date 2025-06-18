@@ -31,9 +31,7 @@ function Body = Materials(Body, MaterialName, SubCase)
                     
                     case "Amir"      
                         c10 = 5e4;
-                        % c10 =  1.99;
                         % division by 2 just to have same with Neo.
-                        %param.c10 = c10/2;
                         param.c10 = c10/2;
                         param.k1 = 600e3;
                         param.k2 = 0.01;     
