@@ -3,7 +3,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
         
     switch CaseName
            case {"LockingBendingLarge", "LockingBendingSmall"}
-                CSName = "Rectangular";
+                CSName = 'Rectangular';
                 Body.Length.X = 2; 
                 Body.Length.Y = 0.5;
                 Body.Length.Z = 0.1;
@@ -20,7 +20,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 end   
 
            case "ElongationHyperelastic"
-                CSName = "Rectangular";
+                CSName = 'Rectangular';
                 Body.Length.X = 1; 
                 Body.Length.Y = 0.1;
                 Body.Length.Z = 0.1;
@@ -32,7 +32,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 Boundary.Type = "reduced"; 
            
            case {'PrincetonBeamSmall', 'PrincetonBeamLarge'}
-                CSName = "Rectangular";
+                CSName = 'Rectangular';
                 Body.Length.X = 0.508; 
                 Body.Length.Y = 12.377 * 1e-3;
                 Body.Length.Z = 3.2024 * 1e-3;

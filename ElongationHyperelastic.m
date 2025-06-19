@@ -10,7 +10,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 2;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
