@@ -19,19 +19,22 @@ if create
     
     if writeMex
             %% TODO: check does these changes affect the body behaviour
+            % they connect to folders , where numerical data are comming
+            % from
+            
             % Body.ElementName = coder.typeof('a', [1, Inf], [false, true]);
             % Body.ElementType = coder.typeof('a', [1, Inf], [false, true]);
             % Body.SubType = coder.typeof('a', [1, Inf], [false, true]);
             % Body.DeformationType = coder.typeof('a', [1, Inf], [false, true]);
             % Body.FiniteDiference = coder.typeof('a', [1, Inf], [false, true]);
-            %  Body.SolutionBase = coder.typeof('a', [1, Inf], [false, true]);
+            % Body.SolutionBase = coder.typeof('a', [1, Inf], [false, true]);
+            % Body.Name = coder.typeof('a', [1, Inf], [false, true]);            
+            % Body.IntegrationType = coder.typeof('a', [1, Inf], [false, true]);
+            % Body.CSName = coder.typeof('a', [1, Inf], [false, true]);
+            % Body.BodyFolder = coder.typeof('a', [1, Inf], [false, true]);
+            % Body.MaterialName = coder.typeof('a', [1, Inf], [false, true]);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            Body.Name = coder.typeof('a', [1, Inf], [false, true]);            
-            Body.IntegrationType = coder.typeof('a', [1, Inf], [false, true]);
-            Body.CSName = coder.typeof('a', [1, Inf], [false, true]);
-            
-            Body.BodyFolder = coder.typeof('a', [1, Inf], [false, true]);
-            Body.MaterialName = coder.typeof('a', [1, Inf], [false, true]);
             Body.const = coder.typeof(0, [1, Inf], [false, true]);  
             Body.Gint = coder.typeof(0, [Inf, 4], [true, false]);  
             Body.const = coder.typeof(0, [1, Inf], [false, true]);  
@@ -50,11 +53,12 @@ if create
             Body.Dvec = coder.typeof(0, [1, Inf], [false, true]);
             Body.SurfaceXi.pointCS = coder.typeof(0, [Inf, 2], [true, false]);
             Body.IsoData = coder.typeof(0, [Inf, 4], [true, false]);
-            
-            Body.bc = coder.typeof(0, [1, Inf], [false, true]);
+            Body.BodyFaces = coder.typeof(0, [Inf, 3], [true, false]);
+            % 
+            Body.bc = coder.typeof(false, [1, Inf], [false, true]);
             Body.Fext = coder.typeof(0, [Inf, 1], [true, false]);
             Body.fextInd = coder.typeof(0, [1, Inf], [false, true]);
-            Body.ForceVectorInit = coder.typeof(0, [1, Inf], [false, true]);
+            Body.ForceVectorInit = coder.typeof(0, [Inf, 1], [false, true]);
 
             codegen InnerForce -args {Body} -config:mex
     end
