@@ -8,9 +8,9 @@ CaseName =  string(mfilename);
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-[Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Poigen");  % Itegration Scheme: Poigen, Standard
+[Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 8;
 Body = CreateFEM(Body,ElementNumber);
 % % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
@@ -28,7 +28,8 @@ SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikho
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
-CreateMex;
+create=false;
+CreateMex(create,Body);
 
 %START NEWTON'S METHOD
 for i=1:steps
@@ -42,7 +43,7 @@ for i=1:steps
     for ii=1:imax    
         tic; 
 
-        [K,Fe] = InnerForce_mex(Body);
+        [K,Fe] = InnerForce(Body);
 
         K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
         ff =  Fe - Fext;

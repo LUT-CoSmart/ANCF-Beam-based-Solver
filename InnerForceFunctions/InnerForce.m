@@ -22,7 +22,12 @@ function [K,Fint] = InnerForce(Body)
         K_local_cell = cell(ElementNumber,1);
         F_local_cell = cell(ElementNumber,1);
         for ii = 1:ElementNumber  % parfor doesn't work yet, so == for  
-            if functionName == "BeamANCF"
+            ElementDofs = Body.ElementDofs;
+            K_loc = zeros(ElementDofs);
+            Fe = zeros(ElementDofs,1);
+
+            % if functionName == "BeamANCF"
+            if strcmp(functionName, 'BeamANCF')
                 [K_loc, Fe] = BeamANCF(Body, ii);
             else
                 error('Inner function is not defined')
