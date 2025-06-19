@@ -32,9 +32,9 @@ if create
             % Body.IntegrationType = coder.typeof('a', [1, Inf], [false, true]);
             % Body.CSName = coder.typeof('a', [1, Inf], [false, true]);
             % Body.BodyFolder = coder.typeof('a', [1, Inf], [false, true]);
-            % Body.MaterialName = coder.typeof('a', [1, Inf], [false, true]);
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+            Body.MaterialName = coder.typeof('a', [1, Inf], [false, true]);
             Body.const = coder.typeof(0, [1, Inf], [false, true]);  
             Body.Gint = coder.typeof(0, [Inf, 4], [true, false]);  
             Body.const = coder.typeof(0, [1, Inf], [false, true]);  

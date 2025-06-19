@@ -12,7 +12,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################
-ElementNumber = 10;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
@@ -29,44 +29,51 @@ SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikho
 
 for angle = angleSet
     fprintf("Considered angle %d\n", angle);
-    titertot=0;  
+    titertot=0; 
+
+    Force.Maginutude.Y = -Force.Maginutude.Total * cosd(angle);
+    Force.Maginutude.Z =  Force.Maginutude.Total * sind(angle);
+     
+    Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
+
     %START NEWTON'S METHOD   
     for i=1:steps
         
-        % Update forces
-        Subforce.Maginutude.X = 0 ;
-        Subforce.Maginutude.Y = -Force.Maginutude.Total * cosd(angle) * (i/steps);        
-        Subforce.Maginutude.Z =  Force.Maginutude.Total * sind(angle) * (i/steps);
-        Subforce.Position = Force.Position;
-        % Application of Boundary conditions
-        Body = CreateBC(Body, Subforce, Boundary);
+        Body = SubLoading(Body, i, steps, "linear");    
         Re=10^(-4);                   % Stopping criterion for residual
         imax=20;                      % Maximum number of iterations for Newton's method 
         Fext = Body.Fext;
+
         for ii=1:imax    
             tic; 
+
             [K,Fe] = InnerForce(Body);
+
             K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
             ff =  Fe - Fext;
     
             ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
             deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
-            u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
-            Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
-            Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
-            titer=toc;
-            titertot=titertot+titer;   
            
-            
+            u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
+                                   
+           
             if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
                 break;  
             end 
+            
+            Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
+            Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
+
+            titer=toc;
+            titertot=titertot+titer;   
+
         end           
     
         %Pick nodal displacements from result vector
         xlocName = 'xloc' + Body.ElementType;
-        DofID = feval(xlocName,Body.DofsAtNode,Body.fextInd,1:3);
-        uf = Body.u(DofID);                
+        uf = Body.u(Body.fextInd); 
+
     end
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
 end    
