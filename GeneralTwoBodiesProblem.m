@@ -11,8 +11,8 @@ Body2.Name = "Body2";
 Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");  
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"KS"); 
-Body2 = Materials(Body2,"KS"); 
+Body1 = Materials(Body1,'KS'); 
+Body2 = Materials(Body2,'KS'); 
 % Geometry
 Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body1.Length.Z = Body1.Length.Z;

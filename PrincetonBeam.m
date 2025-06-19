@@ -96,3 +96,5 @@ title('Displacement along Z');
 xlabel('Angle');
 ylabel('Z');
 grid on;
+
+CleanTemp(Body, true)

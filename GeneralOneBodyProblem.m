@@ -7,7 +7,7 @@ Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,"Neo"); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body = Materials(Body,'Neo'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
 Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
 % ########### Complicate geometry #########################################
@@ -34,7 +34,7 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e6;  % Elongation
+Force.Maginutude.X = 1e3;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 
