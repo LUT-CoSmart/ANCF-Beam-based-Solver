@@ -9,7 +9,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 Body = Materials(Body,'Neo'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body = Geometry(Body,'Tendon',"Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
 % ########### Complicate geometry #########################################
 % Shift
 Body.Shift.X = 0;
@@ -55,22 +55,28 @@ Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 Results = [];  
 visualization(Body,Body.q0,'red',false);
 % % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
-Re=10^(-4);                   % Stopping criterion for residual
+Re=10^(-5);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "penaltyKf";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+SolutionRegType = "off";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+
+create=false;
+CreateMex(create,Body);
+
+
 %START NEWTON'S METHOD   
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Body = SubLoading(Body, i, steps, "exponential"); 
+    Body = SubLoading(Body, i, steps, "cubic"); 
 
     Fext = Body.Fext;    
     for ii=1:imax    
         tic; 
-                                
-        [K,Fe] = InnerForce(Body);
+          
+        % [K,Fe] = InnerForce(Body);
+        [K,Fe] = InnerForce_mex(Body);
                        
         K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
         ff =  Fe - Fext;
@@ -103,3 +109,4 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,Results,visDeformed,visInitial) 
+CleanTemp(Body, true)
