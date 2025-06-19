@@ -93,7 +93,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e5;
+ContactVariable = 1e4;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
@@ -116,20 +116,16 @@ ContactRegType = "penaltyKf";
 Results1 = [];
 Results2 = [];
 
-
+Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
+Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 % profile on -historysize 2e9   % 20 million calls
 %START NEWTON'S METHOD   
 for i=1:steps
 
-    % Update forces of Body1 
-    Subforce1 = SubLoading(Force1, i, steps, "cubic"); 
+    Body1 = SubLoading(Body1, i, steps, "cubic"); 
+    Body2 = SubLoading(Body2, i, steps, "cubic"); 
 
-    % Update forces of Body2
-    Subforce2 = SubLoading(Force2, i, steps, "cubic"); 
-
-    % Application of Boundary conditions
-    Body1 = CreateBC(Body1, Subforce1, Boundary1);
-    Body2 = CreateBC(Body2, Subforce2, Boundary2);
+ 
 
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
@@ -177,13 +173,11 @@ for i=1:steps
 
     %Pick nodal displacements from result vector
     xlocName1 = 'xloc' + Body1.ElementType;
-    DofID1 = feval(xlocName1,Body1.DofsAtNode,Body1.fextInd,1:3);
-    uf1 = Body1.u(DofID1);
+    uf1 = Body1.u(Body1.fextInd);
     Results1 = [Results1; Body1.ElementNumber Body1.TotalDofs uf1'];
 
     xlocName2 = 'xloc' + Body2.ElementType;
-    DofID2 = feval(xlocName2,Body2.DofsAtNode,Body2.fextInd,1:3);
-    uf2 = Body2.u(DofID2);
+    uf2 = Body2.u(Body2.fextInd); 
     Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
 end    
 % profile viewer    % Open profiling report GUI

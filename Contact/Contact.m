@@ -4,7 +4,25 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
        Kc = zeros(length(Fc));
        Gap = NaN;
-    else        
+    else       
+
+        currentFolder = pwd;
+
+        % Go to Body1 folder
+        cd(Body1.BodyFolder);
+        Body1.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
+        Body1.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
+        Body1.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
+        Body1.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
+        
+        cd(Body2.BodyFolder);
+        Body2.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
+        Body2.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
+        Body2.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
+        Body2.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
+        
+        cd(currentFolder);
+
        %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
        sqrtEps = sqrt(eps);
        h1 = 10^(-8);
@@ -59,6 +77,12 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
        Body1.q = q1_backup; % restore
        Body2.q = q2_backup; % restore
        [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
-    end      
+       
 
+
+       Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta'});
+       Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta'});
+
+    end      
+    
     

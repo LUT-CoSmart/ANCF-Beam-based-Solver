@@ -1,17 +1,11 @@
-function Body = Geometry(Body,CSName,ApproximationScheme,k)
+function Body = Geometry(Body,CSName,ApproximationScheme)
     
         
     switch CSName
            case "Rectangular"
-                % Body.Length.X = 1; % Body length
-                % Body.Length.Y = 0.1;
-                % Body.Length.Z = 0.1;
-
-                Body.Length.X = 43e-3*k; 
-                Body.Length.Y = 2.14028e-05*k;
-                %Body.Length.Y = 0.01;
-                Body.Length.Z = 1*k;
-                
+                Body.Length.X = 1; % Body length
+                Body.Length.Y = 0.1;
+                Body.Length.Z = 0.1;
                 Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
            case "Oval"
                 Body.Length.X = 2;   % Body length

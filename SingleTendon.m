@@ -8,13 +8,12 @@ addpath('InnerForceFunctions');
 
 Body.Name = "Body";
 
-k = 1;
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,"GOH","Amir"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body = Materials(Body,"GOH"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Rectangular","Standard",k);  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
+Body = Geometry(Body,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
 % ########### Complicate geometry ######################§##################
 % Shift
 Body.Shift.X = 0;

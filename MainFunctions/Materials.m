@@ -1,8 +1,5 @@
-function Body = Materials(Body, MaterialName, SubCase)
+function Body = Materials(Body, MaterialName)
             
-    if nargin < 3
-        SubCase = "";
-    end
 
     switch MaterialName
            case "Neo" % Neo-Hookean
@@ -20,27 +17,13 @@ function Body = Materials(Body, MaterialName, SubCase)
                 param.c02 = -5.9e5;
                  
            case "GOH" % Gasser-Ogden-Holzaphel material  
-                switch SubCase
-                    case "GOH"
-                        param.c10 = 7.64e3;
-                        param.k1 = 996.6e3;
-                        param.k2 = 524.6;      
-                        param.kappa = 0;      % fiber dipersion
-                        param.a0 = [1 0 0]';   % fiber direction 
-                        Body.FiberTwist = 0; % inner (fiber) pre-twist
-                    
-                    case "Amir"      
-                        c10 = 5e4;
-                        % division by 2 just to have same with Neo.
-                        param.c10 = c10/2;
-                        param.k1 = 600e3;
-                        param.k2 = 0.01;     
-
-                        param.kappa = 0;   % fiber dipersion
-                        param.a0 = [1 0 0]';   % fiber direction 
-                        Body.FiberTwist = 0; % inner (fiber) pre-twist
-                end    
-                    
+                 param.c10 = 7.64e3;
+                 param.k1 = 996.6e3;
+                 param.k2 = 524.6;      
+                 param.kappa = 0;      % fiber dipersion
+                 param.a0 = [1 0 0]';   % fiber direction 
+                 Body.FiberTwist = 0; % inner (fiber) pre-twist
+   
            case "KS" % Kirhhoff-Saint-Venant
                 param.E=2.07e11;
                 param.nu=0.3;
