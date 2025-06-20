@@ -5,7 +5,6 @@ addpath("MeshFunctions")
 addpath(genpath("Contact"))
 addpath("Postprocessing");
 
-
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 % ########### Problem data ################################################
@@ -17,24 +16,12 @@ Body1 = Materials(Body1,'KS');
 Body2 = Materials(Body2,'KS'); 
 % Geometry
 Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body1.Length.Z = Body1.Length.Z;
-
 Body2 = Geometry(Body2,"Rectangular","Standard");  % Itegration Scheme: Poigen, Standard
-Body2.Length.X = Body2.Length.X;
 % ########### Set Bodies positions ########################################
 % Shift of Body1
-Body1.Shift.X = Body1.Length.X/2;
+Body1.Shift.X = 0;
 Body1.Shift.Y = Body1.Length.Y;
-Body1.Shift.Z = 3/4*Body1.Length.X;
-
-% Rotation (in degrees)
-Body1.Rotation.X = 0;
-Body1.Rotation.Y = 90;
-Body1.Rotation.Z = 0;
-
-Body2.Rotation.X = 45;
-Body2.Rotation.Y = 0;
-Body2.Rotation.Z = 0;
+Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
 ElementNumber1 = 2;
@@ -56,7 +43,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -5e8;  
+Force1.Maginutude.Y = -5e6;  
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -73,7 +60,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e10;
+ContactVariable = 1e8;
 Body1.ContactRole = "master"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
@@ -88,12 +75,12 @@ Body2.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 
 % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 5;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
-imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "off";
+imax=15;                      % Maximum number of iterations for Newton's method 
+SolutionRegType = "Tikhonov";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+ContactRegType = "penaltyK";
 Results1 = [];
 Results2 = [];
 
@@ -103,8 +90,8 @@ Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 %START NEWTON'S METHOD   
 for i=1:steps
 
-    Body1 = SubLoading(Body1, i, steps, "quadratic"); 
-    Body2 = SubLoading(Body2, i, steps, "quadratic"); 
+    Body1 = SubLoading(Body1, i, steps, "cubic"); 
+    Body2 = SubLoading(Body2, i, steps, "cubic"); 
 
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
@@ -115,8 +102,12 @@ for i=1:steps
         tic;
 
         % Contact forces
-
         [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
+
+        
+            
+
+
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);

@@ -189,3 +189,6 @@ hold on
         zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
 visualization(Body2,Body2.q,'none',true);
+
+CleanTemp(Body1, true)
+CleanTemp(Body2, true)
