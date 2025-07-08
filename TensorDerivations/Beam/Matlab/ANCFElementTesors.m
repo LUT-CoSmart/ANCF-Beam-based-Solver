@@ -1,10 +1,10 @@
 clc, clear, close all;
 Call_shapeFunctions = false;   % To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
 write_files = true;            % Do we need to write any file?
-disp_based = true;            % What field the tensors are based on: displacement (true), position (false)
-small_deformation = true;     % Appoximation theory: infinite small (true), finite (false)
+disp_based = false;            % What field the tensors are based on: displacement (true), position (false)
+small_deformation = false;     % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3343;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Element=3363;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));           % Number of nodes            
 Dim = str2double(ElementName(end));           % Problem dimensionality     

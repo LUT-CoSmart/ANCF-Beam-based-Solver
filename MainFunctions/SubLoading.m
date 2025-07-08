@@ -15,6 +15,7 @@ function Body = SubLoading(Body, currentStep, Nsteps, type)
                 Loadstep = (currentStep/Nsteps)^3;    
            case "quartic"  
                 Loadstep = (currentStep/Nsteps)^4;    
+          
            otherwise
                 error('Unknown loading type')                 
     end  

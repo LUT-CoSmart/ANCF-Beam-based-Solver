@@ -13,7 +13,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 Body = Materials(Body,"GOH"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
+Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
 % ########### Complicate geometry ######################§##################
 % Shift
 Body.Shift.X = 0;
@@ -32,12 +32,13 @@ Body.Twist.ro = 0;
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
+k =1 ;
 Force.Maginutude.X = 10*k;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
@@ -110,7 +111,7 @@ for i=1:steps
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
 end
 % POST PROCESSING ###############################################
-visDeformed = false;
+visDeformed = true;
 visInitial = false;
 PostProcessing(Body,Results,visDeformed,visInitial) 
 CleanTemp(Body, true)

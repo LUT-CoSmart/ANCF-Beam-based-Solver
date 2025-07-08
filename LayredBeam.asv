@@ -22,9 +22,9 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 4;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 4;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -41,7 +41,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -62.5*10^(5);  
+Force1.Maginutude.Y = -62.5*10^(6);  
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -57,8 +57,8 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e7;
+ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
+ContactVariable = 1e8;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
@@ -73,9 +73,9 @@ Body2.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 
 % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
-Re=10^(-3);                   % Stopping criterion for residual
+Re=10^(-4);                   % Stopping criterion for residual
 imax=15;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 ContactRegType = "off";
@@ -154,9 +154,5 @@ ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
 visualization(Body2,Body2.q,'none',true);
-
-PostProcessing(Body1,Results1,false,false) 
-PostProcessing(Body2,Results2,false,false) 
-
 CleanTemp(Body1, true)
 CleanTemp(Body2, true)

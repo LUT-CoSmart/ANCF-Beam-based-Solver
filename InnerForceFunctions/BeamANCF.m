@@ -17,7 +17,7 @@ function [K_loc,Fe] = BeamANCF(Body,k)
     switch Body.FiniteDiference
             
            case "Matlab"
-                 h1 = 1e-8;
+                 h = 2*sqrtEps; 
                  
                  Fibers = Body.Fibers;
                  detF0 = Body.detF0;
@@ -29,7 +29,7 @@ function [K_loc,Fe] = BeamANCF(Body,k)
                
                  Feh_all = zeros(ElementDofs, ElementDofs);
 
-                 H = diag( max( [sqrtEps * abs(uk(:))'; sqrtEps * abs(qk(:))'; h1 * ones(1, ElementDofs)] ) );
+                 H = diag(h * ones(1, ElementDofs));
 
                  for jj = 1:ElementDofs
                      ukh = uk - H(:,jj);

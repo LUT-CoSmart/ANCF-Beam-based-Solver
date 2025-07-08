@@ -4,14 +4,14 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
     switch CSName
            case "Rectangular"
                 Body.Length.X = 2; % Body length
-                Body.Length.Y = 0.5;
-                Body.Length.Z = 0.5;
+                Body.Length.Y = 0.2;
+                Body.Length.Z = 0.2;
                 Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
                 
            case "Oval"
                 Body.Length.X = 2;   % Body length
-                Body.Length.Y = 0.5; % Oval diameter in y-axis
-                Body.Length.Z = 0.5; % Oval diameter in z-axis
+                Body.Length.Y = 0.2; % Oval diameter in y-axis
+                Body.Length.Z = 0.2; % Oval diameter in z-axis
 
            case {"C", "Tendon",...
                  "Middle_cross_section1_1", "Middle_cross_section2_1", "Middle_cross_section3_1",...

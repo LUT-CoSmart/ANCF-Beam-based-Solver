@@ -2,14 +2,14 @@ function [K,Fint] = InnerForce(Body)
     
         % Accounting rotation 
         % NB: Element Inner Force Functions aren't derived for taking ridgid body rotation
-        if isfield(Body, 'Rotation')              
-            RotInv = Body.RotInv;
-            Rot = Body.Rot;
-            Body.q = RotInv * Body.q;
-            Body.q0 = RotInv * Body.q0;
-            Body.u = RotInv * Body.u;
-            Body.q0f = RotInv * Body.q0f;
-        end  
+        % if isfield(Body, 'Rotation')              
+        %     RotInv = Body.RotInv;
+        %     Rot = Body.Rot;
+        %     Body.q = RotInv * Body.q;
+        %     Body.q0 = RotInv * Body.q0;
+        %     Body.u = RotInv * Body.u;
+        %     Body.q0f = RotInv * Body.q0f;
+        % end  
         
         TotalDofs = Body.TotalDofs;
         xloc = Body.xloc;
@@ -52,12 +52,12 @@ function [K,Fint] = InnerForce(Body)
         end
 
         % Returning back
-        if isfield(Body, 'Rotation')
-            Body.q = Rot* Body.q;
-            Body.q0 = Rot* Body.q0;
-            Body.u = Rot* Body.u;
-            Body.q0f = Rot * Body.q0f;
-            Fint = Rot * Fint;
-            K = Rot * K * RotInv;
-        end
-        
+        % if isfield(Body, 'Rotation')
+        %     Body.q = Rot* Body.q;
+        %     Body.q0 = Rot* Body.q0;
+        %     Body.u = Rot* Body.u;
+        %     Body.q0f = Rot * Body.q0f;
+        %     Fint = Rot * Fint;
+        %     K = Rot * K * RotInv;
+        % end
+        % 

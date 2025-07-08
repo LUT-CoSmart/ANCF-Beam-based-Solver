@@ -7,28 +7,24 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
     else 
         
         currentFolder = pwd;
-
         cd(Body1.BodyFolder);
-
         Body1.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
         Body1.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
         Body1.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
         Body1.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
         Body1.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-        const1 = Body1.Dvec(1:end-3);
-        Body1.Sigma = @(F_) PiolaSecondTensor(F_, const1);
+        const = Body1.Dvec(1:end-3);
+        Body1.Sigma = @(F_) PiolaSecondTensor(F_, const);
 
         cd(Body2.BodyFolder);
-
         Body2.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
         Body2.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
         Body2.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
         Body2.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
         Body2.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-                                                        % F(q,u,q0(PosDofs),phi,L,H,W,xi,eta,zeta);
-        const2 = Body2.Dvec(1:end-3);
-        Body2.Sigma = @(F_) PiolaSecondTensor(F_, const2);
-
+                                                        % F(q,u,q0(PosDofs),phi,L,H,W,xi,eta,zeta
+        const = Body2.Dvec(1:end-3);
+        Body2.Sigma = @(F_) PiolaSecondTensor(F_, const);
         cd(currentFolder);
        
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
@@ -84,21 +80,15 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
            end
           
            Kc(:,ii) = (Fc - Fch) / (h);
-           I_vec(ii)=0;   
-
+           I_vec(ii)=0;                      
         end
-
         Body1.q = q1_backup; % restore
         Body2.q = q2_backup; % restore
-
-        Body1.u = u1_backup; % restore
-        Body2.u = u2_backup; % restore
-        
         [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
 
 
-        Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
-        Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
+        Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta'});
+        Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta'});
     end      
     
     

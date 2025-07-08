@@ -45,13 +45,13 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            inputs.nodes=SurfacePoints;
            inputs.face_mean_nodes=face_mean_nodes;
            inputs.face_normals= - face_normals; % change normal to outward
-           [distances,~,~,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,1);         
+           [distances,~,~,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
 
            %% TODO: This is true for beam elements only 
            
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
-           idx = SurfacePointsIso(highlight_face(:, 1),4); % now we need to find the element via finding the closest nodes, which define the element
+           idx = SurfacePointsIso(highlight_face,4); % now we need to find the element via finding the closest nodes, which define the element
         end 
                 
         if (fl) && any(distances<0) % choosing points inside, due to the normal identification procedure distances>0  
@@ -69,12 +69,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
             for i = 1:length(distancesInside)
         
                 qk=q(xloc(idxInside(i),:));
-
-                % xi_eta_zeta0 = [0; 0; 0];                                        
-                % options = optimoptions('lsqnonlin', 'Display','off','FunctionTolerance', 1e-5);
-                % residual = @(xi_eta_zeta) Shape(L,H,W,xi_eta_zeta(1),xi_eta_zeta(2),xi_eta_zeta(3)) * qk - PointInside(i,:)'; % Defining the residual function
-                % xi_eta_zeta_result = lsqnonlin(residual, xi_eta_zeta0, [-1; -1; -1], [1; 1; 1],options);
-                % 
+          
                 xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,L,H,W,qk, PointInside(i,:));
 
                 xi_eta_zeta_Array(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:)]; 
