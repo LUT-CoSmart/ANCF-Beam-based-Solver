@@ -8,7 +8,7 @@ Body.Name = "Body";
 %% There are two options: Large & Small
 CaseSubtype = "Large"; 
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+Body = DefineElement(Body,"Beam","ANCF",3343,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 % ########## Create FE Model ##############################################

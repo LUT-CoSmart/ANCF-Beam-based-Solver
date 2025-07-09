@@ -14,9 +14,8 @@ Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");
 Body1 = Materials(Body1,"GOH"); 
 Body2 = Materials(Body2,"GOH"); 
 % Geometry
-Body1 = Geometry(Body1,"Middle_cross_section2_1","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
-
-Body2 = Geometry(Body2,"Middle_cross_section1_1","Poigen");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
@@ -26,7 +25,6 @@ Body1.Shift.Z = Body1.CSCenterZ;
 Body2.Shift.X = 0;
 Body2.Shift.Y = Body2.CSCenterY;
 Body2.Shift.Z = Body2.CSCenterZ;
-
 
 % Rotation (in degrees)
 Body1.Rotation.X = 0;
@@ -58,7 +56,7 @@ Body2 = AddTensors(Body2);
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
 %Force1.Maginutude.Y = -5e8;  
-Force1.Maginutude.X = 0;  % Elongation
+Force1.Maginutude.X =  1e3;  % Elongation
 Force1.Maginutude.Y = 0;  
 Force1.Maginutude.Z = 0;  
 
@@ -72,7 +70,7 @@ Boundary1.Position.X = 0;
 Boundary1.Position.Y = 0;
 Boundary1.Position.Z = 0;
 
-Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
+Boundary1.Type = "full"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
 Force2.Maginutude.X = 1e3;  % Elongation
@@ -92,8 +90,8 @@ Boundary2.Position.Z = 0;
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
-ContactVariable = 1e4;
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
+ContactVariable = 1e2;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
@@ -107,12 +105,12 @@ Body2.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 
 % %####################### Solving ######################################## 
-steps = 5;  % sub-loading steps
+steps = 100;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "penaltyKf";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "penaltyKf";
+SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+ContactRegType = "off";
 Results1 = [];
 Results2 = [];
 
@@ -126,7 +124,6 @@ for i=1:steps
     Body2 = SubLoading(Body2, i, steps, "cubic"); 
 
  
-
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
     

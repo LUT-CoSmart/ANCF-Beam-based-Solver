@@ -2,7 +2,7 @@ function  Body = MaterialType(Body,MaterialName,param, compressiblility, fibers)
 
     % Define "bulk" module 
     if nargin < 4 || ~ismember(MaterialName, compressiblility)
-        d = 1e-11;
+        d = 1e-12;
     else
         d = [];
     end

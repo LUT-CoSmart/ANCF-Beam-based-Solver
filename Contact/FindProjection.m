@@ -56,7 +56,8 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
                 
         if (fl) && any(distances<0) % choosing points inside, due to the normal identification procedure distances>0  
     
-            Inside = distances<0;
+            % Inside = distances<0;
+            Inside = (distances < 0) & (abs(distances) > sqrt(eps));
             
             distancesInside = distances(Inside);
             idxInside = idx(Inside);

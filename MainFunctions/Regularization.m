@@ -20,7 +20,7 @@ function [u,K_reg] = Regularization(K,f,RegType,compute)
 
                    if RegType == "penaltyKf"
                        
-                      lambda = sqrt(eps) * norm(K, 2) / norm(f, 2);
+                      lambda = eps * norm(K, 2) / norm(f, 2);
                       K_reg = K + lambda * I;
                       f_reg = f;
                     

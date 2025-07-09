@@ -13,8 +13,8 @@ Body2 = DefineElement(Body2,"Beam","ANCF",3343,"None");
 Body1 = Materials(Body1,'KS'); 
 Body2 = Materials(Body2,'KS'); 
 % Geometry
-Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"Rectangular","Standard");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"Rectangular","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"Rectangular","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
@@ -22,18 +22,18 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 4;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 4;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
-Body1.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body1.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body1.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body1 = AddTensors(Body1);
 
-Body2.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body2.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body2.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body2.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body2 = AddTensors(Body2);
@@ -58,7 +58,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e7;
+ContactVariable = 1e8;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 

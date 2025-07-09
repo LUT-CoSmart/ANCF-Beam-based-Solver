@@ -14,8 +14,9 @@ function SurfacePoints = BuildBeamSurface(Body,q)
             eta = IsoData(i,2);
             zeta = IsoData(i,3);
             Element = IsoData(i,4);
+
             qk = q(xloc(Element ,:));
-            r = Shape_(L,H,W,xi,eta,zeta)*qk;
+            r = Shape_(L,H,W,xi,eta,zeta)*qk;            
             SurfacePoints(i,:) = r';
         end
         

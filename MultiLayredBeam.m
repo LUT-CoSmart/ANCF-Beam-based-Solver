@@ -8,9 +8,9 @@ Body2.Name = "Body2";
 Body3.Name = "Body3";
 % ########### Problem data ################################################
 % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
-Body1 = DefineElement(Body1,"Beam","ANCF",3363,"None");  
-Body2 = DefineElement(Body2,"Beam","ANCF",3363,"None"); 
-Body3 = DefineElement(Body3,"Beam","ANCF",3363,"None"); 
+Body1 = DefineElement(Body1,"Beam","ANCF",3343,"None");  
+Body2 = DefineElement(Body2,"Beam","ANCF",3343,"None"); 
+Body3 = DefineElement(Body3,"Beam","ANCF",3343,"None"); 
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 Body1 = Materials(Body1,'KS'); 
 Body2 = Materials(Body2,'KS'); 
@@ -31,25 +31,25 @@ Body3.Shift.Z =  0;
 
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 2;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 2;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
-ElementNumber3 = 2;
+ElementNumber3 = 1;
 Body3 = CreateFEM(Body3,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
-Body1.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body1.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body1.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body1 = AddTensors(Body1);
 
-Body2.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body2.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body2.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body2.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body2 = AddTensors(Body2);
 
-Body3.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body3.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body3.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body3.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body3 = AddTensors(Body3);
@@ -72,7 +72,6 @@ Force2.Position.X = Body2.Length.X;  % Elongation
 Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
-
 % Body2
 Force3.Maginutude = [];
 Force3.Position.X = Body3.Length.X;  % Elongation
@@ -83,10 +82,11 @@ Boundary3.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e9;
+ContactVariable = 5e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 Body3.ContactRole = "slave";
+
 % ########## Visualization of initial situation ###########################
 % figure;
 % hold on
@@ -96,14 +96,17 @@ Body3.ContactRole = "slave";
 % zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 % visualization(Body1,Body1.q0,'cyan',true);
 % visualization(Body2,Body2.q0,'red',true);
+% #########################################################################
 
-% %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+
+% ######################## Solving ######################################## 
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
 imax=15;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 ContactRegType = "off";
+
 Results1 = [];
 Results2 = [];
 Results3 = [];
@@ -123,20 +126,21 @@ for i=1:steps
     Fext2 = Body2.Fext;
     Fext3 = Body3.Fext;
 
-
     bc = [Body1.bc Body2.bc Body3.bc];
 
     for ii=1:imax
         tic;
-
-        % Contact forces
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Contact forces
         [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
                       zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
-
+        
+            
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Contact forces
         [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
         Fc2_extend = [zeros(Body1.TotalDofs,1); Fc2];
 
@@ -145,14 +149,14 @@ for i=1:steps
         
         Fc = Fc1_extend + Fc2_extend;     
         Kc = Kc1_extend + Kc2_extend;
-        
         Gap = Gap1 + Gap2;
+            
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % inner forces
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);
         [Ke3,Fe3] = InnerForce(Body3);
-
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Assemblance
         Fe = [Fe1; Fe2 ; Fe3];
@@ -162,6 +166,7 @@ for i=1:steps
               zeros(Body3.TotalDofs,Body1.TotalDofs+ Body2.TotalDofs) Ke3];
 
         K = Kc + Ke;
+
         ff =  Fe - Fext + Fc;
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
