@@ -14,15 +14,15 @@ Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"GOH","Alex"); 
-Body2 = Materials(Body2,"GOH","Alex"); 
-Body3 = Materials(Body3,'GOH',"Alex");
+Body1 = Materials(Body1,"Neo","Alex"); 
+Body2 = Materials(Body2,"Neo","Alex"); 
+Body3 = Materials(Body3,'Neo',"Alex");
 % Geometry
 Body1 = Geometry(Body1,"MG_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body2 = Geometry(Body2,"Sol_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 Body3 = Geometry(Body3,"LG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 2;
+angle = 45;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -84,13 +84,13 @@ Body3 = AddTensors(Body3);
 
 
 totalArea = Body1.detF0*sum(Body1.Gint(:,4)) + Body2.detF0*sum(Body2.Gint(:,4)) + Body3.detF0*sum(Body3.Gint(:,4));
-frac1 = Body1.detF0*sum(Body1.Gint(:,4)) / totalArea;
-frac2 = Body2.detF0*sum(Body2.Gint(:,4)) / totalArea;
-frac3 = Body3.detF0*sum(Body3.Gint(:,4)) / totalArea;
+frac1 = 1;%Body1.detF0*sum(Body1.Gint(:,4)) / totalArea;
+frac2 = 1;%Body2.detF0*sum(Body2.Gint(:,4)) / totalArea;
+frac3 = 1;%Body3.detF0*sum(Body3.Gint(:,4)) / totalArea;
 
 % ########## Boundary Conditions ##########################################
 
-Force = 2000;
+Force = 500;
 
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
@@ -152,7 +152,7 @@ Body2.ContactRole = "slave";
 Body3.ContactRole = "master";
 
 % %####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 

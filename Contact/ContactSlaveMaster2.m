@@ -82,7 +82,7 @@ function [Fcont, Ftarg, Gap] = ContactSlaveMaster2(ContactBody,TargetBody,Contac
                     Sigma_cont = ContactBody.Sigma(F_cont); 
                     
                     Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;
-                    lambda = gap^3 * norm(Sigma_n);
+                    lambda = gap^4 * norm(Sigma_n);
                     % lambda = gap * norm(Sigma_n);
 
 
