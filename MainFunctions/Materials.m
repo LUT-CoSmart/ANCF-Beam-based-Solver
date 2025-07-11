@@ -3,7 +3,7 @@ function Body = Materials(Body, MaterialName)
 
     switch MaterialName
            case "Neo" % Neo-Hookean
-                param.mu=9e5;
+                param.mu=90e6;
                 
            case "Mooney2" % 2 contant Mooney-Rivlin
                 param.c10=33.4e4;
