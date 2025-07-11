@@ -1,10 +1,21 @@
-function Body = Materials(Body, MaterialName)
+function Body = Materials(Body, MaterialName, Subtype)
             
+    if  nargin < 3 % preload
+        Subtype = "";
+    end 
 
     switch MaterialName
            case "Neo" % Neo-Hookean
-                param.mu=90e6;
-                
+                            
+               switch  Subtype
+                   case ""
+                       param.mu=9e5;
+    
+                   case "Alex"
+                       param.mu=90e6;
+    
+               end
+
            case "Mooney2" % 2 contant Mooney-Rivlin
                 param.c10=33.4e4;
                 param.c01 = -337;
@@ -17,12 +28,26 @@ function Body = Materials(Body, MaterialName)
                 param.c02 = -5.9e5;
                  
            case "GOH" % Gasser-Ogden-Holzaphel material  
-                 param.c10 = 7.64e3;
-                 param.k1 = 996.6e3;
-                 param.k2 = 524.6;      
-                 param.kappa = 0;      % fiber dipersion
-                 param.a0 = [1 0 0]';   % fiber direction 
-                 Body.FiberTwist = 0; % inner (fiber) pre-twist
+
+               switch  Subtype
+                   case ""
+                       param.c10 = 7.64e3;
+                       param.k1 = 996.6e3;
+                       param.k2 = 524.6;      
+                       param.kappa = 0;      % fiber dipersion
+                       param.a0 = [1 0 0]';   % fiber direction 
+                       Body.FiberTwist = 0; % inner (fiber) pre-twist
+    
+                   case "Alex"
+                       param.c10 = 53600;
+                       param.k1 = 7.5351e7;
+                       param.k2 = 23.926;      
+                       param.kappa = 0;      % fiber dipersion
+                       param.a0 = [1 0 0]';   % fiber direction 
+                       Body.FiberTwist = 0; % inner (fiber) pre-twist
+    
+               end
+                 
    
            case "KS" % Kirhhoff-Saint-Venant
                 param.E=2.07e11;

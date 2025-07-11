@@ -14,9 +14,9 @@ Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"Neo"); 
-Body2 = Materials(Body2,"Neo"); 
-Body3 = Materials(Body3,'Neo');
+Body1 = Materials(Body1,"GOH","Alex"); 
+Body2 = Materials(Body2,"GOH","Alex"); 
+Body3 = Materials(Body3,'GOH',"Alex");
 % Geometry
 Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
@@ -154,7 +154,7 @@ Body2.ContactRole = "master";
 Body3.ContactRole = "master";
 
 % %####################### Solving ######################################## 
-steps = 2;  % sub-loading steps
+steps = 30;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
@@ -168,8 +168,8 @@ Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
 
-% style = "cubic";
- style = "linear";
+ style = "cubic";
+%style = "linear";
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -269,133 +269,7 @@ end
 initial1 = Body1.ForceVectorInit;
 initial2 = Body2.ForceVectorInit;
 initial3 = Body3.ForceVectorInit;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% Second step
-% Force = 1e2;
-% % ########## Boundary Conditions ##########################################
-% % Body1 
-% Force1.Maginutude.X = Force*frac1;  % Elongation
-% % Body2
-% Force2.Maginutude.X = Force*frac2;  % Elongation
-% % Body3
-% Force3.Maginutude.X = Force*frac3;  % Elongation
-% 
-% % %####################### Solving ######################################## 
-% steps = 20;  % sub-loading steps
-% 
-% Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
-% Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
-% Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
-% style = "cubic";
-% % style = "linear";
-% %START NEWTON'S METHOD   
-% for i=1:steps
-% 
-%     Body1 = SubLoading(Body1, i, steps, style,initial1); 
-%     Body2 = SubLoading(Body2, i, steps, style,initial2); 
-%     Body3 = SubLoading(Body3, i, steps, style,initial3); 
-% 
-% 
-%     Fext1 = Body1.Fext;
-%     Fext2 = Body2.Fext;
-%     Fext3 = Body3.Fext;
-% 
-%     bc = [Body1.bc Body2.bc Body3.bc];
-%     for ii=1:imax
-%         tic;
-% 
-%        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % Contact forces
-%         [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
-%         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
-%         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
-%                       zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
-% 
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % Contact forces
-%         [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
-%         Fc2_extend = [zeros(Body1.TotalDofs,1); Fc2];
-% 
-%         Kc2_extend = [zeros(Body1.TotalDofs, Body1.TotalDofs + Body2.TotalDofs+Body3.TotalDofs);
-%                zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
-% 
-%         Fc = Fc1_extend + Fc2_extend;     
-%         Kc = Kc1_extend + Kc2_extend;
-%         Gap = Gap1 + Gap2;
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % inner forces
-%         [Ke1,Fe1] = InnerForce(Body1);
-%         [Ke2,Fe2] = InnerForce(Body2);
-%         [Ke3,Fe3] = InnerForce(Body3);
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % Assemblance
-%         Fe = [Fe1; Fe2 ; Fe3];
-%         Fext = [Fext1; Fext2 ; Fext3];
-%         Ke = [Ke1 zeros(Body1.TotalDofs,Body2.TotalDofs+ Body3.TotalDofs);
-%               zeros(Body2.TotalDofs,Body1.TotalDofs) Ke2 zeros(Body2.TotalDofs,Body3.TotalDofs);
-%               zeros(Body3.TotalDofs,Body1.TotalDofs+ Body2.TotalDofs) Ke3];
-% 
-%         K = Kc + Ke;
-% 
-%         ff =  Fe - Fext + Fc;
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % Calculations
-%         K_bc = K(bc,bc); 
-%         ff_bc = ff(bc);
-%         deltaf=ff_bc/norm(Fext(bc)); 
-%         u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
-% 
-%         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         % Separation
-%         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
-%         Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:Body1.ndof + Body2.ndof);
-%         Body3.u(Body3.bc) = Body3.u(Body3.bc) + u_bc(Body1.ndof + Body2.ndof + 1:end);
-% 
-%         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
-%         Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:Body1.ndof + Body2.ndof);
-%         Body3.q(Body3.bc) = Body3.q(Body3.bc) + u_bc(Body1.ndof + Body2.ndof + 1:end);
-% 
-%         titer=toc;
-%         titertot=titertot+titer;
-% 
-%         if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap)
-%             break;  
-%         end 
-% 
-%     end
-% 
-% 
-% 
-%     %Pick nodal displacements from result vector
-%     xlocName1 = 'xloc' + Body1.ElementType;
-%     uf1 = Body1.u(Body1.fextInd);
-%     Results1 = [Results1; Body1.ElementNumber Body1.TotalDofs uf1'];
-% 
-%     xlocName2 = 'xloc' + Body2.ElementType;
-%     uf2 = Body2.u(Body2.fextInd); 
-%     Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
-% 
-%     xlocName3 = 'xloc' + Body3.ElementType;
-%     uf3 = Body3.u(Body3.fextInd); 
-%     Results3 = [Results3; Body3.ElementNumber Body3.TotalDofs uf3'];
-% end    
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% 
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % % POST PROCESSING ###############################################
 hold on
 axis equal

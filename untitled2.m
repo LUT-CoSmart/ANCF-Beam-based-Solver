@@ -22,7 +22,7 @@ Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangu
 Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 Body3 = Geometry(Body3,"LG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 2;
+angle = 45;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -384,7 +384,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% third step
 steps = 10;  % sub-loading steps
-Force = 1.0e1;
+Force = 1.5e1;
 ContactVariable = 1e1;
 % ########## Boundary Conditions ##########################################
 Force1.Maginutude.X = Force;  % Elongation
@@ -510,8 +510,8 @@ PostProcessing(Body1,Results1,false,false)
 PostProcessing(Body2,Results2,false,false) 
 PostProcessing(Body3,Results3,false,false)
 
-
-
-CleanTemp(Body1, true)
-CleanTemp(Body2, true)
-CleanTemp(Body3, true)
+% 
+% 
+% CleanTemp(Body1, true)
+% CleanTemp(Body2, true)
+% CleanTemp(Body3, true)
