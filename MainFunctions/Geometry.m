@@ -15,7 +15,8 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
 
            case {"C", "Tendon",...
                  "Middle_cross_section1_1", "Middle_cross_section2_1", "Middle_cross_section3_1",...
-                 "Sol_subj2_middle", "MG_subj2_middle", "LG_subj2_middle"}
+                 "Sol_subj2_middle", "MG_subj2_middle", "LG_subj2_middle",...
+                 "ten_Sol_3", "ten_MG_3", "ten_LG_3"}
                 ApproximationScheme = "Poigen";
                 disp("For chosen area the approximation scheme switched to Poigen")
                 
@@ -24,7 +25,7 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
                 elseif (CSName == "Middle_cross_section1_1") || (CSName == "Middle_cross_section2_1") || (CSName == "Middle_cross_section3_1")   
                    Body.Length.X = 0.07; 
                 elseif (CSName == "Sol_subj2_middle") || (CSName == "MG_subj2_middle") || (CSName == "LG_subj2_middle") || ...
-                       (CSName == "ten_Sol_3") || (CSName == "ten_MG_3") || (CSName == "ten_LG_3")                         
+                       (CSName == "ten_Sol_3") || (CSName == "ten_MG_3") || (CSName == "ten_LG_3") 
                    Body.Length.X = 43e-3; 
                 end                
                 

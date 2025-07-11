@@ -22,15 +22,17 @@ function Body = BeamANCFMesh(Body)
     if isfield(Body, 'Twist')
         phik=linspace(0,Body.Twist.angle,nodes);
         ro = Body.Twist.ro;    
+        phi_init = Body.Twist.initial_rot;    
     else
         phik=zeros(1,nodes);
         ro = 0;
+        phi_init = 0;
     end    
    
     % Define nodes' positioning 
     xk = linspace(0,Body.Length.X,nodes);    
-    yk = ro*cosd(phik); % accounting the outer twist
-    zk = ro*sind(phik); % accounting the outer twist
+    yk = ro*cosd(phik+phi_init); % accounting the outer twist
+    zk = ro*sind(phik+phi_init); % accounting the outer twist
 
     % applicable only for beams, used to apply BC locally 
     P00 = [xk' zeros(nodes,1) zeros(nodes,1)]; % simple straight beam-line meshing 

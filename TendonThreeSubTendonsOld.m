@@ -2,6 +2,7 @@ clc,clear,close all;
 format long
 addpath("MainFunctions")
 addpath("MeshFunctions")
+addpath("InnerForceFunctions")
 addpath(genpath("Contact"))
 addpath("Postprocessing");
 Body1.Name = "Body1";
@@ -13,26 +14,36 @@ Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"GOH"); 
-Body2 = Materials(Body2,"GOH"); 
-Body3 = Materials(Body3,'GOH');
+Body1 = Materials(Body1,"Neo"); 
+Body2 = Materials(Body2,"Neo"); 
+Body3 = Materials(Body3,'Neo');
 % Geometry
-Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
-Body3 = Geometry(Body3,"LG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"ten_Sol_3","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"ten_MG_3","Poigen");  % Itegration Scheme: Poigen, Standard
+Body3 = Geometry(Body3,"ten_LG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-% Shift of Body1
-Body1.Shift.X = 0;
-Body1.Shift.Y = Body1.CSCenterY;
-Body1.Shift.Z = Body1.CSCenterZ;
+angle = 30;
+% Tendon twist
+Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
+Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
+Center3 = [Body3.CSCenterY, Body3.CSCenterZ];
 
-Body2.Shift.X = 0;
-Body2.Shift.Y = Body2.CSCenterY;
-Body2.Shift.Z = Body2.CSCenterZ;
+RelCenter1 = Center1 - Center2;
+RelCenter2 = [0, 0];
+RelCenter3 = Center3 - Center2;
 
-Body3.Shift.X = 0;
-Body3.Shift.Y = Body3.CSCenterY;
-Body3.Shift.Z = Body3.CSCenterZ;
+Body1.Twist.angle = angle;
+Body1.Twist.initial_rot = atan2d(RelCenter1(2),RelCenter1(1));
+%Body1.Twist.initial_rot = 0;
+Body1.Twist.ro = norm(Center2 - Center1);
+
+Body2.Twist.angle = angle;
+Body2.Twist.initial_rot = atan2d(RelCenter2(2),RelCenter2(1));
+Body2.Twist.ro = 0;
+
+Body3.Twist.angle = angle;
+Body3.Twist.initial_rot = atan2d(RelCenter3(2),RelCenter3(1));
+Body3.Twist.ro = norm(Center2 - Center3);
 
 % Rotation (in degrees)
 Body1.Rotation.X = 0;
@@ -72,12 +83,11 @@ Body3.SolutionBase = "Position"; % Solution-based calculation: Position, Displac
 Body3.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body3 = AddTensors(Body3);
 
-Force = 1e3;
+Force= 0.25e1; 
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-%Force1.Maginutude.Y = -5e8;  
-Force1.Maginutude.X =  Force;  % Elongation
+Force1.Maginutude.X =  0*Force;  % Elongation
 Force1.Maginutude.Y = 0;  
 Force1.Maginutude.Z = 0;  
 
@@ -94,7 +104,7 @@ Boundary1.Position.Z = 0;
 Boundary1.Type = "full"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
-Force2.Maginutude.X = 0.5*Force;  % Elongation
+Force2.Maginutude.X = 0*Force;  % Elongation
 Force2.Maginutude.Y = 0;  
 Force2.Maginutude.Z = 0;  
 
@@ -130,21 +140,21 @@ Boundary3.Type = "full"; % there are several types: full, reduced, positions, no
 
 
 % ########## Contact characteristics ######################################
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e2;
+ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
+ContactVariable = 0.2e1;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 Body3.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
-% figure;
-% hold on
-% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-% visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'red',true);
-
+figure;
+hold on
+xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+visualization(Body1,Body1.q0,'cyan',true);
+visualization(Body2,Body2.q0,'red',true);
+visualization(Body3,Body3.q0,'green',true);
 % %####################### Solving ######################################## 
 steps = 30;  % sub-loading steps
 titertot=0;  
@@ -167,7 +177,7 @@ for i=1:steps
     Body2 = SubLoading(Body2, i, steps, "cubic"); 
     Body3 = SubLoading(Body3, i, steps, "cubic"); 
 
- 
+
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
     Fext3 = Body3.Fext;
@@ -175,15 +185,15 @@ for i=1:steps
     bc = [Body1.bc Body2.bc Body3.bc];
     for ii=1:imax
         tic;
-        
+
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
         [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
                       zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
-        
-            
+
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
         [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
@@ -191,17 +201,17 @@ for i=1:steps
 
         Kc2_extend = [zeros(Body1.TotalDofs, Body1.TotalDofs + Body2.TotalDofs+Body3.TotalDofs);
                zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
-        
+
         Fc = Fc1_extend + Fc2_extend;     
         Kc = Kc1_extend + Kc2_extend;
         Gap = Gap1 + Gap2;
-            
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % inner forces
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);
         [Ke3,Fe3] = InnerForce(Body3);
-        
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Assemblance
         Fe = [Fe1; Fe2 ; Fe3];
@@ -226,7 +236,7 @@ for i=1:steps
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:Body1.ndof + Body2.ndof);
         Body3.u(Body3.bc) = Body3.u(Body3.bc) + u_bc(Body1.ndof + Body2.ndof + 1:end);
-        
+
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
         Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:Body1.ndof + Body2.ndof);
         Body3.q(Body3.bc) = Body3.q(Body3.bc) + u_bc(Body1.ndof + Body2.ndof + 1:end);
@@ -239,7 +249,7 @@ for i=1:steps
         end 
 
     end
-   
+
 
 
     %Pick nodal displacements from result vector

@@ -15,6 +15,3 @@ function visualization(Body,q,FaceColor,Show)
     else
         disp('No visualization')
     end   
-
-
-    

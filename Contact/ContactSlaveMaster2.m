@@ -82,14 +82,15 @@ function [Fcont, Ftarg, Gap] = ContactSlaveMaster2(ContactBody,TargetBody,Contac
                     Sigma_cont = ContactBody.Sigma(F_cont); 
                     
                     Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;
-                    lambda = gap^3 * norm(Sigma_n);
+                    lambda = gap^5 * norm(Sigma_n);
+                    %lambda = gap * norm(Sigma_n)
 
 
                     d_lambda_targ = norm(Sigma_n)*Normal_targ;
                     d_lambda_cont = norm(Sigma_n)*Normal_cont; 
                      
-                    Ftarg_loc =  penalty * gap * Normal_targ + lambda * Normal_targ + 0*gap * d_lambda_targ;
-                    Fcont_loc =  penalty * gap * Normal_cont + lambda * Normal_cont + 0*gap * d_lambda_cont;
+                    Ftarg_loc =  penalty * gap * Normal_targ + lambda * Normal_targ + 0 * gap * d_lambda_targ;
+                    Fcont_loc =  penalty * gap * Normal_cont + lambda * Normal_cont + 0 * gap * d_lambda_cont;
                  else
                      error('****** Contact type is not implemneted ******')
                  end     
