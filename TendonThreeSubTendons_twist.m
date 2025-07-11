@@ -14,9 +14,9 @@ Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"Neo"); 
-Body2 = Materials(Body2,"Neo"); 
-Body3 = Materials(Body3,'Neo');
+Body1 = Materials(Body1,"GOH"); 
+Body2 = Materials(Body2,"GOH"); 
+Body3 = Materials(Body3,'GOH');
 % Geometry
 Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
@@ -45,6 +45,19 @@ Body3.Twist.angle = angle;
 Body3.Twist.initial_rot = atan2d(RelCenter3(2),RelCenter3(1));
 Body3.Twist.ro = norm(Center2 - Center3);
 
+% % Shift of Body1
+% Body1.Shift.X = 0;
+% Body1.Shift.Y = Body1.CSCenterY;
+% Body1.Shift.Z = Body1.CSCenterZ;
+% 
+% Body2.Shift.X = 0;
+% Body2.Shift.Y = Body2.CSCenterY;
+% Body2.Shift.Z = Body2.CSCenterZ;
+% 
+% Body3.Shift.X = 0;
+% Body3.Shift.Y = Body3.CSCenterY;
+% Body3.Shift.Z = Body3.CSCenterZ;
+
 
 % Rotation (in degrees)
 Body1.Rotation.X = 0;
@@ -61,11 +74,11 @@ Body3.Rotation.Z = 0;
 
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 2;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 2;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
-ElementNumber3 = 2;
+ElementNumber3 = 1;
 Body3 = CreateFEM(Body3,ElementNumber3);
 
 % ########## Calculation adjustments ######################################
@@ -102,7 +115,7 @@ Boundary1.Position.X = 0;
 Boundary1.Position.Y = 0;
 Boundary1.Position.Z = 0;
 
-Boundary1.Type = "full"; % there are s1everal types: full, reduced, positions, none
+Boundary1.Type = "reduced"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
 Force2.Maginutude.X = Force;  % Elongation
@@ -119,7 +132,7 @@ Boundary2.Position.X = 0;
 Boundary2.Position.Y = 0;
 Boundary2.Position.Z = 0;
 
-Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
+Boundary2.Type = "reduced"; % there are several types: full, reduced, positions, none
 
 % Body3
  Force3.Maginutude.X = Force;  % Elongation
@@ -136,8 +149,7 @@ Boundary3.Position.X = 0;
 Boundary3.Position.Y = 0;
 Boundary3.Position.Z = 0;
 
-Boundary3.Type = "full"; % there are several types: full, reduced, positions, none
-
+Boundary3.Type = "reduced"; % there are several types: full, reduced, positions, none
 
 
 % ########## Contact characteristics ######################################
@@ -157,7 +169,7 @@ Body3.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 % visualization(Body3,Body3.q0,'blue',true);
 % %####################### Solving ######################################## 
-steps = 50;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=15;                      % Maximum number of iterations for Newton's method 
@@ -172,11 +184,12 @@ Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
 % profile on -historysize 2e9   % 20 million calls
 %START NEWTON'S METHOD   
-for i=1:30%steps
-
-    Body1 = SubLoading(Body1, i, steps, "cubic"); 
-    Body2 = SubLoading(Body2, i, steps, "cubic"); 
-    Body3 = SubLoading(Body3, i, steps, "cubic"); 
+for i=1:steps
+    style = "cubic";
+    % style = "quadratic";
+    Body1 = SubLoading(Body1, i, steps, style); 
+    Body2 = SubLoading(Body2, i, steps, style); 
+    Body3 = SubLoading(Body3, i, steps, style); 
 
  
     Fext1 = Body1.Fext;
