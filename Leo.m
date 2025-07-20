@@ -58,12 +58,12 @@ Body3.Rotation.Y = 0;
 Body3.Rotation.Z = 0;
 
 % ########## Create FE Models #############################################
-
-ElementNumber1 = 1;
+Elem = 3;
+ElementNumber1 = Elem;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 1;
+ElementNumber2 = Elem;
 Body2 = CreateFEM(Body2,ElementNumber2);
-ElementNumber3 = 1;
+ElementNumber3 = Elem;
 Body3 = CreateFEM(Body3,ElementNumber3);
 
 % ########## Calculation adjustments ######################################
@@ -89,8 +89,17 @@ frac2 = 1;%Body2.detF0*sum(Body2.Gint(:,4)) / totalArea;
 frac3 = 1;%Body3.detF0*sum(Body3.Gint(:,4)) / totalArea;
 
 % ########## Boundary Conditions ##########################################
+% hold on
+% axis equal
+% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+% visualization(Body1,Body1.q,'cyan',true);
+% visualization(Body2,Body2.q,'red',true);
+% visualization(Body3,Body3.q,'blue',true);
 
-Force = 500;
+
+Force = 250;
 
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
@@ -108,7 +117,7 @@ Boundary1.Position.X = 0;
 Boundary1.Position.Y = 0;
 Boundary1.Position.Z = 0;
 
-Boundary1.Type = "reduced"; % there are s1everal types: full, reduced, positions, none
+Boundary1.Type = "full"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
 Force2.Maginutude.X = Force*frac2;  % Elongation
@@ -125,7 +134,7 @@ Boundary2.Position.X = 0;
 Boundary2.Position.Y = 0;
 Boundary2.Position.Z = 0;
 
-Boundary2.Type = "reduced"; % there are several types: full, reduced, positions, none
+Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % Body3
 Force3.Maginutude.X = Force*frac3;  % Elongation
@@ -142,17 +151,21 @@ Boundary3.Position.X = 0;
 Boundary3.Position.Y = 0;
 Boundary3.Position.Z = 0;
 
-Boundary3.Type = "reduced"; % there are several types: full, reduced, positions, none
+Boundary3.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
 ContactVariable = 1e1;
-Body1.ContactRole = "master"; % Options: "master", "slave"
-Body2.ContactRole = "slave";
-Body3.ContactRole = "master";
+% Body1.ContactRole = "master"; % Options: "master", "slave"
+% Body2.ContactRole = "slave";
+% Body3.ContactRole = "master";
+
+Body1.ContactRole = "slave"; % Options: "master", "slave"
+Body2.ContactRole = "master";
+Body3.ContactRole = "slave";
 
 % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 30;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
@@ -166,8 +179,9 @@ Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
 
-style = "cubic";
-%style = "linear";
+%style = "cubic";
+style = "linear";
+%style = "quadratic";
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -269,18 +283,18 @@ initial2 = Body2.ForceVectorInit;
 initial3 = Body3.ForceVectorInit;
 
 % % POST PROCESSING ###############################################
-hold on
-%axis equal
-xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-visualization(Body1,Body1.q,'cyan',true);
-visualization(Body2,Body2.q,'none',true);
-visualization(Body3,Body3.q,'blue',true);
-
-PostProcessing(Body1,Results1,false,false) 
-PostProcessing(Body2,Results2,false,false) 
-PostProcessing(Body3,Results3,false,false)
+% hold on
+% % axis equal
+% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+% visualization(Body1,Body1.q,'cyan',true);
+% visualization(Body2,Body2.q,'red',true);
+% visualization(Body3,Body3.q,'blue',true);
+% 
+% PostProcessing(Body1,Results1,false,false) 
+% PostProcessing(Body2,Results2,false,false) 
+% PostProcessing(Body3,Results3,false,false)
 
 CleanTemp(Body1, true)
 CleanTemp(Body2, true)

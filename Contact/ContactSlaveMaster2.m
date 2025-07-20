@@ -72,19 +72,11 @@ function [Fcont, Ftarg, Gap] = ContactSlaveMaster2(ContactBody,TargetBody,Contac
                     phi_cont=ContactBody.phim(Element_cont,:)';
                     q0PosDofs_cont = q0_cont(ContactBody.PosDofs);
 
-                    % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    % point1=Shape_cont(L_cont,H_cont,W_cont,xi_cont,eta_cont,zeta_cont)*q_cont;
-                    % point2=Shape_targ(L_targ,H_targ,W_targ,xi_targ,eta_targ,zeta_targ)*q_targ;
-                    % gap = min(gap, norm(point1-point2));
-                    % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
                     F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,L_cont,H_cont,W_cont,xi_cont,eta_cont,zeta_cont);        % Deformation gradient
                     Sigma_cont = ContactBody.Sigma(F_cont); 
                     
                     Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;
-                    lambda = gap^4 * norm(Sigma_n);
-                    % lambda = gap * norm(Sigma_n);
-
+                    lambda = gap^3 * norm(Sigma_n);
 
                     d_lambda_targ = norm(Sigma_n)*Normal_targ;
                     d_lambda_cont = norm(Sigma_n)*Normal_cont; 

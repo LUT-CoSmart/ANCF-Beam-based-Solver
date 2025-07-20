@@ -18,13 +18,13 @@ Body2 = Geometry(Body2,"Rectangular","Poigen");  % Itegration Scheme: Poigen, St
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
-Body1.Shift.Y = Body1.Length.Y;
-Body1.Shift.Z = 0;
+Body1.Shift.Y = 0;
+Body1.Shift.Z = Body1.Length.Z;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 1;
+ElementNumber1 = 4;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 1;
+ElementNumber2 = 4;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -63,15 +63,16 @@ Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
-% figure;
-% hold on
-% axis equal 
-% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-% visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'red',true);
-
+figure;
+hold on
+axis equal 
+xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+visualization(Body1,Body1.q0,'cyan',true);
+visualization(Body2,Body2.q0,'red',true);
+grid on
+grid minor
 % %####################### Solving ######################################## 
 steps = 10;  % sub-loading steps
 titertot=0;  
