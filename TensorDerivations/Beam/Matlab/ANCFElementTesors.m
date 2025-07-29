@@ -4,7 +4,7 @@ write_files = true;            % Do we need to write any file?
 disp_based = false;            % What field the tensors are based on: displacement (true), position (false)
 small_deformation = false;     % Appoximation theory: infinite small (true), finite (false)
 % ################## Element type & related numbers #######################
-Element=3363;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Element=3243;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));           % Number of nodes            
 Dim = str2double(ElementName(end));           % Problem dimensionality     
