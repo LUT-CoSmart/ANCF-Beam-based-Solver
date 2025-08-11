@@ -11,7 +11,7 @@ Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,"GOH"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body = Materials(Body,"GOH", "Alex"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
 Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
 % ########### Complicate geometry ######################§##################
@@ -26,6 +26,7 @@ Body.Rotation.Y = 0;
 Body.Rotation.Z = 0;
 
 % Twist
+Body.Twist.initial_rot = 0;
 Body.Twist.angle = 0; % in degrees
 Body.Twist.ro = 0;
 % ########## Create FE Model ##############################################
@@ -39,7 +40,7 @@ Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
 k =1 ;
-Force.Maginutude.X = 10*k;  % Elongation
+Force.Maginutude.X = 10;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 

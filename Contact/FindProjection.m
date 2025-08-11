@@ -37,7 +37,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            W = Body.Length.Z;  
 
          
-           %% TODO: decrease the set of points (PointsToProject) choosing only those, 
+           %% TODO: decrease the set of points (PointsToProject) by choosing only those, 
            %% which are on the same side with Nodes:  dir = Point' - NodalPoint; if dot(dir,r-NodalPoint)>0.
 
            [face_mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);

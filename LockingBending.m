@@ -67,3 +67,4 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,Results,visDeformed,visInitial) 
+CleanTemp(Body, true)

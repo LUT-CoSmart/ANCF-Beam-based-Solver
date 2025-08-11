@@ -22,10 +22,10 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
                 
                 if (CSName == "C") || (CSName == "Tendon")
                    Body.Length.X = 1;
-                elseif (CSName == "Middle_cross_section1_1") || (CSName == "Middle_cross_section2_1") || (CSName == "Middle_cross_section3_1")   
+                elseif (CSName == "Middle_cross_section1_1") || (CSName == "Middle_cross_section2_1") || (CSName == "Middle_cross_section3_1") || ...
+                        (CSName == "ten_Sol_3") || (CSName == "ten_MG_3") || (CSName == "ten_LG_3")   
                    Body.Length.X = 0.07; 
-                elseif (CSName == "Sol_subj2_middle") || (CSName == "MG_subj2_middle") || (CSName == "LG_subj2_middle") || ...
-                       (CSName == "ten_Sol_3") || (CSName == "ten_MG_3") || (CSName == "ten_LG_3") 
+                elseif (CSName == "Sol_subj2_middle") || (CSName == "MG_subj2_middle") || (CSName == "LG_subj2_middle") 
                    Body.Length.X = 43e-3; 
                 end                
                 
@@ -42,6 +42,9 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
     
     addpath('GaussPoints');  
     Body = GausPointsApprox(Body,CSName,ApproximationScheme);
+
+    
+
 
     
     

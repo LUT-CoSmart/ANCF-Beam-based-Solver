@@ -44,5 +44,7 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
 
     % Reorginizing points for AceGen
     [Body.Gint,Body.Nint] = generateGint(num,pcirc,wcirc); 
+
+    Body.Area = (Body.Length.Y * Body.Length.Z / 8 ) *sum(Body.Gint(:,4));
     
        

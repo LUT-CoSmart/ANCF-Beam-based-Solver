@@ -14,10 +14,10 @@ Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");
 Body1 = Materials(Body1,"Neo"); 
 Body2 = Materials(Body2,"Neo"); 
 % Geometry
-Body1 = Geometry(Body1,"ten_Sol_3","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"ten_MG_3","Poigen");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"ten_MG_3","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"ten_LG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 30;
+angle = 0;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -43,9 +43,9 @@ Body2.Rotation.Y = 0;
 Body2.Rotation.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 2;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 2;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -63,7 +63,7 @@ Body2 = AddTensors(Body2);
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
 
-Force= 0.25e1;  
+Force= 100e1;  
 
 Force1.Maginutude.X =  Force;  % Elongation
 Force1.Maginutude.Y = 0;  
@@ -82,7 +82,7 @@ Boundary1.Position.Z = 0;
 Boundary1.Type = "full"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
-Force2.Maginutude.X = 0*Force;  % Elongation
+Force2.Maginutude.X = 0;  % Elongation
 Force2.Maginutude.Y = 0;  
 Force2.Maginutude.Z = 0;  
 
@@ -100,8 +100,8 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 0.2e1;
-Body1.ContactRole = "slave"; % Options: "master", "slave"
+ContactVariable = 1e1;
+Body1.ContactRole = "master"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
@@ -111,12 +111,12 @@ Body2.ContactRole = "master";
 % ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 % zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 % visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'red',true);
+% visualization(Body2,Body2.q0,'none',true);
 
 % %####################### Solving ######################################## 
 steps = 20;  % sub-loading steps
 titertot=0;  
-Re=10^(-3);                   % Stopping criterion for residual
+Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 ContactRegType = "off";
@@ -127,10 +127,10 @@ Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 % profile on -historysize 2e9   % 20 million calls
 %START NEWTON'S METHOD   
-for i=1:steps
+for i=1:9% steps
 
-    Body1 = SubLoading(Body1, i, steps, "cubic"); 
-    Body2 = SubLoading(Body2, i, steps, "cubic"); 
+    Body1 = SubLoading(Body1, i, steps, "linear"); 
+    Body2 = SubLoading(Body2, i, steps, "linear"); 
 
 
     Fext1 = Body1.Fext;
@@ -190,12 +190,12 @@ end
 % profile off       % Stop profiling (optional)
 % POST PROCESSING ###############################################
 hold on
-axis equal
+% axis equal
  xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
         ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
         zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
 visualization(Body2,Body2.q,'red',true);
 
-CleanTemp(Body1, true)
-CleanTemp(Body2, true)
+% CleanTemp(Body1, true)
+% CleanTemp(Body2, true)

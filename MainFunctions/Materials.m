@@ -13,7 +13,15 @@ function Body = Materials(Body, MaterialName, Subtype)
     
                    case "Alex"
                        param.mu=90e6;
-    
+                    
+                   case "Sol_old"
+                       param.mu=103.1e6;
+
+                   case "MG_old"
+                       param.mu=143.2e6;
+
+                   case "LG_old"
+                       param.mu=226.7e6; 
                end
 
            case "Mooney2" % 2 contant Mooney-Rivlin
@@ -45,7 +53,8 @@ function Body = Materials(Body, MaterialName, Subtype)
                        param.kappa = 0;      % fiber dipersion
                        param.a0 = [1 0 0]';   % fiber direction 
                        Body.FiberTwist = 0; % inner (fiber) pre-twist
-    
+                    
+                       
                end
                  
    
