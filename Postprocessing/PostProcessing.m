@@ -6,6 +6,12 @@ function PostProcessing(Body,Results,visDeformed,visInitial)
     for k=1:size(Results,1) 
       fprintf('%d & %d & %10.8f & %10.8f & %10.8f  \n',Results(k,1:5))
     end
+
+    fprintf('Reactions = %s \n', Body.DeformationType)
+    fprintf('Rx & Ry & Rz \n')
+    for k=1:size(Results,1) 
+      fprintf('%10.8f & %10.8f & %10.8f  \n',Results(k,6:8))
+    end
     
     
     if (visDeformed~=true) && (visInitial~=true) 

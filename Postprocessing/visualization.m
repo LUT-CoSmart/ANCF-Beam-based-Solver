@@ -12,6 +12,7 @@ function visualization(Body,q,FaceColor,Show)
         plot3(vertices(:,1), vertices(:,2), vertices(:,3), '.k')    
         plot3(NodePositions(:,1), NodePositions(:,2), NodePositions(:,3), '-*k')
         view(3);  
+        axis equal;
     else
         disp('No visualization')
     end   
