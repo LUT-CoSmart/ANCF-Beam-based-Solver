@@ -22,7 +22,7 @@ Body1 = Geometry(Body1,"MG_subj2_middle","Poigen");  % Cross Sections: Rectangul
 Body2 = Geometry(Body2,"Sol_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 Body3 = Geometry(Body3,"LG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 2;
+angle = 30;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
