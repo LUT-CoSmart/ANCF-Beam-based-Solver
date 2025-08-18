@@ -40,7 +40,7 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
          error('****** Provide correct approximation code ******');
     end
 
-    Body.detF0=1/4*Body.Length.Y*Body.Length.Z*prefac;
+    Body.detF0=1/4*Body.Length.Y*Body.Length.Z;
 
     % Reorginizing points for AceGen
     [Body.Gint,Body.Nint] = generateGint(num,pcirc,wcirc); 
