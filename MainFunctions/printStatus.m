@@ -2,7 +2,7 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
     
      persistent previousDisp previousDisp_2
 
-     if i == 1
+     if ii == 1
         previousDisp = 0; 
         previousDisp_2 = 0;
      end
@@ -32,7 +32,7 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          status = false;
      end 
     
-     % Update persistent variables
+     % Update previous steps' meanings
      if (ii > 1) && (ii < imax)
         previousDisp_2 = previousDisp;
         previousDisp = norm(u_bc);
