@@ -39,7 +39,7 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1000;  % Elongation
+Force.Maginutude.X = 1747.95;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 

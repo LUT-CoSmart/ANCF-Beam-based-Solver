@@ -1,9 +1,11 @@
-function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
+function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
 
     if ContactType == "None"
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
        Kc = zeros(length(Fc));
        Gap = NaN;
+       GapMax.gap = 0;
+       GapMax.area = NaN;
     else 
         
         currentFolder = pwd;
@@ -41,7 +43,7 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
 
         % Initialize the global contact forces
         Kc = zeros(TotalDofs,TotalDofs);
-        [Fc,Gap] = ContactForce(Body1,Body2,ContactVariable,ContactType);
+        [Fc,Gap,GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType);
             
         % variation of the variables
         I_vec=zeros(TotalDofs,1);
@@ -57,30 +59,22 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
             
            I_vec(ii)=1;
 
-           h = 2*sqrtEps; 
+           h = sqrtEps/10; 
 
            % this split is to distribute coord. between bodies 
            if ii <= TotalDofs1
 
                Body1.q = q1_backup - h*I_vec(1:TotalDofs1); 
                Body1.u = u1_backup - h*I_vec(1:TotalDofs1);
-               [Fch, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
-               
-               % Body1.q = q1_backup + h*I_vec(1:TotalDofs1); 
-               % [Fch2, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation                       
-               
+               [Fch,~,~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
                
            else   
                % h = max(sqrtEps * abs(q2_backup(ii-TotalDofs1)) , h1); 
                
                Body2.q = q2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
                Body2.u = u2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
-               [Fch, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
-                            
-               % Body2.q = q2_backup + h*I_vec(1+TotalDofs1:TotalDofs);    
-               % [Fch2, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation                                 
-               
-               
+               [Fch, ~, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
+
            end
           
            Kc(:,ii) = (Fc - Fch) / (h);
@@ -95,8 +89,7 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
         Body2.u = u2_backup; % restore
         
         [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
-
-
+        
         Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
         Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
     end      

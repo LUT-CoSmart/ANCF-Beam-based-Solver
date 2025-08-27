@@ -53,27 +53,35 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
            idx = SurfacePointsIso(highlight_face,4); % now we need to find the element via finding the closest nodes, which define the element
         end 
-                
-        if (fl) && any(distances<0) % choosing points inside, due to the normal identification procedure distances>0  
+          
+        tol = 1e-6;
+        Inside = (distances < 0) & (abs(distances) > tol);
+
+        if (fl) && any(Inside) % choosing points inside, due to the normal identification procedure distances>0  
     
-            % Inside = distances<0;
-            Inside = (distances < 0) & (abs(distances) > sqrt(eps));
-            
             distancesInside = distances(Inside);
             idxInside = idx(Inside);
             PointInside = PointsToProject(Inside,:);
             isoData = isoData(Inside,:);
             FaceNormal= highlight_normals(Inside,:);
-
+            Face = highlight_face(Inside,:);
             xi_eta_zeta_Array = []; % point isocoord & element number & distance, such array, just to save much info as I want, later to make it zero array  
 
             for i = 1:length(distancesInside)
         
                 qk=q(xloc(idxInside(i),:));
           
-                xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,L,H,W,qk, PointInside(i,:));
+                xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,L,H,W,qk, PointInside(i,:)); % it will be used for Nitsche
+                
+                % patch area where the point is projected to
+                % in the case, there are plans to calculate contact stresses
+                A =  SurfacePoints(Face(i,1),:)';
+                B =  SurfacePoints(Face(i,2),:)';
+                C =  SurfacePoints(Face(i,3),:)';
+                
+                Area = 1/2 * norm( cross(B - A, C - A) );
 
-                xi_eta_zeta_Array(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:)]; 
+                xi_eta_zeta_Array(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
            end  
            Outcome = xi_eta_zeta_Array;
         end

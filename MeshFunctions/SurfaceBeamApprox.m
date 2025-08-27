@@ -1,8 +1,8 @@
 function Body = SurfaceBeamApprox(Body)    
     
     % Here are parameters to approximate Body surfaces in all directions
-    Netazeta = 6; % used in standard CS (for Oval x4 multiplied)
-    Nxi = 3;  % used in PoiGen & Standard
+    Netazeta = 7; % used in standard CS (for Oval x4 multiplied)
+    Nxi = 5;  % used in PoiGen & Standard
 
     ApproximationScheme = Body.IntegrationType;
     CSName = Body.CSName;
@@ -20,7 +20,6 @@ function Body = SurfaceBeamApprox(Body)
                
                 if CSName == "Rectangular"
                    % Surface data for contact and visualization 
-                   % surfaceZetaEta = [-1  -1; 0  -1; 1  -1; 1   0; 1   1; 0   1; -1   1; -1   0; -1  -1];
                    % we need to create more dense discritization for the better projections
                    base = linspace(-1, 1, Netazeta);
 

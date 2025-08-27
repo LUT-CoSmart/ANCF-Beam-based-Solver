@@ -12,7 +12,7 @@ function Body = BuildBeamFaces(Body)
                 NpointCS = size(pointCS,1);
 
                 % Creating faces with a triangle mesh      
-                CSNumber = Body.ElementNumber * (Nxi-1) + 1; % total number of "Corss sections"
+                CSNumber = Body.ElementNumber * (Nxi-1) + 1; % total number of "Cross Sections"
 
                 for k = 1:CSNumber - 1
                     offset1 = (k-1)*NpointCS;
