@@ -31,12 +31,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            ShapeXi = Body.ShapeXi;
            ShapeEta = Body.ShapeEta;
            ShapeZeta = Body.ShapeZeta;
-
-           L = Body.Length.Ln;
-           H = Body.Length.Y;
-           W = Body.Length.Z;  
-
-         
+          
            %% TODO: decrease the set of points (PointsToProject) by choosing only those, 
            %% which are on the same side with Nodes:  dir = Point' - NodalPoint; if dot(dir,r-NodalPoint)>0.
 
@@ -71,7 +66,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         
                 qk=q(xloc(idxInside(i),:));
           
-                xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,L,H,W,qk, PointInside(i,:)); % it will be used for Nitsche
+                xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,qk, PointInside(i,:)); % it will be used for Nitsche
                 
                 % patch area where the point is projected to
                 % in the case, there are plans to calculate contact stresses

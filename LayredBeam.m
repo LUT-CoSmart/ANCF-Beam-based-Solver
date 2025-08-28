@@ -7,8 +7,8 @@ Body1.Name = "Body1";
 Body2.Name = "Body2";
 % ########### Problem data ################################################
 % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
-Body1 = DefineElement(Body1,"Beam","ANCF",3343,"None");  
-Body2 = DefineElement(Body2,"Beam","ANCF",3343,"None");  
+Body1 = DefineElement(Body1,"Beam","ANCF",3363,"None");  
+Body2 = DefineElement(Body2,"Beam","ANCF",3363,"None");  
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 Body1 = Materials(Body1,'KS'); 
 Body2 = Materials(Body2,'KS'); 
@@ -24,7 +24,7 @@ Body1.Shift.Z = 0;
 
 ElementNumber1 = 2;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 4;
+ElementNumber2 = 2;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -68,7 +68,7 @@ titertot=0;
 Re=10^(-5);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "penaltyK";
+ContactRegType = "off";
 Results1 = [];
 Results2 = [];
 

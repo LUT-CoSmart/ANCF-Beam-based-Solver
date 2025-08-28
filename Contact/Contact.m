@@ -7,34 +7,9 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
        GapMax.gap = 0;
        GapMax.area = NaN;
     else 
-        
-        currentFolder = pwd;
-
-        cd(Body1.BodyFolder);
-
-        Body1.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
-        Body1.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
-        Body1.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
-        Body1.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
-        Body1.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-        const1 = Body1.Dvec(1:end-3);
-        Body1.Sigma = @(F_) PiolaSecondTensor(F_, const1);
-
-        cd(Body2.BodyFolder);
-
-        Body2.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
-        Body2.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
-        Body2.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
-        Body2.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
-        Body2.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-                                                        % F(q,u,q0(PosDofs),phi,L,H,W,xi,eta,zeta);
-        const2 = Body2.Dvec(1:end-3);
-        Body2.Sigma = @(F_) PiolaSecondTensor(F_, const2);
-
-        cd(currentFolder);
        
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
-        sqrtEps = sqrt(eps);
+        h = 2*sqrt(eps);
        
         TotalDofs1 = Body1.TotalDofs;
         TotalDofs2 = Body2.TotalDofs;
@@ -59,8 +34,6 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
             
            I_vec(ii)=1;
 
-           h = sqrtEps/10; 
-
            % this split is to distribute coord. between bodies 
            if ii <= TotalDofs1
 
@@ -77,7 +50,7 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
 
            end
           
-           Kc(:,ii) = (Fc - Fch) / (h);
+           Kc(:,ii) = (Fc - Fch) / h;
            I_vec(ii)=0;   
 
         end
@@ -90,8 +63,6 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
         
         [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
         
-        Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
-        Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
     end      
     
     
