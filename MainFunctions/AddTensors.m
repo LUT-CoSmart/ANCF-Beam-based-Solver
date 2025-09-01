@@ -118,9 +118,13 @@ function Body = AddTensors(Body)
     W = Body.Length.Z;
     H = Body.Length.Y;
 
+    % for contact
+    Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
+    Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface"; 
+
     Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
     Body.ShapeXi = @(xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
     Body.ShapeEta =  @(xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
     Body.ShapeZeta =  @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
     Body.F = @(q,u,q0_PosDofs,phi,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-    Body.Sigma = @(F_) ( F_ * PiolaSecondTensor(F_, Body.const) * F_' );
+    Body.Sigma = @(F_) ( (1/det(F_) )* F_ * PiolaSecondTensor(F_, Body.const) * F_' ); % Cauchy Stresses

@@ -1,8 +1,4 @@
 function Body = SurfaceBeamApprox(Body)    
-    
-    % Here are parameters to approximate Body surfaces in all directions
-    Netazeta = 7; % used in standard CS (for Oval x4 multiplied)
-    Nxi = 5;  % used in PoiGen & Standard
 
     ApproximationScheme = Body.IntegrationType;
     CSName = Body.CSName;
@@ -11,13 +7,16 @@ function Body = SurfaceBeamApprox(Body)
     switch ApproximationScheme
 
            case "Poigen" % fixed CS 
-
+               Nxi = 20;  % for detail approaximation of the contact area
                run(CSName); 
                [data, ~, ~, ~, ~, ~] = Binormalization(data_1);
                surfaceCSZetaEta = vertcat(data{:}); 
 
-           case "Standard"                
-               
+           case "Standard"   
+
+                Nxi = 5;     
+                Netazeta = 6; % used in standard CS (for Oval is multiplied x4 )
+            
                 if CSName == "Rectangular"
                    % Surface data for contact and visualization 
                    % we need to create more dense discritization for the better projections

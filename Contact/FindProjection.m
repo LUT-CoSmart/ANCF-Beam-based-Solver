@@ -3,7 +3,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         Outcome = [];
 
         faces = Body.BodyFaces;
-        SurfacePoints = feval("Build" + Body.ElementType + "Surface", Body, Body.q);
+        SurfacePoints = Body.SurfacePoints;
         SurfacePointsIso = Body.IsoData;
 
         % Findinding the closest nodes to a point 
@@ -12,9 +12,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         [~, Distance] = knnsearch(Nodes, PointsToProject, 'K', 1);
 
         % Checking the contact possibility
-        dyz = sqrt(Body.Length.Y^2 + Body.Length.Z^2)/2;
-        RofBodyNodes = max([Body.Length.Ln/Body.ElementNodes, dyz],[],'all');
-        
+        RofBodyNodes = Body.NodeSphere; 
         cond = Distance < RofBodyNodes;
         PointsToProject = PointsToProject(cond,:);           
         isoData = isoData(cond,:);
@@ -46,10 +44,10 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
-           idx = SurfacePointsIso(highlight_face,4); % now we need to find the element via finding the closest nodes, which define the element
+           idx = SurfacePointsIso(highlight_face,4); % now we need to find the element
         end 
           
-        tol = 1e-6;
+        tol =sqrt(eps);
         Inside = (distances < 0) & (abs(distances) > tol);
 
         if (fl) && any(Inside) % choosing points inside, due to the normal identification procedure distances>0  
@@ -64,7 +62,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
 
             for i = 1:length(distancesInside)
         
-                qk=q(xloc(idxInside(i),:));
+                qk=q(xloc(idxInside(i),:)); % current element number
           
                 xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,qk, PointInside(i,:)); % it will be used for Nitsche
                 

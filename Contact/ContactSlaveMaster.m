@@ -3,10 +3,7 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
           GapMax.gap = 0;
           GapMax.area = NaN; % doesn't matter, when GapMax.gap == 0
 
-          functionName = "Build" + ContactBody.ElementType + "Surface"; 
-          SurfacePointsSlave = feval(functionName, ContactBody, ContactBody.q);
-
-          OutcomeOnBody = FindProjection(SurfacePointsSlave, ContactBody.IsoData, TargetBody);
+          OutcomeOnBody = FindProjection(ContactBody.SurfacePoints, ContactBody.IsoData, TargetBody);
 
           % 0. contact force & gap initialization  
           Gap = 0;
@@ -15,8 +12,6 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
 
           % exctrating information (1 & 2 are just to keep order, it doesn't necessary correlate with possible bodies' names)
           Shape_cont = ContactBody.Shape;  
-
-
           Shape_targ = TargetBody.Shape;  
 
           % Checking the contact presence
@@ -48,9 +43,8 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
                       GapMax.area = Xi(i,13); 
                  end
 
-                 Normal = Xi(i,6:8)'; % NB: it is not original normal, outwards respected to the body   
+                 Normal = Xi(i,6:8)'; % NB: it is not original normal, outwards respected to the body, so direction towards Contact   
 
-                 % before
                  Normal_targ = -Normal;
                  Normal_cont =  Normal;                
 

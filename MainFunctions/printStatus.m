@@ -22,10 +22,10 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          else
              fprintf('Convergence: %10.4f, Displacements norm: %10.4f\n', norm(abs(deltaf)), norm(u_bc));            
          end
-         fprintf('Solution for %d / %d step  is found on %d iteration, Total CPU-time: %f\n', i, steps, ii, titertot);
+         fprintf('Solution for %d / %d step  is found on %d iteration, Total CPU-time: %.2f\n', i, steps, ii, titertot);
          status = true;
      elseif ii==imax 
-         fprintf('The solution for %d step is not found. The maximum number of iterations is reached. Total CPU-time: %d\n', i, titertot);
+         fprintf('The solution for %d step is not found. The maximum number of iterations is reached. Total CPU-time: %.2f\n', i, titertot);
          status = false;   
      else     
          if ~isnan(Gap)

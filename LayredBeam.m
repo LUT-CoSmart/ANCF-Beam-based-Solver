@@ -57,7 +57,7 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
+ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
 ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
@@ -115,8 +115,9 @@ for i=1:steps
 
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
-        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
+
+        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);        
         Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:end);
 
         titer=toc;

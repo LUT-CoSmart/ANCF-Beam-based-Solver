@@ -22,7 +22,7 @@ Body1 = Geometry(Body1,"ten_Sol_3","Poigen");  % Cross Sections: Rectangular, Ov
 Body2 = Geometry(Body2,"ten_MG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 Body3 = Geometry(Body3,"ten_LG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 0;
+angle = 10;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -106,12 +106,12 @@ Boundary3.Type = BoundaryType; % there are several types: full, reduced, positio
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
 
 % %####################### Solving ######################################## 
-steps = 10;                   % sub-loading steps
+steps = 20;                   % sub-loading steps
 titertot=0;  
 Re=1e-5;                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "penaltyK";
+ContactRegType = "off";
 Results1 = [];
 Results2 = [];
 Results3 = [];
