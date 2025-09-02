@@ -53,7 +53,16 @@ function Body = Materials(Body, MaterialName, Subtype)
                        param.kappa = 0;      % fiber dipersion
                        param.a0 = [1 0 0]';   % fiber direction 
                        Body.FiberTwist = 0; % inner (fiber) pre-twist
-                    
+                   
+                   case "Amir"
+                        param.c10 = 9.67e6;
+                        param.k1 = 135.5e6;
+                        param.k2 = 131;
+                        param.kappa = 0; % fiber dipersion
+                        param.a0 = [1 0 0]'; % fiber direction
+                        Body.FiberTwist = 0; % inner (fiber) pre-twist
+                         
+
                        
                end
                  

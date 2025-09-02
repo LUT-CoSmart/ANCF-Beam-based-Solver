@@ -18,7 +18,7 @@ tree_model=KDTreeSearcher(face_mean_nodes);
 %% create test points (these are the query or test points)
 bb.min=min(nodes)-10;
 bb.max=max(nodes)+10;
-num_pts=1000;
+num_pts=100000;
 pts=rand(num_pts,3).*(bb.max-bb.min)+bb.min;
 
 

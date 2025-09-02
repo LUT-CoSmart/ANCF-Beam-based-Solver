@@ -14,13 +14,14 @@ function [u,K_reg] = Regularization(K,f,RegType,compute)
                   K_reg = K;
                   f_reg = f;  
                     
-               case {"penaltyKf", "penaltyK", "Tikhonov" }
+               case {"penaltyKf", "penaltyK", "Tikhonov", "Papadopoulos" }
                                          
                    I = eye(size(K,2));
 
                    if RegType == "penaltyKf"
                        
-                      lambda = eps * norm(K, 2) / norm(f, 2);
+
+                      lambda = sqrt(eps)  * norm(K, 'fro') / max(norm(f),1);
                       K_reg = K + lambda * I;
                       f_reg = f;
                     
@@ -34,7 +35,10 @@ function [u,K_reg] = Regularization(K,f,RegType,compute)
                       lambda = sqrt(eps) * norm(K, 'fro'); 
                       K_reg = K' * K + lambda * I;
                       f_reg = K' * f;
-                   
+                   elseif RegType == "Papadopoulos"
+                      lambda = sqrt(eps) * norm(K, 'fro'); 
+                      K_reg = K + lambda * I;
+                      f_reg = f + lambda * ones(length(f),1);
 
                   end    
     
