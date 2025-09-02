@@ -6,19 +6,34 @@ function SurfacePoints = BuildBeamSurfacePartly(Body,q,j)
         SurfacePoints = Body.SurfacePoints; % before the change    
         
         % j - a changed position; 
-
         AffectedElements = find(any(xloc == j, 2));
-        idx_points = find(ismember(IsoData(:,4), AffectedElements)); % it can be several elements 
-        for i = 1:length(idx_points)            
-            xi   = IsoData(idx_points(i),1);
-            eta  = IsoData(idx_points(i),2);
-            zeta = IsoData(idx_points(i),3);
-            elems = IsoData(idx_points(i),4);
-            q_affected   = q(xloc(elems,:));  % DOFs of the element 
-            r = Shape_(xi,eta,zeta)*q_affected;
-            SurfacePoints(idx_points(i),:) = r'; % update position
+        
+        for i = 1:length(AffectedElements)
+            
+            AffectedElement = AffectedElements(i);
+            AffectedDOFs =  xloc(AffectedElement,:); % affeted DOFs
+            q_affected = q(AffectedDOFs);
+            idx_affected_points = find(IsoData(:,4) == AffectedElement);
+
+            for k = 1:length(idx_affected_points)
+
+                point_iso = idx_affected_points(k);
+                xi = IsoData(point_iso,1);
+                eta = IsoData(point_iso,2);
+                zeta = IsoData(point_iso,3);
+                r = Shape_(xi,eta,zeta)*q_affected;
+                SurfacePoints(point_iso,:) = r'; % update position
+
+            end    
         end    
-    
+        
+
+
+           
+             
+            
+
+
         
 
 

@@ -3,7 +3,6 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         Outcome = [];
 
         faces = Body.BodyFaces;
-        faceElem = Body.BodyFacesElements;
         SurfacePoints = Body.SurfacePoints;
         SurfacePointsIso = Body.IsoData;
 
@@ -13,14 +12,14 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         [~, Distance] = knnsearch(Nodes, PointsToProject, 'K', 1);
 
         % Checking the contact possibility
-        cond = Distance < Body.NodeSphere;
+        RofBodyNodes = Body.NodeSphere; 
+        cond = Distance < RofBodyNodes;
         PointsToProject = PointsToProject(cond,:);           
         isoData = isoData(cond,:);
 
         fl = false; % flag, showing the contact possiblity
         
         if any(cond)
-
            fl = true; % contact distantly possible
 
            % Getting element parameters
@@ -39,22 +38,18 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            inputs.nodes=SurfacePoints;
            inputs.face_mean_nodes=face_mean_nodes;
            inputs.face_normals= - face_normals; % change normal to outward
-           % [distances,~,outside,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
-           [distances,~,outside,projected_faces]=fastPoint2TriMesh_opt(inputs,PointsToProject); 
-           
+           [distances,~,~,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
+
            %% TODO: This is true for beam elements only 
-           % attributes of the target body (Body here)
+           
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
-
            idx = SurfacePointsIso(highlight_face,4); % now we need to find the element
-           % idx =  faceElem(highlight_face);
         end 
           
         tol =sqrt(eps);
-        Inside = ~outside;                               
-        Inside(Inside) = abs(distances(Inside)) > tol;    
-        
+        Inside = (distances < 0) & (abs(distances) > tol);
+
         if (fl) && any(Inside) % choosing points inside, due to the normal identification procedure distances>0  
     
             distancesInside = distances(Inside);
