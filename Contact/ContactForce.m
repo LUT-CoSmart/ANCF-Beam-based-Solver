@@ -21,7 +21,7 @@ function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactTyp
             Gap = max(Gap1,Gap2);
 
             if Gap1Max.gap > Gap2Max.gap     
-                GapMax= Gap1Max;
+                GapMax = Gap1Max;
             else
                 GapMax = Gap2Max;
             end    

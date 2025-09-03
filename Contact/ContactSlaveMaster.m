@@ -6,19 +6,20 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
           OutcomeOnBody = FindProjection(ContactBody.SurfacePoints, ContactBody.IsoData, TargetBody);
 
           % 0. contact force & gap initialization  
-          Gap = 0;
+          Gap = 0; % total gap
           Fcont = zeros(ContactBody.TotalDofs,1);
           Ftarg = zeros(TargetBody.TotalDofs,1);
 
           % exctrating information (1 & 2 are just to keep order, it doesn't necessary correlate with possible bodies' names)
           Shape_cont = ContactBody.Shape;  
           Shape_targ = TargetBody.Shape;  
+        
+          
 
           % Checking the contact presence
           if ~isempty(OutcomeOnBody)
 
              Xi = OutcomeOnBody;       % taking data 
-             Gap = abs(sum(Xi(:,5)));  % total gap
 
              for i = 1:size(Xi,1)  % loop over all points
 
@@ -36,23 +37,26 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
                  Element_targ = Xi(i,4);  % element  
                  DOFs_targ =  TargetBody.xloc(Element_targ,:);     % associated DOFs
 
-                 Gap = abs(Xi(i,5)); 
+                 gap = abs(Xi(i,5)); 
+                 Gap = Gap + gap;
                  
-                 if Gap > GapMax.gap
-                      GapMax.gap = Gap;
+                 if gap > GapMax.gap
+                      GapMax.gap = gap;
                       GapMax.area = Xi(i,13); 
                  end
 
-                 Normal = Xi(i,6:8)'; % NB: it is not original normal, outwards respected to the body, so direction towards Contact   
+                 Normal = Xi(i,6:8)'; % NB: it is an original normal (inwards to the respected body)
+                 % that is why here for Normal_targ and Normal_cont signs are in reverse
 
                  Normal_targ = -Normal;
                  Normal_cont =  Normal;                
 
-                 penalty = ContactVariable;                    
+                 penalty = ContactVariable;         
+                 
                  if ContactType == "Penalty"
                      
-                    Fcont_loc =  penalty * Gap * Normal_cont;                                                                              
-                    Ftarg_loc =  penalty * Gap * Normal_targ;
+                    Fcont_loc =  penalty * gap * Normal_cont;                                                                              
+                    Ftarg_loc =  penalty * gap * Normal_targ;
 
                  elseif ContactType == "NitscheLin"
                           
@@ -74,14 +78,14 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
                                      
                     % Normal force difference 
                     Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;    
-                    Gap_power = Gap;       
+                    Gap_power = gap;       
                     lambda = Gap_power * norm(Sigma_n);
                    
                     d_lambda_targ = norm(Sigma_n)*Normal_targ;
                     d_lambda_cont = norm(Sigma_n)*Normal_cont; 
 
-                    Ftarg_loc = penalty * Gap * Normal_targ + lambda * Normal_targ + Gap_power * d_lambda_targ;
-                    Fcont_loc = penalty * Gap * Normal_cont + lambda * Normal_cont + Gap_power * d_lambda_cont; 
+                    Ftarg_loc = penalty * gap * Normal_targ + lambda * Normal_targ + Gap_power * d_lambda_targ;
+                    Fcont_loc = penalty * gap * Normal_cont + lambda * Normal_cont + Gap_power * d_lambda_cont; 
                     
                  else
                      error('****** Contact type is not implemneted ******')
