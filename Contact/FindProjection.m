@@ -71,9 +71,10 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
 
             FaceNormal= highlight_normals(Inside,:);
             Face = highlight_face(Inside,:);
-
-            xi_eta_zeta_Array = []; % point isocoord & element number & distance, such array, just to save much info as I want, later to make it zero array  
-
+            
+            % point isocoord targ (3) & element number (1) & distance (1) &
+            % normal (3) & point isocoord cond (4 + element no. ) & contact area
+            Outcome = zeros(length(distancesInside),13); % prelocation
             for i = 1:length(distancesInside)
         
                 qk=q(xloc(idxInside(i),:)); % current element number
@@ -88,7 +89,6 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
                 
                 Area = 1/2 * norm( cross(B - A, C - A) );
 
-                xi_eta_zeta_Array(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
+                Outcome(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
            end  
-           Outcome = xi_eta_zeta_Array;
         end
