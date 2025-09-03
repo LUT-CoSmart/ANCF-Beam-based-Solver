@@ -22,7 +22,7 @@ Body1 = Geometry(Body1,"ten_Sol_3","Poigen");  % Cross Sections: Rectangular, Ov
 Body2 = Geometry(Body2,"ten_MG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 Body3 = Geometry(Body3,"ten_LG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 45;
+angle = 10;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -58,11 +58,11 @@ Body3.Rotation.Y = 0;
 Body3.Rotation.Z = 0;
 % ########## Create FE Models #############################################
 
-Elem = 2;
-ElementNumber1 = Elem;
-Body1 = CreateFEM(Body1,Elem);
-Body2 = CreateFEM(Body2,Elem);
-Body3 = CreateFEM(Body3,Elem);
+ElemSlave = 1;
+ElemMaster = 4;
+Body1 = CreateFEM(Body1,ElemSlave);
+Body2 = CreateFEM(Body2,ElemMaster);
+Body3 = CreateFEM(Body3,ElemMaster);
 
 % ########## Calculation adjustments ######################################
 Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
@@ -85,7 +85,7 @@ Force= 400;
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
 BoundaryType = "full";
 
-Force1.Maginutude.X =  Force;  % Elongation
+Force1.Maginutude.X=  Force;  % Elongation
 Force1.Position.X = Body1.Length.X;  % Elongation
 Boundary1.Position.X = 0;  
 Boundary1.Type = BoundaryType; % there are s1everal types: full, reduced, positions, none
@@ -104,23 +104,11 @@ Boundary3.Type = BoundaryType; % there are several types: full, reduced, positio
 
 % ########## Contact characteristics ######################################
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
-Body1.ContactRole = "master"; % Options: "master", "slave"
-Body2.ContactRole = "master";
-Body3.ContactRole = "master";
 
-% ########## Visualization of initial situation ###########################
-% figure;
-% hold on
-% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-% visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'none',true);
-% visualization(Body3,Body3.q0,'green',true);
 % %####################### Solving ######################################## 
-steps = 30;  % sub-loading steps
+steps = 20;                   % sub-loading steps
 titertot=0;  
-Re=10^(-3);                   % Stopping criterion for residual
+Re=1e-5;                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 ContactRegType = "off";
@@ -132,7 +120,8 @@ Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
 
-style = "linear";
+style = "linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+ContactVariable = 1e2;
 
 %START NEWTON'S METHOD   
 for i=1:steps
@@ -150,28 +139,55 @@ for i=1:steps
         tic;
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Contact forces
-
-        ContactVariable = max([Fext1; Fext2 ; Fext3])/10;
-
-        [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
+        Body1.ContactRole = "slave"; % Options: "master", "slave"
+        Body2.ContactRole = "master";
+        [Kc1,Fc1,Gap1,Gap12Max] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
                       zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
-        
-            
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Body3.ContactRole = "slave"; % Options: "master", "slave"
+        Body2.ContactRole = "master";
         % Contact forces
-        [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
+        
+        [Kc2,Fc2,Gap2,Gap23Max] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
         Fc2_extend = [zeros(Body1.TotalDofs,1); Fc2];
 
         Kc2_extend = [zeros(Body1.TotalDofs, Body1.TotalDofs + Body2.TotalDofs+Body3.TotalDofs);
-               zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
+                      zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
         
-        Fc = Fc1_extend + Fc2_extend;     
-        Kc = Kc1_extend + Kc2_extend;
-        Gap = Gap1 + Gap2;
-            
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Body1.ContactRole = "slave"; % Options: "master", "slave"
+        Body3.ContactRole = "master";
+        % Contact forces
+        [Kc3,Fc3,Gap3,Gap13Max] = Contact(Body1,Body3,ContactType,ContactVariable,ContactRegType);
+        Kc3_1 = Kc3(1:Body1.TotalDofs,1:Body1.TotalDofs);
+        Kc3_2 = Kc3(Body1.TotalDofs+1:end, Body1.TotalDofs+1:end);
+        
+        Fc3_1 = Fc3(1:Body1.TotalDofs);
+        Fc3_2 = Fc3(Body1.TotalDofs+1:end);
+        
+        Fc3_extend = [Fc3_1; zeros(Body2.TotalDofs,1); Fc3_2];
+
+        Kc3_extend = [Kc3_1 zeros(Body1.TotalDofs, Body2.TotalDofs + Body3.TotalDofs);
+                       zeros(Body2.TotalDofs,Body1.TotalDofs +  Body2.TotalDofs + Body3.TotalDofs);  
+                      zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs) Kc3_2];
+        
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        Fc = Fc1_extend + Fc2_extend + Fc3_extend;     
+        Kc = Kc1_extend + Kc2_extend + Kc3_extend;
+        Gap = Gap1 + Gap2 + Gap3; 
+
+        GapMax   = Gap12Max;
+        if Gap13Max.gap > GapMax.gap
+            GapMax = Gap13Max;
+        end
+    
+        if Gap23Max.gap > GapMax.gap
+            GapMax = Gap23Max;
+        end
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % inner forces
         [Ke1,Fe1] = InnerForce(Body1);
@@ -195,6 +211,7 @@ for i=1:steps
         K_bc = K(bc,bc); 
         ff_bc = ff(bc);
         deltaf=ff_bc/norm(Fext(bc)); 
+
         u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -210,14 +227,14 @@ for i=1:steps
         titer=toc;
         titertot=titertot+titer;
 
+        
+
         if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap)
             break;  
         end 
 
     end
    
-
-
     %Pick nodal displacements from result vector
     xlocName1 = 'xloc' + Body1.ElementType;
     uf1 = Body1.u(Body1.fextInd);
@@ -230,17 +247,36 @@ for i=1:steps
     xlocName3 = 'xloc' + Body3.ElementType;
     uf3 = Body3.u(Body3.fextInd); 
     Results3 = [Results3; Body3.ElementNumber Body3.TotalDofs uf3'];
+
+    
 end 
+
+if (ContactType == "None") && (i == steps)
+    [~,~,Gap12,Gap12Max] = Contact(Body1,Body2,"Penalty",0,ContactRegType);
+    [~,~,Gap23,Gap23Max] = Contact(Body2,Body3,"Penalty",0,ContactRegType);
+    [~,~,Gap13,Gap13Max] = Contact(Body1,Body3,"Penalty",0,ContactRegType);
+
+    Gap = Gap12 + Gap13;
+    GapMax   = Gap12Max;
+    if Gap13Max.gap > GapMax.gap
+        GapMax = Gap13Max;
+    end
+
+    if Gap23Max.gap > GapMax.gap
+        GapMax = Gap23Max;
+    end
+
+end
 
 % POST PROCESSING ###############################################
 hold on
-% axis equal
+axis equal
 xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
 ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-visualization(Body1,Body1.q,'cyan',true);
-visualization(Body2,Body2.q,'red',true);
-visualization(Body3,Body3.q,'blue',true);
+visualization(Body1,Body1.q,'green',true);
+visualization(Body2,Body2.q,'blue',true);
+visualization(Body3,Body3.q,'red',true);
 
 PostProcessing(Body1,Results1,false,false) 
 PostProcessing(Body2,Results2,false,false) 

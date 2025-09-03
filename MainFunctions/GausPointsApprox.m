@@ -17,12 +17,10 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
        else
            [data, nu2, Body.CSCenterZ, Body.CSCenterY, Body.Length.Z, Body.Length.Y] = Binormalization(data_1);              
        end
-       [pcirc,wcirc]=PoiGen(data,nu2,Deg);
-       prefac = 1;  
+       [pcirc,wcirc]=PoiGen(data,nu2,Deg); 
     elseif ApproximationScheme == "Standard"
 
            if CSName == "Rectangular"
-              prefac = 1;     
               [xi,wxi] = gauleg2(-1,1,num);
               pcirc(:,1)=repmat(xi',1,num);
               pcirc(:,2)=reshape(repmat(xi,1,num)',num^2,1);
@@ -40,7 +38,7 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
          error('****** Provide correct approximation code ******');
     end
 
-    Body.detF0=1/4*Body.Length.Y*Body.Length.Z*prefac;
+    Body.detF0=1/4*Body.Length.Y*Body.Length.Z;
 
     % Reorginizing points for AceGen
     [Body.Gint,Body.Nint] = generateGint(num,pcirc,wcirc); 

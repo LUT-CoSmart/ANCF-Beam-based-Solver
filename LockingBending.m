@@ -14,7 +14,7 @@ Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type 
 ElementNumber = 8;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);

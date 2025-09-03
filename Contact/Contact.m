@@ -1,38 +1,27 @@
-function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
-
+function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
+    
     if ContactType == "None"
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
        Kc = zeros(length(Fc));
        Gap = NaN;
+       GapMax.gap = 0;
+       GapMax.area = NaN;
     else 
         
-        currentFolder = pwd;
+        addpath("Contact\ContactType\");
+        if ContactType == "Penalty"
+           ContactType = @Penalty;
+        elseif ContactType == "NitscheLin"
+           ContactType = @NitscheLin; 
+        else
+           error('****** Contact type is not implemneted ******')
+        end
 
-        cd(Body1.BodyFolder);
-
-        Body1.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
-        Body1.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
-        Body1.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
-        Body1.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
-        Body1.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-        const1 = Body1.Dvec(1:end-3);
-        Body1.Sigma = @(F_) PiolaSecondTensor(F_, const1);
-
-        cd(Body2.BodyFolder);
-
-        Body2.Shape = @(L,H,W,xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
-        Body2.ShapeXi = @(L,H,W,xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
-        Body2.ShapeEta =  @(L,H,W,xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
-        Body2.ShapeZeta =  @(L,H,W,xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
-        Body2.F = @(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-                                                        % F(q,u,q0(PosDofs),phi,L,H,W,xi,eta,zeta);
-        const2 = Body2.Dvec(1:end-3);
-        Body2.Sigma = @(F_) PiolaSecondTensor(F_, const2);
-
-        cd(currentFolder);
-       
+        % Creating names for the bodies' surface functions
+        Body1.SurfacePoints = feval(Body1.SurfacefunctionName, Body1, Body1.q);         
+        Body2.SurfacePoints = feval(Body2.SurfacefunctionName, Body2, Body2.q);
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
-        sqrtEps = sqrt(eps);
+        h = 2*sqrt(eps);
        
         TotalDofs1 = Body1.TotalDofs;
         TotalDofs2 = Body2.TotalDofs;
@@ -41,7 +30,7 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
 
         % Initialize the global contact forces
         Kc = zeros(TotalDofs,TotalDofs);
-        [Fc,Gap] = ContactForce(Body1,Body2,ContactVariable,ContactType);
+        [Fc,Gap,GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType);
             
         % variation of the variables
         I_vec=zeros(TotalDofs,1);
@@ -49,41 +38,35 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
         % Backup original coordinates
         q1_backup = Body1.q;
         q2_backup = Body2.q;
-        
+        SurfacePoints1_backup = Body1.SurfacePoints;
+              
         u1_backup = Body1.u;
         u2_backup = Body2.u;
-         
+        SurfacePoints2_backup = Body2.SurfacePoints;
+
         for ii = 1:TotalDofs
             
            I_vec(ii)=1;
-
-           h = 2*sqrtEps; 
 
            % this split is to distribute coord. between bodies 
            if ii <= TotalDofs1
 
                Body1.q = q1_backup - h*I_vec(1:TotalDofs1); 
                Body1.u = u1_backup - h*I_vec(1:TotalDofs1);
-               [Fch, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
-               
-               % Body1.q = q1_backup + h*I_vec(1:TotalDofs1); 
-               % [Fch2, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation                       
-               
-               
+               Body1.SurfacePoints = feval(Body1.SurfacefunctionName + "Partly", Body1, Body1.q, ii); 
+               [Fch,~,~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
+               Body1.SurfacePoints = SurfacePoints1_backup;
            else   
                % h = max(sqrtEps * abs(q2_backup(ii-TotalDofs1)) , h1); 
                
                Body2.q = q2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
                Body2.u = u2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
-               [Fch, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
-                            
-               % Body2.q = q2_backup + h*I_vec(1+TotalDofs1:TotalDofs);    
-               % [Fch2, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation                                 
-               
-               
+               Body2.SurfacePoints = feval(Body2.SurfacefunctionName + "Partly", Body2, Body2.q, ii - TotalDofs1); 
+               [Fch, ~, ~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
+               Body2.SurfacePoints = SurfacePoints2_backup; 
            end
           
-           Kc(:,ii) = (Fc - Fch) / (h);
+           Kc(:,ii) = (Fc - Fch) / h;
            I_vec(ii)=0;   
 
         end
@@ -95,10 +78,7 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRe
         Body2.u = u2_backup; % restore
         
         [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
-
-
-        Body1 = rmfield(Body1, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
-        Body2 = rmfield(Body2, {'Shape', 'ShapeXi', 'ShapeEta', 'ShapeZeta', 'F', 'Sigma'});
+        
     end      
     
     

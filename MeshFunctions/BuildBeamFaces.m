@@ -2,7 +2,7 @@ function Body = BuildBeamFaces(Body)
          
 
         faces = [];
-        
+        faceElem = [];
         switch Body.IntegrationType
 
            case {"Standard", "Poigen"} % fixed CS   
@@ -12,21 +12,25 @@ function Body = BuildBeamFaces(Body)
                 NpointCS = size(pointCS,1);
 
                 % Creating faces with a triangle mesh      
-                CSNumber = Body.ElementNumber * (Nxi-1) + 1; % total number of "Corss sections"
-
+                CSNumber = Body.ElementNumber * (Nxi-1) + 1; % total number of "Cross Sections"
+                
                 for k = 1:CSNumber - 1
+                    element = ceil(k / (Nxi-1));
                     offset1 = (k-1)*NpointCS;
                     offset2 = k*NpointCS;
                     for p = 1:NpointCS - 1                
                         faces = [faces;
                                 offset1+p,   offset1+p+1, offset2+p+1;
                                 offset1+p,   offset2+p+1, offset2+p];
+
+                        faceElem = [faceElem; element; element];
                     end
                     
                     % closing
                     faces = [faces;
                              offset1+NpointCS, offset1+1, offset2+1;
                              offset1+NpointCS, offset2+1, offset2+NpointCS];
+                    faceElem = [faceElem; element; element];                    
                 end    
 
 
@@ -53,15 +57,16 @@ function Body = BuildBeamFaces(Body)
 
                 faces = [faces; facesStart; facesEnd];
 
+                faceElem = [faceElem; ones(size(facesStart,1),1); Body.ElementNumber*ones(size(facesStart,1),1)];
 
             otherwise                  
                 error('****** Unkown Integration type for %s ******', Body.Name);
         end
         
         Body.BodyFaces = faces;
-        
-        % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 
-        % Option        
+        Body.BodyFacesElements = faceElem;
+        % % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 
+        % % Option        
         % SurfacePoints = BuildBeamSurface(Body,Body.q0);
         % addpath(genpath("Contact"))
         % [mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
