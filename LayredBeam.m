@@ -57,15 +57,15 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
 ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % %####################### Solving ######################################## 
-steps = 25;  % sub-loading steps
+steps = 50;  % sub-loading steps
 titertot=0;  
-Re=10^(-5);                   % Stopping criterion for residual
+Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 ContactRegType = "off";
@@ -75,7 +75,7 @@ Results2 = [];
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="mixed_Loadvise"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 
 %START NEWTON'S METHOD   
 for i=1:steps

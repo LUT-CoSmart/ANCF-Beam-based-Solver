@@ -5,17 +5,18 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         faces = Body.BodyFaces;
         faceElem = Body.BodyFacesElements;
         SurfacePoints = Body.SurfacePoints;
-        SurfacePointsIso = Body.IsoData;
+        % SurfacePointsIso = Body.IsoData;
 
         % Findinding the closest nodes to a point 
         DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3);
         Nodes = reshape(Body.q(DofID), 3, []).'; % nodes positions ,reorginized to NodeNumberx3 
         [~, Distance] = knnsearch(Nodes, PointsToProject, 'K', 1);
 
-        % Checking the contact possibility
+        % Checking the contact possibility 
+        % attributed to Contact body
         cond = Distance < Body.NodeSphere;
         PointsToProject = PointsToProject(cond,:);           
-        isoData = isoData(cond,:);
+        isoData = isoData(cond,:); 
 
         fl = false; % flag, showing the contact possiblity
         
@@ -35,10 +36,13 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            %% which are on the same side with Nodes:  dir = Point' - NodalPoint; if dot(dir,r-NodalPoint)>0.
 
            [face_mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
+           % face_normals
            inputs.faces=faces;
            inputs.nodes=SurfacePoints;
            inputs.face_mean_nodes=face_mean_nodes;
-           inputs.face_normals= - face_normals; % change normal to outward
+           inputs.face_normals= -face_normals; % change normals for !!!!distance calculation!!! to outward
+           % !!!! actual normals are still inwards  
+
            % [distances,~,outside,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
            [distances,~,outside,projected_faces]=fastPoint2TriMesh_opt(inputs,PointsToProject); 
            
@@ -47,8 +51,10 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
 
-           idx = SurfacePointsIso(highlight_face,4); % now we need to find the element
-           % idx =  faceElem(highlight_face);
+           % idx = SurfacePointsIso(highlight_face(:,3),4); % now we need to find the element, 
+           % with such organization of building faces, their all vertexes belong to one element
+           idx = faceElem(projected_faces);  % the second way to define elements 
+
         end 
           
         tol =sqrt(eps);
@@ -59,12 +65,16 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
     
             distancesInside = distances(Inside);
             idxInside = idx(Inside);
+
             PointInside = PointsToProject(Inside,:);
             isoData = isoData(Inside,:);
+
             FaceNormal= highlight_normals(Inside,:);
             Face = highlight_face(Inside,:);
-            xi_eta_zeta_Array = []; % point isocoord & element number & distance, such array, just to save much info as I want, later to make it zero array  
-
+            
+            % point isocoord targ (3) & element number (1) & distance (1) &
+            % normal (3) & point isocoord cond (4 + element no. ) & contact area
+            Outcome = zeros(length(distancesInside),13); % prelocation
             for i = 1:length(distancesInside)
         
                 qk=q(xloc(idxInside(i),:)); % current element number
@@ -79,7 +89,6 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
                 
                 Area = 1/2 * norm( cross(B - A, C - A) );
 
-                xi_eta_zeta_Array(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
+                Outcome(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
            end  
-           Outcome = xi_eta_zeta_Array;
         end

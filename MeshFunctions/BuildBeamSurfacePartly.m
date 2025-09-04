@@ -7,8 +7,8 @@ function SurfacePoints = BuildBeamSurfacePartly(Body,q,j)
         
         % j - a changed position; 
 
-        AffectedElements = find(any(xloc == j, 2));
-        idx_points = find(ismember(IsoData(:,4), AffectedElements)); % it can be several elements 
+        AffectedElements = find(any(xloc == j, 2)); % find DOFs with number j, it can be several elements 
+        idx_points = find(ismember(IsoData(:,4), AffectedElements)); % all points belonging to these elements
         for i = 1:length(idx_points)            
             xi   = IsoData(idx_points(i),1);
             eta  = IsoData(idx_points(i),2);

@@ -1,5 +1,5 @@
 function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType)
-
+    
     if ContactType == "None"
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
        Kc = zeros(length(Fc));
@@ -7,8 +7,17 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
        GapMax.gap = 0;
        GapMax.area = NaN;
     else 
-        % Creating names for the bodies' surface functions
+        
+        addpath("Contact\ContactType\");
+        if ContactType == "Penalty"
+           ContactType = @Penalty;
+        elseif ContactType == "NitscheLin"
+           ContactType = @NitscheLin; 
+        else
+           error('****** Contact type is not implemneted ******')
+        end
 
+        % Creating names for the bodies' surface functions
         Body1.SurfacePoints = feval(Body1.SurfacefunctionName, Body1, Body1.q);         
         Body2.SurfacePoints = feval(Body2.SurfacefunctionName, Body2, Body2.q);
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
