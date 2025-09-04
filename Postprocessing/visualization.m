@@ -11,12 +11,8 @@ function visualization(Body,q,FaceColor,Show)
         patch('Vertices', vertices, 'Faces', Body.BodyFaces, 'FaceColor', FaceColor, 'FaceAlpha', 0.3);
         plot3(vertices(:,1), vertices(:,2), vertices(:,3), '.k')    
         plot3(NodePositions(:,1), NodePositions(:,2), NodePositions(:,3), '-*k')
-<<<<<<< HEAD
         view(3);  
         axis equal;
-=======
-        view(20, 15)
->>>>>>> origin/main
     else
         disp('No visualization')
     end   
