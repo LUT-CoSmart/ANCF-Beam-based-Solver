@@ -14,8 +14,8 @@ function Body = SurfaceBeamApprox(Body)
 
            case "Standard"   
 
-                Nxi = 5;     
-                Netazeta = 7; % used in standard CS (for Oval is multiplied x4 )
+                Nxi = 7;     
+                Netazeta = 5; % used in standard CS (for Oval is multiplied x4 )
             
                 if CSName == "Rectangular"
                    % Surface data for contact and visualization 

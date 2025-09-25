@@ -4,7 +4,7 @@ addpath("MainFunctions")
 addpath("MeshFunctions")
 addpath("InnerForceFunctions")
 addpath(genpath("Contact"))
-addpath("Postprocessing");
+addpath("Postprocessing")
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 Body3.Name = "Body3";

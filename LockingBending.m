@@ -3,6 +3,7 @@ format long
 addpath("MainFunctions");
 addpath("MeshFunctions");
 addpath("Postprocessing");
+addpath("InnerForceFunctions")
 Body.Name = "Body";
 CaseName =  string(mfilename);
 CaseSubtype = "Large"; % there are two options: Large & Small

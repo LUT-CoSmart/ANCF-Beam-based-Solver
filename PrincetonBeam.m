@@ -2,7 +2,8 @@ clc,clear,close all;
 format long
 addpath("MainFunctions");
 addpath("Postprocessing");
-addpath("MeshFunctions")
+addpath("MeshFunctions");
+addpath("InnerForceFunctions")
 CaseName =  string(mfilename);
 Body.Name = "Body";
 %% There are two options: Large & Small

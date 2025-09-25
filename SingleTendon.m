@@ -7,13 +7,12 @@ addpath("Postprocessing");
 addpath('InnerForceFunctions');
 
 Body.Name = "Body";
-
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 Body = Materials(Body,"GOH", "Amir"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Oval","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
+Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
 % ########### Complicate geometry ######################§##################
 % Shift
 Body.Shift.X = 0;
@@ -111,30 +110,7 @@ for i=1:steps
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
 end
 % POST PROCESSING ###############################################
-visDeformed = false;
-visInitial = false;
+visDeformed = true;
+visInitial = true;
 PostProcessing(Body,Results,visDeformed,visInitial) 
 CleanTemp(Body, true)
-
-% 
-% L = Body.Length.Ln;
-% H = Body.Length.Y;
-% W = Body.Length.Z;
-% r1 = Shape_(L,H,W,1,-1,-1)*Body.q;
-% r2 = Shape_(L,H,W,-1,-1,-1)*Body.q;
-% 
-% XX = norm(r1-r2);
-% 
-% 
-% r1 = Shape_(L,H,W,1, 1,-1)*Body.q;
-% r2 = Shape_(L,H,W,1, -1,-1)*Body.q;
-% YY = norm(r1-r2);
-% 
-% 
-% r1 = Shape_(L,H,W,1, 1, 1)*Body.q;
-% r2 = Shape_(L,H,W,1, 1,-1)*Body.q;
-% ZZ = norm(r1-r2);
-% 
-% % Body.Volume
-% % 
-% % VV = XX*ZZ*YY

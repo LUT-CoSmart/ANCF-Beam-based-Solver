@@ -41,7 +41,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -62.5*10^(7)/2;  
+Force1.Maginutude.Y = -62.5*10^7;  
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -57,13 +57,13 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin"...
+ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
 ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % %####################### Solving ######################################## 
-steps = 50;  % sub-loading steps
+steps = 30 ;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
@@ -75,7 +75,7 @@ Results2 = [];
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="mixed_Loadvise"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 
 %START NEWTON'S METHOD   
 for i=1:steps
