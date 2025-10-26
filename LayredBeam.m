@@ -24,7 +24,7 @@ Body1.Shift.Z = 0;
 
 ElementNumber1 = 2;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 2;
+ElementNumber2 = 4;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -63,7 +63,7 @@ Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % %####################### Solving ######################################## 
-steps = 30 ;  % sub-loading steps
+steps = 20 ;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
