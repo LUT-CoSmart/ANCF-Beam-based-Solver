@@ -75,8 +75,19 @@ for i=1:steps
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
 end
 % POST PROCESSING ###############################################
-visDeformed = false;
-visInitial = false;
+visDeformed = true;
+visInitial = true;
 PostProcessing(Body,Results,visDeformed,visInitial) 
-% CleanTemp(Body, true)
+
+% Volume change check
+faces=Body.BodyFaces;
+vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
+vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
+
+V_after = VolumeViaFaces(vertices_after, faces);
+V_before = VolumeViaFaces(vertices_before, faces);
+
+fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
+
+CleanTemp(Body, true)
 
