@@ -13,8 +13,9 @@ Body2 = DefineElement(Body2,"Beam","ANCF",3363,"None");
 Body1 = Materials(Body1,'KS'); 
 Body2 = Materials(Body2,'KS'); 
 % Geometry
-Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"Rectangular","Standard");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"Rectangular","Standard","Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"Rectangular","Standard","Gaus");  % Integration Scheme: Poigen, Standard
+                                                          % Integration points of generating line : Gauss, Lobatto
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
@@ -22,13 +23,13 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 2;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 4;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
-Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
 Body1.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body1.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body1 = AddTensors(Body1);
@@ -57,6 +58,7 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
+ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
 ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
@@ -75,7 +77,7 @@ Results2 = [];
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="cubic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 
 %START NEWTON'S METHOD   
 for i=1:steps
@@ -92,7 +94,7 @@ for i=1:steps
         tic;
 
         % Contact forces
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
+        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType,ContactFiniteDiference);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);
@@ -136,7 +138,6 @@ for i=1:steps
 
     xlocName2 = 'xloc' + Body2.ElementType;
     uf2 = Body2.u(Body2.fextInd); 
-
     Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
 end    
 

@@ -13,8 +13,8 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
-Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
+Body.FiniteDiference= "Matlab_automatic"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % % ########## Visualization of initial situation ##########################
@@ -28,8 +28,9 @@ SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikho
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
-create=false;
-CreateMex(create,Body);
+%% TODO: rebuild CreateMex, it addresses the wrong folder
+% create=false;
+% CreateMex(create,Body);
 
 %START NEWTON'S METHOD
 for i=1:steps

@@ -1,6 +1,6 @@
 function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationScheme)
     
-        
+    IntegrationPoints = "Gauss";    
     switch CaseName
            case {"LockingBendingLarge", "LockingBendingSmall"}
                 CSName = 'Rectangular';
@@ -60,5 +60,5 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
     Body = MaterialType(Body,MaterialName,param, compressiblility, fibers);
    
     addpath('GaussPoints');
-    Body = GausPointsApprox(Body,CSName,ApproximationScheme);
+    Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoints);
    

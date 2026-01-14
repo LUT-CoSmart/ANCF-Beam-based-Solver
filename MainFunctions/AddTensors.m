@@ -107,6 +107,12 @@ function Body = AddTensors(Body)
                Body.DeformationType = "Finite"; 
             end
     
+       case "Matlab_automatic" 
+           if Body.SolutionBase == "Position"
+               disp("For chosen finite difference and solution-based scheme, deformations are only finite")
+               Body.DeformationType = "Finite"; 
+           end
+           
        otherwise
             error('****** Choose correct Finite Diference scheme ******\n')
     end        

@@ -11,8 +11,9 @@ Body.Name = "Body";
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 Body = Materials(Body,"GOH", "Amir"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-% Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,"Tendon","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon, Middle_cross_section1_1
+                                                        % Integration Scheme: Poigen, Standard
+Body = Geometry(Body,"ten_Sol_3","Poigen", "Lobatto");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
+                                                        % Integration points of generating line: Gauss, Lobatto
 % ########### Complicate geometry ######################§##################
 % Shift
 Body.Shift.X = 0;
@@ -32,15 +33,19 @@ Body.Twist.ro = 0;
 ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Matlab_automatic"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1747.95;  % Elongation
-Force.Maginutude.Y = 0;  
-Force.Maginutude.Z = 0;  
+steps = 40;  % sub-loading steps
+Force.Maginutude.X = 3e+04;  % Elongation
+
+% steps = 50;  % sub-loading steps
+% Force.Maginutude.X = 2.889627761315940*1e5;
+% Force.Maginutude.Y = 0;  
+% Force.Maginutude.Z = 0;  
 
 % Positioning applied locally to the Undefomred configuration
 % Shift and curvature are accounted automaticaly)
@@ -52,16 +57,16 @@ Force.Position.Z = 0;
 Boundary.Position.X = 0;  
 Boundary.Position.Y = 0;
 Boundary.Position.Z = 0;
-Boundary.Type = "reduced"; % there are several types: full, reduced, positions, none
+Boundary.Type = "full"; % there are several types: full, reduced, positions, none
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 % ########## Visualization of initial situation ###########################
 Results = [];  
 visualization(Body,Body.q0,'red',false);
 % % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+%steps = 40;  % sub-loading steps
 titertot=0;  
-Re=10^(-4);           % Stopping criterion for residual
+Re=1*10^(-4);           % Stopping criterion for residual
 imax=40;              % Maximum number of iterations for Newton's method 
 
 % origFolder = pwd;
@@ -71,6 +76,7 @@ imax=40;              % Maximum number of iterations for Newton's method
 
 SolutionRegType = "off";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
 %START NEWTON'S METHOD   
+
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
@@ -79,7 +85,7 @@ for i=1:steps
                     
     for ii=1:imax    
         tic; 
-                                
+
         [K,Fe] = InnerForce(Body);
                        
         K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
@@ -101,16 +107,26 @@ for i=1:steps
         end 
       
 
+        
     end           
-      
-    %Pick nodal displacements from result vector
-    xlocName = 'xloc' + Body.ElementType;
-    uf = Body.u(Body.fextInd); 
 
+    %Pick nodal displacements from result vector
+    uf = Body.u(Body.fextInd); 
     Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
+    
 end
 % POST PROCESSING ###############################################
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,Results,visDeformed,visInitial) 
-CleanTemp(Body, true)
+% CleanTemp(Body, true)
+
+% volume check
+faces=Body.BodyFaces;
+vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
+vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
+
+V_after = VolumeViaFaces(vertices_after, faces);
+V_before = VolumeViaFaces(vertices_before, faces);
+
+fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)

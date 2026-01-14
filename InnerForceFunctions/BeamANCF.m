@@ -17,8 +17,8 @@ function [K_loc,Fe] = BeamANCF(Body,k)
     switch Body.FiniteDiference
             
            case "Matlab"
-                 h = 2*sqrtEps; 
-                 
+
+                 h = 2*sqrtEps;                  
                  Fibers = Body.Fibers;
                  detF0 = Body.detF0;
                  PosDofs = Body.PosDofs;
@@ -40,6 +40,7 @@ function [K_loc,Fe] = BeamANCF(Body,k)
                  K_loc = (Fe - Feh_all) ./ diag(H)';
 
            case "AceGen"
+
                 DIM = Body.DIM;
                 DofsAtNode = Body.DofsAtNode;
                 qk0f=Body.q0f(xloc(k,:));
@@ -48,5 +49,24 @@ function [K_loc,Fe] = BeamANCF(Body,k)
                 qk0_DIM = reshape(qk0, [DIM, DofsAtNode])';
                 uk_DIM = reshape(uk, [DIM, DofsAtNode])'; 
                 [~,~,~,~,K_loc,Fe,~,~] = AceGenForce(qk0f_DIM,qk0_DIM,uk_DIM,Dvec,K_loc,Fe0,Gint',Nint);
-                Fe = - Fe; % taking into account the difference between AceGen and Fe_fun          
+                Fe = - Fe; % taking into account the difference between AceGen and Fe_fun 
+
+           case "Matlab_automatic" 
+
+                Fibers = Body.Fibers;
+                detF0 = Body.detF0;
+                PosDofs = Body.PosDofs;
+                qk=Body.q(xloc(k,:));
+                phik=Body.phim(k,:)';    
+                Phik=Body.Phim(k,:)';                 
+                Fe=Fe_fun(Fe0,uk,qk,qk0,phik,Phik,Fibers,Dvec,ElementDofs,PosDofs,Gint,Nint,detF0); 
+                fac = 1e-4;
+                if Body.SolutionBase == "Position"
+                    G = @(t,y) Fe_fun(Fe0,uk,y,qk0,phik,Phik,Fibers,Dvec,ElementDofs,PosDofs,Gint,Nint,detF0);
+                    K_loc = numjac(G, 0, qk, Fe, fac, []);
+                else % Body.SolutionBase == "Displacement"
+                    G = @(t,y) Fe_fun(Fe0,y,qk,qk0,phik,Phik,Fibers,Dvec,ElementDofs,PosDofs,Gint,Nint,detF0);
+                    K_loc = numjac(G, 0, uk, Fe, fac, []);
+                end
+
     end           
