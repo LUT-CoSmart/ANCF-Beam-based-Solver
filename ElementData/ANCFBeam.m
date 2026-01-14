@@ -1,4 +1,4 @@
-function Body = ElementDataANCFBeam(Body,ElmentType,SubType,Element) % Define element properties
+function Body = ANCFBeam(Body,ElmentType,SubType,Element) % Define element properties
 
 Body.Element = Element;
 
