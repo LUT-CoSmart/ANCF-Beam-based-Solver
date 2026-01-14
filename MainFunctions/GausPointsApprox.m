@@ -1,4 +1,4 @@
-function Body = GausPointsApprox(Body,CSName,ApproximationScheme)    
+function Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoints)    
 
     % Number of point in axial direction usually equals to number of nodes
     Body.IntegrationType = ApproximationScheme;    
@@ -41,7 +41,7 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme)
     Body.detF0=1/4*Body.Length.Y*Body.Length.Z;
 
     % Reorginizing points for AceGen
-    [Body.Gint,Body.Nint] = generateGint(num,pcirc,wcirc); 
+    [Body.Gint,Body.Nint] = generateGint(num,pcirc,wcirc, IntegrationPoints); 
 
     Body.Area = (Body.Length.Y * Body.Length.Z / 8 ) *sum(Body.Gint(:,4));
     

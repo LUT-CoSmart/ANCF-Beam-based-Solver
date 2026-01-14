@@ -1,11 +1,11 @@
-function Body = Geometry(Body,CSName,ApproximationScheme)
+function Body = Geometry(Body,CSName,ApproximationScheme, IntegrationPoints)
     
         
     switch CSName
            case "Rectangular"
                 Body.Length.X = 2; % Body length
                 Body.Length.Y = 0.5;
-                Body.Length.Z = 0.5;
+                Body.Length.Z = 0.5;                
                 Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
                 
            case "Oval"
@@ -42,8 +42,8 @@ function Body = Geometry(Body,CSName,ApproximationScheme)
                end  
     end    
     
-    addpath('GaussPoints');  
-    Body = GausPointsApprox(Body,CSName,ApproximationScheme);
+    addpath('IntegrationPoints');  
+    Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoints);
 
     
 
