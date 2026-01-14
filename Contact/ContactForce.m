@@ -1,4 +1,4 @@
-function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType)
+    function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType)
         
         if (Body1.ContactRole == "slave") && (Body2.ContactRole == "master")
             
@@ -16,8 +16,8 @@ function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactTyp
             % Projection of Body1 on Body2
             [Fc1_2, Fc2_2, Gap2, Gap2Max] = ContactSlaveMaster(Body1, Body2, ContactVariable, ContactType);
                         
-            Fc1 = Fc1_1 + Fc1_2;
-            Fc2 = Fc2_1 + Fc2_2; 
+            Fc1 = 0.5 * (Fc1_1 + Fc1_2);
+            Fc2 = 0.5 * (Fc2_1 + Fc2_2); 
             Gap = max(Gap1,Gap2);
 
             if Gap1Max.gap > Gap2Max.gap     

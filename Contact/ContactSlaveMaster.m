@@ -1,5 +1,5 @@
 function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody,ContactVariable, ContactType)
-                                                      %(BodySlave,BodyMaster,ContactVariable, ContactType)                  
+                                                                     
           GapMax.gap = 0;
           GapMax.area = NaN; % doesn't matter, when GapMax.gap == 0
 
@@ -11,6 +11,8 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
           Gap = 0; % total gap
           Fcont = zeros(ContactBody.TotalDofs,1);
           Ftarg = zeros(TargetBody.TotalDofs,1);
+        
+          %% TODO: adding the bounding boxing to check the contact at the first place  
 
           % Projection
           Outcome = FindProjection(ContactBody.SurfacePoints, ContactBody.IsoData, TargetBody);
