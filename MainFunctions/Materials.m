@@ -10,7 +10,13 @@ function Body = Materials(Body, MaterialName, Subtype)
                switch  Subtype
                    case ""
                        param.mu=9e5;
-    
+                   
+                   case "optimized_SEE"  
+                       param.mu=28559355.9219739;
+
+                   case "Recalculated_to_245mm"
+                       param.mu=90e6/(0.245/0.07);    
+
                    case "Alex"
                        param.mu=90e6;
                     
@@ -62,8 +68,22 @@ function Body = Materials(Body, MaterialName, Subtype)
                         param.a0 = [1 0 0]'; % fiber direction
                         Body.FiberTwist = 0; % inner (fiber) pre-twist
                          
+                   case "optimized_SEE"    
+                       param.c10 = 53600;
+                       param.k1 = 8409291.05908193;
+                       param.k2 = 4.78018491589778;      
+                       param.kappa = 0;      % fiber dipersion
+                       param.a0 = [1 0 0]';   % fiber direction 
+                       Body.FiberTwist = 0; % inner (fiber) pre-twist 
+                   
+                   case "stiff"
+                       param.c10 = 50e6;
+                       param.k1 = 7.5351e7;
+                       param.k2 = 23.926;      
+                       param.kappa = 0;      % fiber dipersion
+                       param.a0 = [1 0 0]';   % fiber direction 
+                       Body.FiberTwist = 0; % inner (fiber) pre-twist 
 
-                       
                end
                  
    

@@ -1,11 +1,11 @@
 function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap)
     
-     persistent previousForce previousDisp
+     % persistent previousForce previousDisp
 
-     if ii == 1
-        previousForce = 0; 
-        previousDisp = 0; 
-     end
+     % if ii == 1
+     %    previousForce = 0; 
+     %    previousDisp = 0; 
+     % end
      
      if  nargin < 9 % Gap is optional
          Gap= NaN;
@@ -34,12 +34,12 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          status = false;
      end 
     
-     % Update previous steps' meanings
-     if (ii > 1) && (ii < imax)
-        previousForce = deltaf;
-        previousDisp = norm(u_bc);
-     end
-    
+     % % Update previous steps' meanings
+     % if (ii > 1) && (ii < imax)
+     %    previousForce = deltaf;
+     %    previousDisp = norm(u_bc);
+     % end
+     % 
      
 
      

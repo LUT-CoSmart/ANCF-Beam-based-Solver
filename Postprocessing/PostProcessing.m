@@ -13,7 +13,7 @@ function PostProcessing(Body,Results,visDeformed,visInitial)
         return
     else
         figure;
-        % axis equal
+        axis equal
         set(gca, 'FontSize', [12], 'FontName','Times New Roman');
         set(text, 'FontSize', [12], 'FontName','Times New Roman');
         xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
