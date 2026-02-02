@@ -13,16 +13,16 @@ Body3.Name = "Body3";
 Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");  
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
+% Geometry
+Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen", "Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"MG_subj2_middle","Poigen", "Gaus");  % Itegration Scheme: Poigen, Standard
+Body3 = Geometry(Body3,"LG_subj2_middle","Poigen", "Gaus");  % Itegration Scheme: Poigen, Standard
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 Body1 = Materials(Body1,"GOH"); 
 Body2 = Materials(Body2,"GOH"); 
 Body3 = Materials(Body3,'GOH');
-% Geometry
-Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"MG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
-Body3 = Geometry(Body3,"LG_subj2_middle","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 30;
+angle = 0;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -34,7 +34,6 @@ RelCenter3 = Center3 - Center2;
 
 Body1.Twist.angle = angle;
 Body1.Twist.initial_rot = atan2d(RelCenter1(2),RelCenter1(1));
-%Body1.Twist.initial_rot = 0;
 Body1.Twist.ro = norm(Center2 - Center1);
 
 Body2.Twist.angle = angle;
@@ -97,7 +96,7 @@ Body3.SolutionBase = "Position"; % Solution-based calculation: Position, Displac
 Body3.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body3 = AddTensors(Body3);
 
-Force = 1e1;
+Force = 1e0;
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
@@ -153,8 +152,9 @@ Boundary3.Type = "reduced"; % there are several types: full, reduced, positions,
 
 
 % ########## Contact characteristics ######################################
+ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 0.5e1;
+ContactVariable = 0.5e0;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 Body3.ContactRole = "master";
@@ -169,12 +169,11 @@ Body3.ContactRole = "master";
 % visualization(Body2,Body2.q0,'red',true);
 % visualization(Body3,Body3.q0,'blue',true);
 % %####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+steps = 5;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=15;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "off";
 Results1 = [];
 Results2 = [];
 Results3 = [];
@@ -202,7 +201,7 @@ for i=1:steps
         
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
-        [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
+        [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference);
         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
                       zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
@@ -210,7 +209,7 @@ for i=1:steps
             
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
-        [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactRegType);
+        [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactFiniteDiference);
         Fc2_extend = [zeros(Body1.TotalDofs,1); Fc2];
 
         Kc2_extend = [zeros(Body1.TotalDofs, Body1.TotalDofs + Body2.TotalDofs+Body3.TotalDofs);

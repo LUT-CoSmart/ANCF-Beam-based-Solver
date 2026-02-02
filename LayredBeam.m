@@ -9,13 +9,13 @@ Body2.Name = "Body2";
 % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 Body1 = DefineElement(Body1,"Beam","ANCF",3363,"None");  
 Body2 = DefineElement(Body2,"Beam","ANCF",3363,"None");  
-% Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,'KS'); 
-Body2 = Materials(Body2,'KS'); 
 % Geometry
 Body1 = Geometry(Body1,"Rectangular","Standard","Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body2 = Geometry(Body2,"Rectangular","Standard","Gaus");  % Integration Scheme: Poigen, Standard
                                                           % Integration points of generating line : Gauss, Lobatto
+% Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body1 = Materials(Body1,'KS'); 
+Body2 = Materials(Body2,'KS'); 
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = 0;
@@ -69,8 +69,7 @@ steps = 20 ;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "off";
+SolutionRegType = "off";  % Regularization type: off, on
 Results1 = [];
 Results2 = [];
 
@@ -94,7 +93,7 @@ for i=1:steps
         tic;
 
         % Contact forces
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType,ContactFiniteDiference);
+        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);

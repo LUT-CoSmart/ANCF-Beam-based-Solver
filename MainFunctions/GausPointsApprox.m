@@ -10,12 +10,13 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoi
        run(CSName); 
        Deg=input('Input Approximation degree (1 or above): ');      % Approximation degree for Green's formula    
            
-       if  (CSName == "Rectangular") || (CSName== "Oval") 
+       if  (CSName == "Rectangular") || (CSName== "Oval") % standard shapes
            [data, nu2, Body.CSCenterZ] = Binormalization(data_1); 
        else
            [data, nu2, Body.CSCenterZ, Body.CSCenterY, Body.Length.Z, Body.Length.Y] = Binormalization(data_1);              
        end
        [pcirc,wcirc]=PoiGen(data,nu2,Deg); 
+
     elseif ApproximationScheme == "Standard"
 
            if CSName == "Rectangular"

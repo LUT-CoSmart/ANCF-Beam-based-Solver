@@ -59,6 +59,6 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
 
     Body = MaterialType(Body,MaterialName,param, compressiblility, fibers);
    
-    addpath('GaussPoints');
+    addpath('IntegrationPoints');
     Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoints);
    

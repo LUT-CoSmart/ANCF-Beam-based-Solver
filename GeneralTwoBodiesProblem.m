@@ -13,14 +13,15 @@ Body2.Name = "Body2";
 Body1 = DefineElement(Body1,"Beam","ANCF",3343,"None");  
 Body2 = DefineElement(Body2,"Beam","ANCF",3343,"None");  
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,'KS'); 
-Body2 = Materials(Body2,'KS'); 
 % Geometry
-Body1 = Geometry(Body1,"Rectangular","Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body1 = Geometry(Body1,"Rectangular","Standard", "Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
 Body1.Length.Z = Body1.Length.Z;
 
-Body2 = Geometry(Body2,"Rectangular","Standard");  % Itegration Scheme: Poigen, Standard
+Body2 = Geometry(Body2,"Rectangular","Standard", "Gaus");  % Itegration Scheme: Poigen, Standard
 Body2.Length.X = Body2.Length.X;
+
+Body1 = Materials(Body1,'KS'); 
+Body2 = Materials(Body2,'KS'); 
 % ########### Set Bodies positions ########################################
 % Shift of Body1
 Body1.Shift.X = Body1.Length.X/2;
@@ -72,10 +73,11 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
+ContactFiniteDiference = "Matlab";  % Options: "Matlab", "Matlab_automatic"
 ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
 ContactVariable = 1e10;
 Body1.ContactRole = "master"; % Options: "master", "slave"
-Body2.ContactRole = "master";
+Body2.ContactRole = "slave";
 
 % ########## Visualization of initial situation ###########################
 % figure;
@@ -93,7 +95,6 @@ titertot=0;
 Re=10^(-3);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
 SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-ContactRegType = "off";
 Results1 = [];
 Results2 = [];
 
@@ -115,8 +116,7 @@ for i=1:steps
         tic;
 
         % Contact forces
-
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType);
+        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference);
 
         [Ke1,Fe1] = InnerForce(Body1);
         [Ke2,Fe2] = InnerForce(Body2);

@@ -6,10 +6,11 @@ addpath('MeshFunctions');
 Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
-                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,'Neo'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 % Itegration Scheme: Poigen, Standard
-Body = Geometry(Body,'Sol_subj2_middle',"Standard");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body = Geometry(Body,'Rectangular',"Standard", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon                                                       
+                                                      % Integration points of generating line: Gauss, Lobatto      
+Body = Materials(Body,'Neo'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % ########### Complicate geometry #########################################
 % Shift
 Body.Shift.X = 0;
@@ -28,7 +29,7 @@ Body.Rotation.Z = 0;
 Body.Twist.angle = 45; % in degrees
 Body.Twist.ro = 0;
 % ########## Create FE Model ##############################################
-ElementNumber = 8;
+ElementNumber = 4;
 Body = CreateFEM(Body,ElementNumber);
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
@@ -37,7 +38,7 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e3;  % Elongation
+Force.Maginutude.X = 1e5;  % Elongation
 Force.Maginutude.Y = 0;  
 Force.Maginutude.Z = 0;  
 
@@ -62,10 +63,11 @@ steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-5);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+SolutionRegType = "off";      % Regularization type: off, on (automatic Matlab-based function)
 
-create=false;
-CreateMex(create,Body);
+%% TODO: Fix it for Matlab2025 
+% create=false;
+% CreateMex(create,Body);
 
 
 %START NEWTON'S METHOD   
@@ -78,8 +80,8 @@ for i=1:steps
     for ii=1:imax    
         tic; 
           
-        % [K,Fe] = InnerForce(Body);
-        [K,Fe] = InnerForce_mex(Body);
+        [K,Fe] = InnerForce(Body);
+        %[K,Fe] = InnerForce_mex(Body);
                        
         K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
         ff =  Fe - Fext;

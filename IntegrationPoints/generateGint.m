@@ -1,7 +1,6 @@
 function [Gint,N_int] = generateGint(num, pcirc, wcirc, IntegrationPoints)    
 
 if IntegrationPoints == "Lobatto"
-    % [xi,wxi] = Lobatto(num+1);
     [xi,wxi] =  lglnodes(num);
 else    
     [xi,wxi] = gauleg2(-1,1,num);

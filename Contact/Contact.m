@@ -1,4 +1,4 @@
-function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactRegType,ContactFiniteDiference)
+function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference)
     
     if ContactType == "None"
        Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
@@ -33,8 +33,6 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
                 [Kc,Fc,Gap,GapMax] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable);
             
         end    
-        [~,Kc] = Regularization(Kc,Fc,ContactRegType,false);
-        
     end      
     
     

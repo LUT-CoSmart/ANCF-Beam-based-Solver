@@ -1,4 +1,4 @@
-    function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType)
+    function [Fc, Gap, GapMax] = ContactForce(Body1,Body2,ContactVariable, ContactType)
         
         if (Body1.ContactRole == "slave") && (Body2.ContactRole == "master")
             

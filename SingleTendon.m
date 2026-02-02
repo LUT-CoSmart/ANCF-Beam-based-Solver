@@ -8,12 +8,13 @@ addpath('InnerForceFunctions');
 
 Body.Name = "Body";
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
-                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-Body = Materials(Body,"GOH", "optimized_SEE"); % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-                                                        % Integration Scheme: Poigen, Standard
+Body = DefineElement(Body,"Beam","ANCF",3333,"None"); % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+                                                      % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103) 
 Body = Geometry(Body,"ten_Sol_3","Poigen", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
-                                                        % Integration points of generating line: Gauss, Lobatto
+                                                      % Integration points of generating line: Gauss, Lobatto  
+Body = Materials(Body,"GOH", "optimized_SEE");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+                                                      % Integration Scheme: Poigen, Standard
+                                                     
 % ########### Complicate geometry ######################§##################
 % Shift
 Body.Shift.X = 0;
@@ -60,13 +61,7 @@ steps = 300;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);           % Stopping criterion for residual
 imax=20;              % Maximum number of iterations for Newton's method 
-
-% origFolder = pwd;
-% cd InnerForceFunctions;
-% codegen InnerForce -args {Body} -config:mex
-% cd(origFolder);
-
-SolutionRegType = "off";      % Regularization type: off, penaltyK, penaltyKf, Tikhonov
+SolutionRegType = "off";      % Regularization type: off, on (automatic Matlab-based function)
 %START NEWTON'S METHOD   
 Results = []; 
 for i=1:steps

@@ -29,11 +29,10 @@ if create
             % Body.FiniteDiference = coder.typeof('a', [1, Inf], [false, true]);
             % Body.SolutionBase = coder.typeof('a', [1, Inf], [false, true]);
             % Body.Name = coder.typeof('a', [1, Inf], [false, true]);            
-            % Body.IntegrationType = coder.typeof('a', [1, Inf], [false, true]);
-            
+            % Body.IntegrationType = coder.typeof('a', [1, Inf], [false, true]);            
             % Body.BodyFolder = coder.typeof('a', [1, Inf], [false, true]);
             
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
             Body.CSName = coder.typeof('a', [1, Inf], [false, true]);
             Body.MaterialName = coder.typeof('a', [1, Inf], [false, true]);
             Body.const = coder.typeof(0, [1, Inf], [false, true]);  
@@ -55,7 +54,6 @@ if create
             Body.SurfaceXi.pointCS = coder.typeof(0, [Inf, 2], [true, false]);
             Body.IsoData = coder.typeof(0, [Inf, 4], [true, false]);
             Body.BodyFaces = coder.typeof(0, [Inf, 3], [true, false]);
-            % 
             Body.bc = coder.typeof(false, [1, Inf], [false, true]);
             Body.Fext = coder.typeof(0, [Inf, 1], [true, false]);
             Body.fextInd = coder.typeof(0, [1, Inf], [false, true]);
