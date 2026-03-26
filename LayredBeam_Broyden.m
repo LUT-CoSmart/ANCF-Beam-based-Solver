@@ -61,21 +61,21 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e10;
+ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
-% %####################### Solving ######################################## 
-steps = 60;  % sub-loading steps
+
+% ####################### Solving ######################################## 
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-Body1.Results = [];
-Body2.Results = [];
 
+Results2 = [];
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="cubic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -85,13 +85,14 @@ for i=1:steps
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
 
-   
+    bc = [Body1.bc Body2.bc];
     Fext = [Fext1; Fext2];
 
     for ii=1:imax
         tic;
-        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
-       
+        
+        [u_bc,deltaf,Gap] = Newton_cont2Body_Broyden(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
+
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);

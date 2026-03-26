@@ -3,6 +3,7 @@ format long
 addpath("MainFunctions");
 addpath("Postprocessing");
 addpath('MeshFunctions');
+addpath(genpath("Solvers"))
 Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
@@ -11,6 +12,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 Body = Geometry(Body,'Rectangular',"Standard", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon                                                       
                                                       % Integration points of generating line: Gauss, Lobatto      
 Body = Materials(Body,'Neo'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+
 % ########### Complicate geometry #########################################
 % Shift
 Body.Shift.X = 0;
@@ -28,14 +30,19 @@ Body.Rotation.Z = 0;
 % Twist
 Body.Twist.angle = 45; % in degrees
 Body.Twist.ro = 0;
+
 % ########## Create FE Model ##############################################
-ElementNumber = 4;
+ElementNumber = 2;
 Body = CreateFEM(Body,ElementNumber);
+
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
+
+%% TODO: rebuild CreateMex, it addresses the wrong folder
+Body.mex = false;
 % ########## Boundary Conditions ##########################################
 % Force 
 Force.Maginutude.X = 1e5;  % Elongation
@@ -55,20 +62,16 @@ Boundary.Position.Z = 0;
 Boundary.Type = "full"; % there are several types: full, reduced, positions, none
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
+
 % ########## Visualization of initial situation ###########################
 Results = [];  
 visualization(Body,Body.q0,'red',false);
-% % %####################### Solving ######################################## 
+
+% ####################### Solving ######################################## 
 steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-5);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";      % Regularization type: off, on (automatic Matlab-based function)
-
-%% TODO: Fix it for Matlab2025 
-% create=false;
-% CreateMex(create,Body);
-
 
 %START NEWTON'S METHOD   
 for i=1:steps
@@ -80,16 +83,7 @@ for i=1:steps
     for ii=1:imax    
         tic; 
           
-        [K,Fe] = InnerForce(Body);
-        %[K,Fe] = InnerForce_mex(Body);
-                       
-        K_bc = K(Body.bc,Body.bc);            % Eliminate linear constraints from stiffness matrix
-        ff =  Fe - Fext;
-
-        ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector
-        deltaf=ff_bc/norm(Fext(Body.bc));% Compute residual
-
-        u_bc = Regularization(K_bc,ff_bc,SolutionRegType);  % Compute displacements
+        [u_bc,deltaf] = Newton_full(Body,Fext);
 
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
@@ -102,16 +96,10 @@ for i=1:steps
 
     end           
 
-      
-
-    %Pick nodal displacements from result vector
-    xlocName = 'xloc' + Body.ElementType;
-    uf = Body.u(Body.fextInd); 
-
-    Results = [Results; Body.ElementNumber Body.TotalDofs uf'];
+    Body = SaveResults(Body,i, "last"); % options: "all", "last", each by (number) 
 end
 % POST PROCESSING ###############################################
 visDeformed = true;
 visInitial = true;
-PostProcessing(Body,Results,visDeformed,visInitial) 
+PostProcessing(Body,visDeformed,visInitial) 
 CleanTemp(Body, true)

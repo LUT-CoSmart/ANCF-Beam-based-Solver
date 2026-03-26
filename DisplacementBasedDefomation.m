@@ -39,7 +39,6 @@ Body = CreateBCDisplacement(Body, Displacement, Boundary); % Application of Diri
 titertot=0;  
 Re=1e-4;                   % Stopping criterion for residual
 imax=30;                   % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";  
 Results = [];
 bcInd = Body.bcInd; % 0Transformation of body DOF indentifiers to global system
 
@@ -63,7 +62,7 @@ for stepnumber=1:steps
     K_bc(sub2ind(size(K),bcInd,bcInd))=-1; %put unity on the main diagonal in the positions corresponding to Dirihlet BC                                       
 
     % Calculations      
-    u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
+    u_bc = Solving(K_bc,ff_bc); 
 
     Body.u = Body.u + u_bc(1:Body.TotalDofs);             
     Body.q = Body.q + u_bc(1:Body.TotalDofs);
@@ -79,7 +78,7 @@ for stepnumber=1:steps
         K_bc = K(Body.bc,Body.bc);
                                                     
         % Calculations
-        u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
+        u_bc = Solving(K_bc,ff_bc); 
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         
@@ -90,11 +89,12 @@ for stepnumber=1:steps
            break;  
         end 
     end
+
     uf = Body.u(Body.bcInd);
-    Results = [Results; Body.ElementNumber Body.TotalDofs uf(end-2:end)'];    
+    Body.Results = [Body.Results; Body.ElementNumber Body.TotalDofs uf(end-2:end)'];    
 end 
 % POST PROCESSING ###############################################
 visualization(Body,Body.q,'cyan',false);
 visualization(Body,Body.q0,'blue',false);
-PostProcessing(Body,Results,false,false) 
+PostProcessing(Body,false,false) 
 CleanTemp(Body, true)

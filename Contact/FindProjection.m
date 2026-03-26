@@ -1,53 +1,41 @@
 function Outcome = FindProjection(PointsToProject, isoData, Body)
 
         Outcome = [];
+        q = Body.q;
+        
 
-        faces = Body.BodyFaces;
-        faceElem = Body.BodyFacesElements;
-        SurfacePoints = Body.SurfacePoints;
-
-        %% TODO: This is true for beam elements only     
         % Findinding the closest node to a point 
         DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3); 
-        Nodes = reshape(Body.q(DofID), 3, []).'; % nodes positions, reorginized to NodeNumberx3 
+        Nodes = reshape(q(DofID), 3, []).'; % nodes positions, reorginized to NodeNumberx3 
         [~, Distance] = knnsearch(Nodes, PointsToProject, 'K', 1); % taking the closest one 
 
         % Checking the contact possibility 
-        % attributed to Contact body
+        fl = false; % initial contact possiblity, used later for function refactoring 
         cond = Distance < Body.NodeSphere;
         PointsToProject = PointsToProject(cond,:);           
         isoData = isoData(cond,:); 
-
-        fl = false; % flag, showing the contact possiblity, used later for function refuctoring 
-        
-        if any(cond)
-
-           fl = true; % contact distantly possible
+                
+        if any(cond) % contact distantly possible
+           fl = true; 
 
            % Getting element parameters
-           q = Body.q;
-           xloc = Body.xloc;           
-           Shape = Body.Shape;
-           ShapeXi = Body.ShapeXi;
-           ShapeEta = Body.ShapeEta;
-           ShapeZeta = Body.ShapeZeta;
+           faces = Body.BodyFaces;
+           faceElem = Body.BodyFacesElements;
+           SurfacePoints = Body.SurfacePoints;    
 
            %% TODO: decrease the set of points (PointsToProject) by choosing only those, 
            %% which are on the same side with Nodes:  dir = Point' - NodalPoint; if dot(dir,r-NodalPoint)>0. (??)
 
            [face_mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);           
-           % face_normals
            inputs.faces=faces;
            inputs.nodes=SurfacePoints;
            inputs.face_mean_nodes=face_mean_nodes;
            inputs.face_normals= -face_normals; % change normals for !!!!distance calculation!!! to outward
-                                               % !!!! actual normals are still inwards  
+                                               % the actual normals are still inwards  
 
            % [distances,~,outside,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
            [distances,~,outside,projected_faces]=fastPoint2TriMesh_opt(inputs,PointsToProject); 
            
-           %% TODO: This is true for beam elements only 
-           % attributes of the target body (Body here)
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
            idx = faceElem(projected_faces);  % find the elements for respected surfaces  
@@ -59,6 +47,11 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         Inside(Inside) = abs(distances(Inside)) > tol;    
         
         if (fl) && any(Inside) % choosing points inside, due to the normal identification procedure distances>0  
+            xloc = Body.xloc;           
+            Shape = Body.Shape;
+            ShapeXi = Body.ShapeXi;
+            ShapeEta = Body.ShapeEta;
+            ShapeZeta = Body.ShapeZeta;
 
             distancesInside = distances(Inside);
             idxInside = idx(Inside);

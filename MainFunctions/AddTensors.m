@@ -2,7 +2,6 @@ function Body = AddTensors(Body)
     
     path = 'TensorDerivations\' + Body.ElementType + '\' ;
     
-
     % Creation of temporal folder   
     TempRoot = fullfile(pwd, 'Temp');
     % Create Temp root if missing
@@ -132,4 +131,11 @@ function Body = AddTensors(Body)
     Body.ShapeEta =  @(xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
     Body.ShapeZeta =  @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
     Body.Sigma_n = @(F_, N) N'*( (1/det(F_) )* F_ * PiolaSecondTensor(F_, Body.const) * F_' )*N;  % N' * Cauchy Stresses * N;
+    
 
+    % if Body.mex 
+    %    CreateMex(create,Body);
+    %    InnerForce = @(Body) InnerForce_mex(Body);
+    % end
+
+    Body.Results = [];
