@@ -35,12 +35,15 @@ for i=1:steps
     Body = SubLoading(Body, i, steps, "linear"); 
     
     Re=10^(-4);                   % Stopping criterion for residual
-    imax=20;                      % Maximum number of iterations for Newton's method 
+    imax=800;                     % Maximum number of iterations for Newton's method 
+                                  % it is taken large for Krylov-based (CG) algorithm  
     Fext = Body.Fext;
     for ii=1:imax    
         
         tic; 
-        [u_bc,deltaf] = Newton_full(Body,Fext);              
+        % [u_bc,deltaf] = Newton_full(Body,Fext);  
+        % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
+        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions

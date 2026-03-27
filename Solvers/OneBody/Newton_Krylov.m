@@ -1,17 +1,22 @@
-function [u_bc,deltaf] = Newton_Krylov_CG(Body,Fext,ii,Re)
+function [u_bc,deltaf] = Newton_Krylov(ii,Body,Fext,Re,name)
     % Taken from (7):
     % J. Hales, S. Novascone, R. L. Williamson, D. Gaston, M. Tonks (2012). 
     % Solving Nonlinear Solid Mechanics Problems with the Jacobian-Free Newton Krylov Method.
     % Computer Modeling in Engineering and Sciences. 84. 123. 
     
-    persistent v r s Fe;
+    if nargin < 5
+        name = "JF";
+        warning('chosen JF algorithm');  
+    end
+
+    persistent v r s Fe J;
            
     q_backup = Body.q;
     u_backup = Body.u;
     bc = Body.bc; 
     
     if ii == 1
-        [~,Fe] = InnerForce(Body);
+        [J,Fe] = InnerForce(Body);
         r =  -(Fe - Fext);       % assembley    
         s = zeros(size(r));
         v = r;
@@ -26,23 +31,31 @@ function [u_bc,deltaf] = Newton_Krylov_CG(Body,Fext,ii,Re)
         r_bc = r(bc);
         v(~bc) = 0;
         v_bc = v(bc);
+        
+        switch name 
 
-        Body.q = q_backup + h*v;
-        Body.u = u_backup + h*v;
+            case "JF"
+                g = J*v;
+    
+            case "CG"
+                Body.q = q_backup + h*v;
+                Body.u = u_backup + h*v;
+    
+                [~,Fev] = InnerForce(Body);
+                g = (Fev - Fe) / h;
+    
+                Body.q = q_backup; % restore
+                Body.u = u_backup; % restore
 
-        [~,Fev] = InnerForce(Body); 
+            otherwise
+                warning(' not correct Newton-Krylov algorithm, switched to JF');    
+        end
 
-        Body.q = q_backup; % restore
-        Body.u = u_backup; % restore
-
-        g = (Fev - Fe) / h;
         g_bc= g(bc);
         
         alpha = r_bc' * r_bc/(v_bc'*g_bc);
         s = s + alpha * v;
         r = r - alpha * g; % update r
-
-        % u_bc = s(bc);
 
         beta = r(bc)' * r(bc) / (r_bc' *r_bc);
         v = r + beta * v;

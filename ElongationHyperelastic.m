@@ -26,7 +26,7 @@ Results = [];
 visualization(Body,Body.q0,'cyan',false); % initial situation
 
 % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 200;  % sub-loading steps, a lot for non full Newton-based algorithms
 titertot=0; 
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
@@ -38,28 +38,29 @@ for i=1:steps
     Body = SubLoading(Body, i, steps, "linear"); 
 
     Re=10^(-4);                   % Stopping criterion for residual
-    imax=20;                      % Maximum number of iterations for Newton's method 
+    imax=800;                     % Maximum number of iterations for Newton's method 
     Fext = Body.Fext;
     for ii=1:imax    
         tic; 
         
-        [u_bc,deltaf] = Newton_full(Body,Fext);
-        % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
-
-        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
-            break;  
-        end                
-
+        % [u_bc,deltaf] = Newton_full(Body,Fext);
+        [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
+        % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "CG"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
 
         titer=toc;
-        titertot=titertot+titer;   
+        titertot=titertot+titer;
 
+        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
+            break;  
+        end                
     end           
 
     Body = SaveResults(Body,i,"last");
 end
+
 % POST PROCESSING ###############################################
 visDeformed = true;
 visInitial = true;
