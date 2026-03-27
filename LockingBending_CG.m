@@ -37,22 +37,26 @@ for i=1:steps
     imax=800;                      % Maximum number of iterations for Newton's method 
     Fext = Body.Fext;
    
-    tic;          
-    
-    [u_bc,deltaf,ii] = Newton_Krylov_CG(Body,Fext,imax, Re);                                
-    
-    if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
-      % no break due to inner cycle in the Newton_Krylov_CG
-    end    
+    tic; 
+    for ii = 1:imax  
 
+        [u_bc,deltaf] = Newton_Krylov_CG(Body,Fext, ii, Re);  
 
-    Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
-    Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
-    titer=toc;
-    titertot=titertot+titer;   
+        Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement
+        Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
+        
+        titer=toc;
+        titertot=titertot+titer;
+
+        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
+           break
+        end           
+    end
 
     Body = SaveResults(Body,i, "all"); % options: "all", "last", each by (number) 
 end
+
+
 
 % POST PROCESSING ###############################################
 visDeformed = true;

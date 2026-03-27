@@ -84,6 +84,7 @@ for i=1:steps
 
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
+        
         titer=toc;
         titertot=titertot+titer;   
 

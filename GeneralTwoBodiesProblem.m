@@ -1,10 +1,8 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions")
-addpath("MeshFunctions")
+addpath("MainFunctions", "MeshFunctions", "InnerForceFunctions","Postprocessing")
+addpath(genpath("Solvers"))
 addpath(genpath("Contact"))
-addpath("Postprocessing");
-
 
 Body1.Name = "Body1";
 Body2.Name = "Body2";
@@ -94,52 +92,34 @@ steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-Results1 = [];
-Results2 = [];
+Body1.Results = [];
+Body2.Results = [];
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
+LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 %START NEWTON'S METHOD   
 for i=1:steps
 
-    Body1 = SubLoading(Body1, i, steps, "quadratic"); 
-    Body2 = SubLoading(Body2, i, steps, "quadratic"); 
+    Body1 = SubLoading(Body1, i, steps, LoadType); 
+    Body2 = SubLoading(Body2, i, steps, LoadType); 
 
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
 
-    bc = [Body1.bc Body2.bc];
+    Fext = [Fext1; Fext2];
 
     for ii=1:imax
         tic;
-
-        % Contact forces
-        [Kc,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference);
-
-        [Ke1,Fe1] = InnerForce(Body1);
-        [Ke2,Fe2] = InnerForce(Body2);
-
-        % Assemblance
-        Fe = [Fe1; Fe2];
-        Fext = [Fext1; Fext2];
-        Ke = [Ke1 zeros(Body1.TotalDofs,Body2.TotalDofs);
-              zeros(Body2.TotalDofs,Body1.TotalDofs) Ke2];
-
-        K = Kc + Ke;
-        ff =  Fe - Fext + Fc;
-
-        % Calculations
-        K_bc = K(bc,bc); 
-        ff_bc = ff(bc);
-        deltaf=ff_bc/norm(Fext(bc)); 
-
-        u_bc = Solving(K_bc,ff_bc); 
+        
+        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
 
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
-        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
+
+        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);        
         Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:end);
 
         titer=toc;
@@ -151,23 +131,22 @@ for i=1:steps
 
     end
 
-    %Pick nodal displacements from result vector
-    xlocName1 = 'xloc' + Body1.ElementType;
-    uf1 = Body1.u(Body1.fextInd);
-    Results1 = [Results1; Body1.ElementNumber Body1.TotalDofs uf1'];
+   Body1 = SaveResults(Body1,i,"last"); % options: "all", "last", each by (number) 
+   Body2 = SaveResults(Body2,i,"last");
 
-    xlocName2 = 'xloc' + Body2.ElementType;
-    uf2 = Body2.u(Body2.fextInd); 
-
-    Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
 end    
 
 % POST PROCESSING ###############################################
 hold on
+axis equal 
 xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
 ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
 visualization(Body2,Body2.q,'none',true);
+
+PostProcessing(Body1,false,false) 
+PostProcessing(Body2,false,false) 
+
 CleanTemp(Body1, true)
 CleanTemp(Body2, true)

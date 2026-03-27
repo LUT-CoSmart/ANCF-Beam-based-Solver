@@ -4,7 +4,7 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          Gap= NaN;
      end   
         
-      if  all(abs(deltaf) < Re) || (norm(u_bc)<Re^2) 
+      if  all(abs(deltaf) < Re)  %|| (norm(u_bc)<Re^2) 
 
          if ~isnan(Gap)
              fprintf('Convergence: %10.4f, Displacements norm: %10.4f, Total gap: %10.7f\n', norm(abs(deltaf)), norm(u_bc), Gap);            

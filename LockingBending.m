@@ -42,15 +42,15 @@ for i=1:steps
         tic; 
         [u_bc,deltaf] = Newton_full(Body,Fext);              
         
-        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
-            break;  
-        end 
-        
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         titer=toc;
         titertot=titertot+titer;   
 
+        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
+            break;  
+        end 
+       
     end           
 
     Body = SaveResults(Body,i, "all"); % options: "all", "last", each by (number) 

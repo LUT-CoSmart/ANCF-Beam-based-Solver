@@ -40,7 +40,6 @@ for i=1:steps
     Re=10^(-4);                   % Stopping criterion for residual
     imax=20;                      % Maximum number of iterations for Newton's method 
     Fext = Body.Fext;
-    state = []; 
     for ii=1:imax    
         tic; 
         
