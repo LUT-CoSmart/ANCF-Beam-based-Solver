@@ -12,8 +12,7 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
     
     if ContactType ~= "None" 
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
-        addpath("Contact\ContactType\");
-        
+                
         if ContactType == "Penalty"
            ContactType = @Penalty;
         elseif ContactType == "NitscheLin"

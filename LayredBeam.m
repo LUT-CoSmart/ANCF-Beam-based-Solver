@@ -24,9 +24,9 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 1;
+ElementNumber1 = 4;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 1;
+ElementNumber2 = 4;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -35,7 +35,7 @@ Body1.SolutionBase = "Position"; % Solution-based calculation: Position, Displac
 Body1.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body1 = AddTensors(Body1);
 
-Body2.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body2.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
 Body2.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body2.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body2 = AddTensors(Body2);
@@ -61,21 +61,21 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
-ContactVariable = 1e10;
+ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 % %####################### Solving ######################################## 
-steps = 60;  % sub-loading steps
+steps = 30;  % sub-loading steps
 titertot=0;  
-Re=10^(-4);                   % Stopping criterion for residual
-imax=20;                      % Maximum number of iterations for Newton's method 
+Re=10^(-3);                   % Stopping criterion for residual
+imax= 50;                      % Maximum number of iterations for Newton's method 
 Body1.Results = [];
 Body2.Results = [];
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="cubic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -84,14 +84,15 @@ for i=1:steps
 
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
-
    
     Fext = [Fext1; Fext2];
 
     for ii=1:imax
         tic;
-        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
-       
+        % [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
+        [u_bc,deltaf,Gap] = Newton_cont2Body_Broyden(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+        % [u_bc,deltaf,Gap] = Newton_cont2Body_Krylov(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext, Re, "CG");
+        
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
