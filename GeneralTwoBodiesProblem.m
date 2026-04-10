@@ -92,8 +92,6 @@ steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
-Body1.Results = [];
-Body2.Results = [];
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions

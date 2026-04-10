@@ -63,8 +63,7 @@ Boundary.Type = "full"; % there are several types: full, reduced, positions, non
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
-% ########## Visualization of initial situation ###########################
-Results = [];  
+% ########## Visualization of initial situation ########################### 
 visualization(Body,Body.q0,'red',false);
 
 % ####################### Solving ######################################## 

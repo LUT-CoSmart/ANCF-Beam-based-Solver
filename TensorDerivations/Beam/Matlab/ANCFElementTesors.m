@@ -1,14 +1,16 @@
 clc, clear, close all;
 Call_shapeFunctions = false;   % To create AceGen-generated functions, it might be necessary to demonstrate shape functinos 
 write_files = true;            % Do we need to write any file?
-disp_based = false;            % What field the tensors are based on: displacement (true), position (false)
-small_deformation = false;     % Appoximation theory: infinite small (true), finite (false)
+disp_based = true;            % What field the tensors are based on: displacement (true), position (false)
+small_deformation = true;     % Appoximation theory: infinite small (true), finite (false)
+
 % ################## Element type & related numbers #######################
-Element=3243;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Element=3363;                                 % Available: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
 ElementName = num2str(Element);               % using 'abcd' classification, see in https://doi.org/10.1007/s11071-022-07518-z
 Nodes = str2double(ElementName(2));           % Number of nodes            
 Dim = str2double(ElementName(end));           % Problem dimensionality     
 VecAtNode = str2double(ElementName(3:end-1)); % Vector functions per node  
+
 % ################## Symbolic variables ###################################
 syms x y z real;                              % Physical coordinates       
 syms xi eta zeta real;                        % Binormalized coordinates   
@@ -22,6 +24,7 @@ phi = sym('phi', [Nodes 1], 'real');          % Twist vector of the element's sl
 a0 = sym('a0', [Dim 1],'real');               % Fibres' direction vector
 Phi = sym('Phi', [Nodes 1], 'real');          % Pre-twist of fiber vector around x axis of element's slopes 
 F_brick_inv = [2/L 0 0; 0 2/H 0; 0 0 2/W];    % Gradient of brick (dF_00/d_xi)^-1 used for fibers adjustments
+
 % ################## Basic functions for element ########################## 
 BasicFunctions;
 switch Element % Find the corresponding basis set to the element
@@ -35,6 +38,7 @@ switch Element % Find the corresponding basis set to the element
         error('Unsupported element type!');        
 end
 ShapeFunctions;
+
 % ################## Element's initial cofiguration #######################
 q0 = [];   % Element's DoF vector (all Dofs) in the initial configuration
 q0f = []; % Element's DoF vector (all Dofs) in the initial fibers' configuration for the length reshaping
@@ -63,7 +67,7 @@ for i=1:Nodes
     q0posAndrx = [q0posAndrx; q0pos(Dim*(i-1)+1:Dim*(i-1)+Dim);  drdx_curve];    
 end
 
-% % ################## Position vectors & tensors ###########################
+% ################## Position vectors & tensors ###########################
 I = eye(3);                                          % identity tensor
 r0 = Nm_xi*q0;                                       % Position vector in the initial configuration
 F0 = jacobian(r0,xi_vec);
@@ -82,10 +86,13 @@ if disp_based == true
 else
     r = Nm_xi*q;                                     % Position vector in the actual configuration
     dir_name = "Position/" + ElementName; 
-    F = jacobian(r,xi_vec)*F0^(-1);                  % deformation gradient via the position field
+    F = jacobian(r,xi_vec)*F0^(-1);                  % deformation gradient via the position field    
     E = 0.5*( F'*F - I );                            % Green strain tensor based on position field    
     variable = q;
 end
+
+F_xi = jacobian(reshape(F,9,1),xi_vec);
+
 for ii=1:Dim
     for jj=1:Dim
         for kk=1:Dim*Nodes*VecAtNode   
@@ -107,7 +114,7 @@ a0_fib=a0_fib/norm(a0_fib);            % Normalization, such as the length can c
 
 % ################## Saving functions #####################################
 if write_files == true
-               
+
     dir_name_2 = "ShapeFunctions/" + ElementName;
 
     if ~isfolder(dir_name_2)
@@ -127,4 +134,5 @@ if write_files == true
     matlabFunction(a0_fib, 'file', fullfile(dir_name,'a0_fib'), 'vars', {a0,q0posAndrx,phi,Phi,L,H,W,xi,eta,zeta});
     matlabFunction(F, 'file', fullfile(dir_name,'F'), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
     matlabFunction(dEde, 'file', fullfile(dir_name,'dEde'), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
+    matlabFunction(F_xi, 'file', fullfile(dir_name,'F_xi'), 'vars', {q,u,q0posAndrx,phi,L,H,W,xi,eta,zeta});
 end

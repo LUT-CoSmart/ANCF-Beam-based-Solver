@@ -26,7 +26,6 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
 % ########## Visualization of initial situation ###########################
-Results = [];  
 visualization(Body,Body.q0,'cyan',false); % initial situation
 
 % ####################### Solving ########################################

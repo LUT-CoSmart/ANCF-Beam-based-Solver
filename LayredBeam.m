@@ -24,9 +24,9 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 4;
+ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 4;
+ElementNumber2 = 1;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -60,21 +60,20 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
-ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin"...
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
 ContactVariable = 1e9;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 % %####################### Solving ######################################## 
-steps = 30;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
-imax= 50;                      % Maximum number of iterations for Newton's method 
-Body1.Results = [];
-Body2.Results = [];
+imax= 30;                     % Maximum number of iterations for Newton's method 
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
+alpha = 1;
 LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 %START NEWTON'S METHOD   
 for i=1:steps
@@ -89,16 +88,16 @@ for i=1:steps
 
     for ii=1:imax
         tic;
-        % [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
-        [u_bc,deltaf,Gap] = Newton_cont2Body_Broyden(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
+        % [u_bc,deltaf,Gap] = Newton_cont2Body_Broyden(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
         % [u_bc,deltaf,Gap] = Newton_cont2Body_Krylov(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext, Re, "CG");
         
         % Separation
-        Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
-        Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
+        Body1.u(Body1.bc) = Body1.u(Body1.bc) + alpha * u_bc(1:Body1.ndof);
+        Body1.q(Body1.bc) = Body1.q(Body1.bc) + alpha * u_bc(1:Body1.ndof);
 
-        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);        
-        Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:end);
+        Body2.u(Body2.bc) = Body2.u(Body2.bc) + alpha * u_bc(Body1.ndof + 1:end);        
+        Body2.q(Body2.bc) = Body2.q(Body2.bc) + alpha * u_bc(Body1.ndof + 1:end);
 
         titer=toc;
         titertot=titertot+titer;
