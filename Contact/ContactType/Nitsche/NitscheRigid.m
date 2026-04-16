@@ -1,4 +1,4 @@
-function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = NitscheLin(penalty, ContactBody,TargetBody, Xi)
+function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = NitscheRigid(penalty, ContactBody,TargetBody, Xi)
 
         gap = abs(Xi(5)); 
         
@@ -21,7 +21,7 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         xi_targ = Xi(1);
         eta_targ = Xi(2);
         zeta_targ = Xi(3);
-        Xi_targ = Xi(1:4);
+        Xi_targ = Xi(1:3);
 
         Element_targ = Xi(4);  % element  
         DOFs_targ =  TargetBody.xloc(Element_targ,:);     % associated DOFs   
@@ -32,7 +32,8 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         phi_targ=TargetBody.phim(Element_targ,:)';
         q0PosDofs_targ = q0_targ(TargetBody.PosDofs);
         F_targ = TargetBody.F(q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);        % Deformation gradient
-        Sigma_targ_n = TargetBody.Sigma_n(F_targ, Normal_targ); 
+        Sigma_targ_nn = TargetBody.Sigma_nn(F_targ, Normal_targ); 
+
 
         q_cont = ContactBody.q(DOFs_cont);
         u_cont = ContactBody.u(DOFs_cont);
@@ -40,15 +41,25 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         phi_cont=ContactBody.phim(Element_cont,:)';
         q0PosDofs_cont = q0_cont(ContactBody.PosDofs);
         F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);        % Deformation gradient
-        Sigma_cont_n = ContactBody.Sigma_n(F_cont, Normal_cont); 
-                                     
-        % Normal force difference 
-        Sigma_n = Sigma_cont_n - Sigma_targ_n;    
-        Gap_power = gap;       
-        lambda = Gap_power * norm(Sigma_n);
-                   
-        d_lambda_targ = norm(Sigma_n);
-        d_lambda_cont = norm(Sigma_n); 
+        Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_cont); 
 
-        Ftarg_loc = (penalty * gap + lambda + Gap_power * d_lambda_targ) * Normal_targ;
-        Fcont_loc = (penalty * gap + lambda + Gap_power * d_lambda_cont) * Normal_cont; 
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q0_targ);
+        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q0_cont);
+
+        Sigma_xi_targ = TargetBody.Sigma_xi;
+        Sigma_xi_cont = ContactBody.Sigma_xi;
+        nabla_Sigma_nn_targ = Sigma_nnFD(Normal_targ,Sigma_xi_targ,nabla_r_xi_targ,q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
+        nabla_Sigma_nn_cont = Sigma_nnFD(Normal_cont,Sigma_xi_cont,nabla_r_xi_cont,q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
+ 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+        difference = Sigma_cont_nn - Sigma_targ_nn; % Normal force difference
+
+        lambda = gap * abs(difference); 
+        lambda_2_targ =-sign(difference)* gap^2 * nabla_Sigma_nn_targ;
+        lambda_2_cont = sign(difference)* gap^2 * nabla_Sigma_nn_cont;
+
+        Ftarg_loc = (penalty * gap + 2*lambda) * Normal_targ + lambda_2_targ;
+        Fcont_loc = (penalty * gap + 2*lambda) * Normal_cont + lambda_2_cont; 

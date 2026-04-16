@@ -17,6 +17,11 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
            ContactType = @Penalty;
         elseif ContactType == "NitscheLin"
            ContactType = @NitscheLin; 
+        elseif ContactType == "NitscheRigid"
+           ContactType = @NitscheRigid; 
+        elseif ContactType == "NitscheFull"
+           ContactType = @NitscheFull; 
+
         else
            error('****** Contact type is not implemneted ******')
         end

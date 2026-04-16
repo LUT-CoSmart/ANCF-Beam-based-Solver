@@ -30,9 +30,14 @@ function [Fcont, Ftarg, Gap, GapMax] = ContactSlaveMaster(ContactBody,TargetBody
                       GapMax.gap = gap;
                       GapMax.area = Outcome(i,13); 
                  end   
-                    
-                 Fcont(DOFs_cont) = Fcont(DOFs_cont) + Shape_cont(Xi_cont(1),Xi_cont(2),Xi_cont(3))'*Fcont_loc;
-                 Ftarg(DOFs_targ) = Ftarg(DOFs_targ) + Shape_targ(Xi_targ(1),Xi_targ(2),Xi_targ(3))'*Ftarg_loc; 
+                 
+                 % cross weighting                 
+                 total_weight = norm(Fcont_loc) + norm(Ftarg_loc); 
+                 weight_targ = norm(Fcont_loc) / total_weight;
+                 weight_cont = norm(Ftarg_loc) / total_weight;
+                 
+                 Fcont(DOFs_cont) = Fcont(DOFs_cont) + Shape_cont(Xi_cont(1),Xi_cont(2),Xi_cont(3))'*Fcont_loc * weight_cont;
+                 Ftarg(DOFs_targ) = Ftarg(DOFs_targ) + Shape_targ(Xi_targ(1),Xi_targ(2),Xi_targ(3))'*Ftarg_loc * weight_targ; 
 
              end                      
           end

@@ -42,11 +42,13 @@ for i=1:steps
         
         tic; 
         % [u_bc,deltaf] = Newton_full(Body,Fext);  
-        % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
-        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
+        % [u_bc,deltaf] = Newton_BFGS(ii, Body, Fext)
+        % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
+        
         titer=toc;
         titertot=titertot+titer;   
 
@@ -63,4 +65,4 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,visDeformed,visInitial) 
-CleanTemp(Body, true)
+% CleanTemp(Body, true)

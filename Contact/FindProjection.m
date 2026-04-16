@@ -14,7 +14,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         cond = Distance < Body.NodeSphere;
         PointsToProject = PointsToProject(cond,:);           
         isoData = isoData(cond,:); 
-                
+
         if any(cond) % contact distantly possible
            fl = true; 
 
@@ -43,16 +43,17 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         end 
           
         tol = sqrt(eps);
-        Inside = ~outside;                               
-        Inside(Inside) = abs(distances(Inside)) > tol;    
         
+        if fl
+            Inside = ~outside;                               
+            Inside(Inside) = abs(distances(Inside)) > tol;    
+        else
+            
+        end    
         if (fl) && any(Inside) % choosing points inside, due to the normal identification procedure distances>0  
             xloc = Body.xloc;           
             Shape = Body.Shape;
-            ShapeXi = Body.ShapeXi;
-            ShapeEta = Body.ShapeEta;
-            ShapeZeta = Body.ShapeZeta;
-
+            nabla_r_xi = Body.nabla_r_xi;
             distancesInside = distances(Inside);
             idxInside = idx(Inside);
 
@@ -70,7 +71,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
         
                 qk=q(xloc(idxInside(i),:)); % current element number
           
-                xi_eta_zeta_result = FindIsoCoord(Shape,ShapeXi,ShapeEta,ShapeZeta,qk, PointInside(i,:)); % it will be used for Nitsche
+                xi_eta_zeta_result = FindIsoCoord(Shape,nabla_r_xi,qk,PointInside(i,:)); % it will be used for Nitsche
 
                 % patch area where the point is projected to (to calculate contact stresses?)
                 A =  SurfacePoints(Face(i,1),:)';

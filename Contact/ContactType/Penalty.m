@@ -18,4 +18,4 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = P
         Ftarg_loc =  penalty * gap * Normal_targ;
     
         Xi_cont = Xi(9:11);
-        Xi_targ = Xi(1:4);
+        Xi_targ = Xi(1:3);

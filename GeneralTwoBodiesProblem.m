@@ -71,12 +71,15 @@ Boundary2.Position = [];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
-ContactFiniteDiference = "Matlab";  % Options: "Matlab", "Matlab_automatic"
-ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche"...
+ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
+% Nitshe affected by Rotation field
+ContactType = "Penalty"; % Options: "None", "Penalty" (
 ContactVariable = 1e10;
 Body1.ContactRole = "master"; % Options: "master", "slave"
 Body2.ContactRole = "slave";
 
+Body1 = AddContactFunciton(Body1,ContactType);
+Body2 = AddContactFunciton(Body2,ContactType);
 % ########## Visualization of initial situation ###########################
 % figure;
 % hold on
@@ -111,8 +114,9 @@ for i=1:steps
     for ii=1:imax
         tic;
         
-        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
-
+        % [u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
+        [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+        
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);

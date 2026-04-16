@@ -24,9 +24,9 @@ Body1.Shift.Y = Body1.Length.Y;
 Body1.Shift.Z = 0;
 % ########## Create FE Models #############################################
 
-ElementNumber1 = 1;
+ElementNumber1 = 4;
 Body1 = CreateFEM(Body1,ElementNumber1);
-ElementNumber2 = 1;
+ElementNumber2 = 4;
 Body2 = CreateFEM(Body2,ElementNumber2);
 
 % ########## Calculation adjustments ######################################
@@ -43,7 +43,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -62.5*10^7;  
+Force1.Maginutude.Y = -62.5*10^7;
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -60,12 +60,16 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
-ContactVariable = 1e9;
+% TODO: rotation affects Nitsche
+ContactType = "NitscheFull"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
+ContactVariable = 1e7;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
-% %####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+
+Body1 = AddContactFunciton(Body1,ContactType);
+Body2 = AddContactFunciton(Body2,ContactType);
+% ####################### Solving ######################################## 
+steps = 30;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
 imax= 30;                     % Maximum number of iterations for Newton's method 
@@ -73,8 +77,7 @@ imax= 30;                     % Maximum number of iterations for Newton's method
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-alpha = 1;
-LoadType ="linear"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
+LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", "logarithmic"
 %START NEWTON'S METHOD   
 for i=1:steps
     
@@ -83,21 +86,21 @@ for i=1:steps
 
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
-   
+
     Fext = [Fext1; Fext2];
 
     for ii=1:imax
         tic;
-        [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
-        % [u_bc,deltaf,Gap] = Newton_cont2Body_Broyden(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
-        % [u_bc,deltaf,Gap] = Newton_cont2Body_Krylov(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext, Re, "CG");
-        
-        % Separation
-        Body1.u(Body1.bc) = Body1.u(Body1.bc) + alpha * u_bc(1:Body1.ndof);
-        Body1.q(Body1.bc) = Body1.q(Body1.bc) + alpha * u_bc(1:Body1.ndof);
+        % [u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
+        [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+        % [u_bc,deltaf,Gap] = Newton_Krylov_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext, Re, "CG");
 
-        Body2.u(Body2.bc) = Body2.u(Body2.bc) + alpha * u_bc(Body1.ndof + 1:end);        
-        Body2.q(Body2.bc) = Body2.q(Body2.bc) + alpha * u_bc(Body1.ndof + 1:end);
+        % Separation
+        Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
+        Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);
+
+        Body2.u(Body2.bc) = Body2.u(Body2.bc) + u_bc(Body1.ndof + 1:end);        
+        Body2.q(Body2.bc) = Body2.q(Body2.bc) + u_bc(Body1.ndof + 1:end);
 
         titer=toc;
         titertot=titertot+titer;
