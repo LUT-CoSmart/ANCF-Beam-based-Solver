@@ -45,8 +45,8 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q0_targ);
-        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q0_cont);
+        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
+        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
 
         Sigma_xi_targ = TargetBody.Sigma_xi;
         Sigma_xi_cont = ContactBody.Sigma_xi;

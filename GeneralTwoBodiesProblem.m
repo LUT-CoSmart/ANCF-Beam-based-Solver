@@ -78,8 +78,6 @@ ContactVariable = 1e10;
 Body1.ContactRole = "master"; % Options: "master", "slave"
 Body2.ContactRole = "slave";
 
-Body1 = AddContactFunciton(Body1,ContactType);
-Body2 = AddContactFunciton(Body2,ContactType);
 % ########## Visualization of initial situation ###########################
 % figure;
 % hold on

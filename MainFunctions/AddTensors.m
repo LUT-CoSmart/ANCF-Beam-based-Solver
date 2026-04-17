@@ -127,11 +127,21 @@ function Body = AddTensors(Body)
     H = Body.Length.Y;
     
     Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
+    Body.F = @(q,u,q0_PosDofs,phi,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
+    Body.nabla_r_xi = @(xi,eta,zeta,q) [Shape_xi_(L,H,W,xi,eta,zeta)*q Shape_eta_(L,H,W,xi,eta,zeta)*q Shape_zeta_(L,H,W,xi,eta,zeta)*q];    
     
+    Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
+    
+    % Sigma = @(F_) (1/det(F_) )* F_ * PiolaSecondTensor(F_, Body.const) * F_'; %  Cauchy Stresses 
+    Sigma = @(F_) PiolaSecondTensor(F_, Body.const); 
+
+    Body.Sigma_nn = @(F_, N) N'* Sigma(F_) *N;    
+    Body.Sigma_n = @(F_, N) Sigma(F_) * N;        
+    Body.Sigma_xi = @(q,u,q0_PosDofs,phi,xi,eta,zeta) Sigma( F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) );
+   
     % if Body.mex 
     %    CreateMex(create,Body);
     %    InnerForce = @(Body) InnerForce_mex(Body);
     % end
-
 
     Body.Results = [];

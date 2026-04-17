@@ -11,7 +11,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 2;
 Body = CreateFEM(Body,ElementNumber);
 
 % % ########## Calculation adjustments ######################################
@@ -20,10 +20,6 @@ Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Disp
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 
 Body = AddTensors(Body);
-
-% ########## Visualization of initial situation ##########################
-Results = [];  
-visualization(Body,Body.q0,'cyan',false); % initial situation
 
 % %####################### Solving ######################################## 
 steps = 100;  % sub-loading steps, a lot for non full Newton-based algorithms

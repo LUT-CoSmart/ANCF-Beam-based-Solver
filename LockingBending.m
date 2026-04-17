@@ -15,7 +15,7 @@ Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type 
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 
 % ########## Create FE Model ##############################################
-ElementNumber = 4;
+ElementNumber = 16;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################

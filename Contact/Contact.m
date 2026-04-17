@@ -15,10 +15,13 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
                 
         if ContactType == "Penalty"
            ContactType = @Penalty;
+           
         elseif ContactType == "NitscheLin"
            ContactType = @NitscheLin; 
+
         elseif ContactType == "NitscheRigid"
            ContactType = @NitscheRigid; 
+
         elseif ContactType == "NitscheFull"
            ContactType = @NitscheFull; 
 

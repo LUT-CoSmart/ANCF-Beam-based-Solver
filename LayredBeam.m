@@ -43,7 +43,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -62.5*10^7;
+Force1.Maginutude.Y = -62.5*10^7 * 0.5;
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -61,13 +61,11 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 % TODO: rotation affects Nitsche
-ContactType = "NitscheFull"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
-ContactVariable = 1e7;
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
+ContactVariable = 1e8;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
-Body1 = AddContactFunciton(Body1,ContactType);
-Body2 = AddContactFunciton(Body2,ContactType);
 % ####################### Solving ######################################## 
 steps = 30;  % sub-loading steps
 titertot=0;  

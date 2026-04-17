@@ -43,10 +43,9 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);        % Deformation gradient
         Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_cont); 
 
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q0_targ);
-        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q0_cont);
+        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
+        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
 
         Sigma_xi_targ = TargetBody.Sigma_xi;
         Sigma_xi_cont = ContactBody.Sigma_xi;
