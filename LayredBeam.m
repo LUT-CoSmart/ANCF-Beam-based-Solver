@@ -1,9 +1,9 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions", "MeshFunctions", "InnerForceFunctions","Postprocessing")
-addpath(genpath("Solvers"))
+addpath("MeshFunctions", "InnerForceFunctions","ReportingFunctions")
 addpath(genpath("Contact"))
-
+addpath(genpath("Solvers"))
+addpath(genpath("MainFunctions"))
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 % ########### Problem data ################################################
@@ -61,7 +61,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 % TODO: rotation affects Nitsche
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
+ContactType = "NitscheRigid"; % Options: "None", "Penalty", "NitscheLin", "NitscheRigid", "NitscheFull" 
 ContactVariable = 1e8;
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
