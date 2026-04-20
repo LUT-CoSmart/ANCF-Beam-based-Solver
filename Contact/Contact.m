@@ -1,4 +1,4 @@
-function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,CalculateStiffness)
+function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactTypeName,ContactVariable,ContactFiniteDiference,CalculateStiffness)
     
     if nargin < 6 % some methods don't need to calculate stiffness matrix
         CalculateStiffness = true;
@@ -10,20 +10,14 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactType,ContactVariable,Co
     GapMax.gap = 0;
     GapMax.area = NaN;     
     
-    if ContactType ~= "None" 
+    if ContactTypeName ~= "None" 
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
                 
-        if ContactType == "Penalty"
+        if ContactTypeName == "Penalty"
            ContactType = @Penalty;
-           
-        elseif ContactType == "NitscheLin"
-           ContactType = @NitscheLin; 
-
-        elseif ContactType == "NitscheRigid"
-           ContactType = @NitscheRigid; 
-
-        elseif ContactType == "NitscheFull"
-           ContactType = @NitscheFull; 
+                   
+        elseif contains(ContactTypeName, "Nitsche")
+             ContactType = @(varargin)Nitsche(ContactTypeName,varargin{:});
 
         else
            error('****** Contact type is not implemneted ******')

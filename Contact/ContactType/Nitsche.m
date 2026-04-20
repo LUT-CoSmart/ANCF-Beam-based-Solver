@@ -1,4 +1,4 @@
-function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = NitscheFull(penalty, ContactBody,TargetBody, Xi)
+function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = Nitsche(ContactType,penalty, ContactBody,TargetBody, Xi)
 
         gap = abs(Xi(5)); 
         
@@ -43,33 +43,49 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);        % Deformation gradient
         Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_cont); 
 
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
-        nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
-
-        Sigma_xi_targ = TargetBody.Sigma_xi;
-        Sigma_xi_cont = ContactBody.Sigma_xi;
-        nabla_Sigma_nn_targ = Sigma_nnFD(Normal_targ,Sigma_xi_targ,nabla_r_xi_targ,q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
-        nabla_Sigma_nn_cont = Sigma_nnFD(Normal_cont,Sigma_xi_cont,nabla_r_xi_cont,q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
- 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Normal force difference
         difference = Sigma_cont_nn - Sigma_targ_nn; % Normal force difference
 
         lambda = gap * abs(difference); 
-        lambda_2_targ =-sign(difference)* gap^2 * nabla_Sigma_nn_targ;
-        lambda_2_cont = sign(difference)* gap^2 * nabla_Sigma_nn_cont;
+        
+        Ftarg_loc = (penalty * gap + 2*lambda) * Normal_targ;
+        Fcont_loc = (penalty * gap + 2*lambda) * Normal_cont; 
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        if ContactType ~= "NitscheLin"
+           Multiplier = sign(difference)* gap^2;
+
+           Sigma_xi_targ = TargetBody.Sigma_xi;
+           Sigma_xi_cont = ContactBody.Sigma_xi;
+           
+           nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
+           nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
+
+           nabla_Sigma_nn_targ = Sigma_nnFD(Normal_targ,Sigma_xi_targ,nabla_r_xi_targ,q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
+           nabla_Sigma_nn_cont = Sigma_nnFD(Normal_cont,Sigma_xi_cont,nabla_r_xi_cont,q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
+  
+           lambda_2_targ =-Multiplier * nabla_Sigma_nn_targ;
+           lambda_2_cont = Multiplier * nabla_Sigma_nn_cont; 
+                  
+           Ftarg_loc = Ftarg_loc + lambda_2_targ;
+           Fcont_loc = Fcont_loc + lambda_2_cont; 
+        end    
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        Force_cont = ContactBody.Sigma_n(F_cont,Normal_cont);
-        Force_targ = TargetBody.Sigma_n(F_targ,Normal_targ);
-        Force_total = Force_cont+Force_targ;
+        if (ContactType ~= "NitscheLin") && (ContactType ~= "NitscheRigid")
+
+           Force_cont = ContactBody.Sigma_n(F_cont,Normal_cont);
+           Force_targ = TargetBody.Sigma_n(F_targ,Normal_targ);
+           Force_total = Force_cont+Force_targ;
         
-        nabla_N_cont = (eye(3) - Normal_cont * Normal_cont')./gap;
-        nabla_N_targ = (eye(3) - Normal_targ * Normal_targ')./gap;
+           nabla_N_cont = (eye(3) - Normal_cont * Normal_cont')./gap;
+           nabla_N_targ = (eye(3) - Normal_targ * Normal_targ')./gap;
         
-        lambda_3_targ =-sign(difference)* gap^2 * ( 2* nabla_N_targ' * Force_total);
-        lambda_3_cont = sign(difference)* gap^2 * ( 2* nabla_N_cont' * Force_total); 
+           lambda_3_targ =-Multiplier * ( 2* nabla_N_targ' * Force_total);
+           lambda_3_cont = Multiplier * ( 2* nabla_N_cont' * Force_total); 
         
-        Ftarg_loc = (penalty * gap + 2*lambda) * Normal_targ + lambda_2_targ + lambda_3_targ;
-        Fcont_loc = (penalty * gap + 2*lambda) * Normal_cont + lambda_2_cont + lambda_3_cont; 
+           Ftarg_loc = Ftarg_loc + lambda_3_targ;
+           Fcont_loc = Fcont_loc + lambda_3_cont;  
+        end    
+        
