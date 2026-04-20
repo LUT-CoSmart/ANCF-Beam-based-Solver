@@ -120,8 +120,7 @@ function Body = AddTensors(Body)
     Body.BodyFolder = bodyFolder;
 
     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface"; 
-    
-    
+        
     L = Body.Length.Ln;
     W = Body.Length.Z;
     H = Body.Length.Y;
@@ -132,10 +131,10 @@ function Body = AddTensors(Body)
     
     Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
     
-    % Sigma = @(F_) (1/det(F_) )* F_ * PiolaSecondTensor(F_, Body.const) * F_'; %  Cauchy Stresses 
+    %Sigma = @(F_) (1/det(F_) )* F_ * PiolaSecondTensor(F_, Body.const) * F_'; %  Cauchy Stresses 
     Sigma = @(F_) PiolaSecondTensor(F_, Body.const); 
 
-    Body.Sigma_nn = @(F_, N) N'* Sigma(F_) *N;    
+    Body.Sigma_nn = @(F_, N) N' * Sigma(F_) * N;    
     Body.Sigma_n = @(F_, N) Sigma(F_) * N;        
     Body.Sigma_xi = @(q,u,q0_PosDofs,phi,xi,eta,zeta) Sigma( F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) );
    

@@ -79,11 +79,10 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
            Force_targ = TargetBody.Sigma_n(F_targ,Normal_targ);
            Force_total = Force_cont+Force_targ;
         
-           nabla_N_cont = (eye(3) - Normal_cont * Normal_cont')./gap;
-           nabla_N_targ = (eye(3) - Normal_targ * Normal_targ')./gap;
+           nabla_N = (eye(3) - Normal_cont * Normal_cont')./gap; 
         
-           lambda_3_targ =-Multiplier * ( 2* nabla_N_targ' * Force_total);
-           lambda_3_cont = Multiplier * ( 2* nabla_N_cont' * Force_total); 
+           lambda_3_targ =-Multiplier * ( 2* nabla_N' * Force_total);
+           lambda_3_cont = Multiplier * ( 2* nabla_N' * Force_total); 
         
            Ftarg_loc = Ftarg_loc + lambda_3_targ;
            Fcont_loc = Fcont_loc + lambda_3_cont;  

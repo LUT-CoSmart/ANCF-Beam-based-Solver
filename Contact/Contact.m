@@ -12,10 +12,11 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactTypeName,ContactVariabl
     
     if ContactTypeName ~= "None" 
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
-                
+        % Penalty approach        
         if ContactTypeName == "Penalty"
            ContactType = @Penalty;
-                   
+
+        % Nitshes approach           
         elseif contains(ContactTypeName, "Nitsche")
              ContactType = @(varargin)Nitsche(ContactTypeName,varargin{:});
 

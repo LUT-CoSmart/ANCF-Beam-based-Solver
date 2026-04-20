@@ -18,7 +18,7 @@
                         
             Fc1 = 0.5 * (Fc1_1 + Fc1_2);
             Fc2 = 0.5 * (Fc2_1 + Fc2_2); 
-            Gap = max(Gap1,Gap2);
+            Gap = 0.5 * (Gap1 + Gap2);
 
             if Gap1Max.gap > Gap2Max.gap     
                 GapMax = Gap1Max;
