@@ -1,7 +1,7 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions");
-addpath("Postprocessing");
+addpath(genpath("MainFunctions"));
+addpath("ReportingFunctions");
 addpath('MeshFunctions');
 addpath(genpath("Solvers"))
 Body.Name = "Body";
