@@ -1,9 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MeshFunctions", "InnerForceFunctions","ReportingFunctions")
-addpath(genpath("Contact"))
-addpath(genpath("Solvers"))
-addpath(genpath("MainFunctions"))
+addpath(genpath(pwd));
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 % ########### Problem data ################################################

@@ -104,4 +104,4 @@ V_after = VolumeViaFaces(vertices_after, faces);
 V_before = VolumeViaFaces(vertices_before, faces);
 
 fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
-CleanTemp(Body, true)
+% CleanTemp(Body, true)

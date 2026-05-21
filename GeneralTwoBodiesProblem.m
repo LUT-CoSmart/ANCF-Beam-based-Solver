@@ -1,8 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions", "MeshFunctions", "InnerForceFunctions","Postprocessing")
-addpath(genpath("Solvers"))
-addpath(genpath("Contact"))
+addpath(genpath(pwd));
 
 Body1.Name = "Body1";
 Body2.Name = "Body2";
@@ -78,17 +76,7 @@ ContactVariable = 1e10;
 Body1.ContactRole = "master"; % Options: "master", "slave"
 Body2.ContactRole = "slave";
 
-% ########## Visualization of initial situation ###########################
-% figure;
-% hold on
-% axis equal 
-% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-% visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'red',true);
-
-% %####################### Solving ######################################## 
+% ######################## Solving ######################################## 
 steps = 80;  % sub-loading steps
 titertot=0;  
 Re=10^(-3);                   % Stopping criterion for residual
