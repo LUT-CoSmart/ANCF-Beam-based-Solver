@@ -3,9 +3,9 @@ function Body = Geometry(Body,CSName,ApproximationScheme, IntegrationPoints)
         
     switch CSName
            case "Rectangular"
-                Body.Length.X = 2; % Body length
-                Body.Length.Y = 0.5;
-                Body.Length.Z = 0.5;                
+                Body.Length.X = 1; % Body length
+                Body.Length.Y = 0.25;
+                Body.Length.Z = 0.25;                
                 Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
                 
            case "Oval"
@@ -18,8 +18,10 @@ function Body = Geometry(Body,CSName,ApproximationScheme, IntegrationPoints)
                  "Sol_subj2_middle", "MG_subj2_middle", "LG_subj2_middle",...
                  "ten_Sol_3", "ten_MG_3", "ten_LG_3",...
                  "ten_Sol_3_2", "ten_MG_3_2", "ten_LG_3_2"}
-                ApproximationScheme = "Poigen";
-                disp("For chosen area the approximation scheme switched to Poigen")
+                if ApproximationScheme ~= "Poigen"
+                    disp("For chosen area the approximation scheme switched to Poigen")
+                    ApproximationScheme = "Poigen";
+                end
                 
                 if (CSName == "C") || (CSName == "Tendon")
                    Body.Length.X = 1;

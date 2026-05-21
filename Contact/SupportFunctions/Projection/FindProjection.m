@@ -1,49 +1,49 @@
-function Outcome = FindProjection(PointsToProject, isoData, Body)
-
+function Outcome = FindProjection(BodyToProject, Body)
+        
         Outcome = [];
+        fl = false; % initial contact possiblity, used later for function refactoring 
+        tol = sqrt(eps);
         q = Body.q;
+ 
+        [PointsToProject,isoData,mask] = SelectingProjectedPoints_v2(BodyToProject, Body, tol);
+        %  verification of direction (works for v1 without trisurf)        
+        % [PointsToProject,isoData,mask,Nodes,facesToProject,centersSelected,normalsSelected,dirFace] = SelectingProjectedPoints_v2(BodyToProject, Body, tol);        
+        % plot3(PointsToProject(:,1),PointsToProject(:,2),PointsToProject(:,3),'or' )
+        % hold on
+        % plot3(Body.SurfacePoints(:,1),Body.SurfacePoints(:,2),Body.SurfacePoints(:,3),'ok' )
+        % quiver3(centersSelected(:,1), centersSelected(:,2), centersSelected(:,3),dirFace(:,1), dirFace(:,2), dirFace(:,3), 0.2, 'b', 'LineWidth', 1.5); 
+        % plot3(Nodes(:,1),Nodes(:,2),Nodes(:,3),'-ok') 
+        % plot3(BodyToProject.SurfacePoints(:,1),BodyToProject.SurfacePoints(:,2),BodyToProject.SurfacePoints(:,3),'og' )
+        % trisurf(facesToProject, PointsToProject(:,1), PointsToProject(:,2), PointsToProject(:,3), 'FaceAlpha', 0.35,'EdgeColor', 'k');
+        % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         
 
-        % Findinding the closest node to a point 
-        DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3); 
-        Nodes = reshape(q(DofID), 3, []).'; % nodes positions, reorginized to NodeNumberx3 
-        [~, Distance] = knnsearch(Nodes, PointsToProject, 'K', 1); % taking the closest one 
-
-        % Checking the contact possibility 
-        fl = false; % initial contact possiblity, used later for function refactoring 
-        cond = Distance < Body.NodeSphere;
-        PointsToProject = PointsToProject(cond,:);           
-        isoData = isoData(cond,:); 
-
-        if any(cond) % contact distantly possible
+        if any(mask) % contact distantly possible
            fl = true; 
 
            % Getting element parameters
            faces = Body.BodyFaces;
            faceElem = Body.BodyFacesElements;
-           SurfacePoints = Body.SurfacePoints;    
+           SurfacePoints = Body.SurfacePoints; 
+           [face_mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
 
-           %% TODO: decrease the set of points (PointsToProject) by choosing only those, 
-           %% which are on the same side with Nodes:  dir = Point' - NodalPoint; if dot(dir,r-NodalPoint)>0. (??)
-
-           [face_mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);           
            inputs.faces=faces;
            inputs.nodes=SurfacePoints;
            inputs.face_mean_nodes=face_mean_nodes;
            inputs.face_normals= -face_normals; % change normals for !!!!distance calculation!!! to outward
-                                               % the actual normals are still inwards  
+                                                % the actual normals are still inwards  
 
-           % [distances,~,outside,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
+           %[distances,~,outside,projected_faces]=fastPoint2TriMesh(inputs,PointsToProject,0);         
            [distances,~,outside,projected_faces]=fastPoint2TriMesh_opt(inputs,PointsToProject); 
-           
+                      
            highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face  
            highlight_normals = face_normals(projected_faces, :); % find the normals to the surfaces
            idx = faceElem(projected_faces);  % find the elements for respected surfaces  
 
         end 
           
-        tol = sqrt(eps);
         
+ 
         if fl
             Inside = ~outside;                               
             Inside(Inside) = abs(distances(Inside)) > tol;    
@@ -65,7 +65,8 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
             
             % point isocoord targ (3) & element number (1) & distance (1) &
             % normal (3) & point isocoord cond (4 + element no. ) & contact area
-            Outcome = zeros(length(distancesInside),13); % prelocation
+            % contact point in global CS (3) 
+            Outcome = zeros(length(distancesInside),16); % prelocation
 
             for i = 1:length(distancesInside)
         
@@ -80,7 +81,7 @@ function Outcome = FindProjection(PointsToProject, isoData, Body)
 
                 Area = 1/2 * norm( cross(B - A, C - A) );
 
-                Outcome(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area]; 
+                Outcome(i,:) =  [xi_eta_zeta_result', idxInside(i), distancesInside(i), FaceNormal(i,:), isoData(i,:), Area, PointInside(i,:)]; 
             end  
 
         end

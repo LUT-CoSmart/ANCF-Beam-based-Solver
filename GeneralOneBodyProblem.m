@@ -1,9 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions");
-addpath("Postprocessing");
-addpath('MeshFunctions');
-addpath(genpath("Solvers"))
+addpath(genpath(pwd));
 Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
@@ -32,7 +29,7 @@ Body.Twist.angle = 45; % in degrees
 Body.Twist.ro = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 2;
+ElementNumber = 10;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################
@@ -64,7 +61,7 @@ Boundary.Type = "full"; % there are several types: full, reduced, positions, non
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
 % ####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+steps = 50;  % sub-loading steps
 titertot=0;  
 Re=10^(-5);                   % Stopping criterion for residual
 imax=20;                      % Maximum number of iterations for Newton's method 
@@ -73,7 +70,7 @@ imax=20;                      % Maximum number of iterations for Newton's method
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Body = SubLoading(Body, i, steps, "cubic"); 
+    Body = SubLoading(Body, i, steps, "linear"); 
 
     Fext = Body.Fext;    
     for ii=1:imax    

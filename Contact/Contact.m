@@ -1,4 +1,4 @@
-function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactTypeName,ContactVariable,ContactFiniteDiference,CalculateStiffness)
+function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactTypeName,ContactVariable,ContactFiniteDiference,CalculateStiffness)
     
     if nargin < 6 % some methods don't need to calculate stiffness matrix
         CalculateStiffness = true;
@@ -6,10 +6,11 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactTypeName,ContactVariabl
     
     Fc = zeros(Body1.TotalDofs + Body2.TotalDofs,1);
     Kc = zeros(length(Fc));
-    Gap = NaN;
-    GapMax.gap = 0;
-    GapMax.area = NaN;     
-    
+    Gap.total = NaN;
+    Gap.maximum= 0;
+    Gap.area = NaN;     
+    Gap.points = [];
+
     if ContactTypeName ~= "None" 
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
         % Penalty approach        
@@ -30,14 +31,14 @@ function [Kc,Fc,Gap,GapMax] = Contact(Body1,Body2,ContactTypeName,ContactVariabl
         
         switch ContactFiniteDiference
             case "Matlab"
-                [Kc,Fc,Gap,GapMax] = ContactForceMatlab(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);
+                [Kc,Fc,Gap] = ContactForceMatlab(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);
 
             case "Matlab_automatic"
-                [Kc,Fc,Gap,GapMax] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);
+                [Kc,Fc,Gap] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);
 
             otherwise
                 disp("Unknown finite difference scheme for the contact, switched to Matlab_automatic")
-                [Kc,Fc,Gap,GapMax] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);          
+                [Kc,Fc,Gap] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);          
         end    
     end      
     

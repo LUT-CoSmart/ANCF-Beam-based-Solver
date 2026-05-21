@@ -1,6 +1,6 @@
 function nabla_Sigma_nn = Sigma_nnFD(N,Sigma_xi,nabla_r_xi,q,u,q0PosDofs,phi,xi,eta,zeta)
 
-        h = 1e-6;
+        h = 1e-5;
         h_vec = h*eye(3);        
         vec=[xi,eta,zeta]';
         Sigma_xi0 = Sigma_xi(q,u,q0PosDofs,phi,vec(1),vec(2),vec(3));

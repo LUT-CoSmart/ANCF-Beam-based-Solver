@@ -7,20 +7,20 @@ function Body = SurfaceBeamApprox(Body)
     switch ApproximationScheme
 
            case "Poigen" % fixed CS 
-               Nxi = 20;  % for detail approaximation of the contact area
+               Nxi = 7;  % for detail approaximation of the contact area
                run(CSName); 
                [data, ~, ~, ~, ~, ~] = Binormalization(data_1);
                surfaceCSZetaEta = vertcat(data{:}); 
 
            case "Standard"   
 
-                Nxi = 7;     
+                Nxi = 5;     
                 Netazeta = 5; % used in standard CS (for Oval is multiplied x4 )
             
                 if CSName == "Rectangular"
                    % Surface data for contact and visualization 
-                   % we need to create more dense discritization for the better projections
-                   base = linspace(-1, 1, Netazeta);
+                   base = linspace(-1, 1, Netazeta); % equal spacing
+                   % base = [-1 gauleg2(-1, 1, Netazeta)' 1]; % spacing is more detailed near the edges
 
                    bottom = [base', -1*ones(length(base),1)];
                    right  = [ones(length(base),1), base'];

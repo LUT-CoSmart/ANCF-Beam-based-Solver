@@ -12,7 +12,7 @@ Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None"); % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103) 
-Body = Geometry(Body,"ten_Sol_3","Poigen", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
+Body = Geometry(Body,"Rectangular","Standard","Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
                                                       % Integration points of generating line: Gauss, Lobatto  
 Body = Materials(Body,"GOH", "optimized_SEE");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
                                                       % Integration Scheme: Poigen, Standard
@@ -34,7 +34,7 @@ Body.Twist.angle = 0; % in degrees
 Body.Twist.ro = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 2;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################
@@ -48,7 +48,7 @@ Body.mex = false;
 
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 5e6;  % Elongation
+Force.Maginutude.X = 2e6;  % Elongation
 
 % Positioning applied locally to the Undefomred configuration
 % Shift and curvature are accounted automaticaly)
@@ -71,41 +71,65 @@ Re=10^(-4);           % Stopping criterion for residual
 imax=20;              % Maximum number of iterations for Newton's method 
 
 %START NEWTON'S METHOD   
-for i=1:steps
 
-    % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Body = SubLoading(Body, i, steps, "cubic"); 
-    Fext = Body.Fext;    
-                    
-    for ii=1:imax    
-        tic; 
+Body = SubLoading(Body, 1, steps, "linear"); 
 
-        [u_bc,deltaf] = Newton_full(Body,Fext);
+myFx = @(x)myfun(Body,x);
+x0 = zeros(Body.ndof,1);
 
-        Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
-        Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
-        
-        titer=toc;
-        titertot=titertot+titer;   
+maxIter = 100;
 
-        if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot)
-            break;  
-        end   
-    end           
+m = 20;
+re = 1e-5;
 
-    Body = SaveResults(Body,i,"all"); % options: "all", "last", each by (number) 
+n = length(x0);
+Sm = zeros(n,m);
+Ym = zeros(n,m);
+[f0,g0]=feval(myFx,x0)
+
+alpha = ones(n,1);
+x1 = x0 - g0* alpha
+
+
+k = 1;
+while (k < maxIter) && norm(g0)>re
+
+    fnorm = norm(g0)   
+
+    s0 = x1-x0;
+    y0 = g1-g0;
+
+    hdiag = s0'*y0/(y0'*y0);
+    p = zeros(length(g0),1);
+    if (k<=m)
+        % update S,Y
+        Sm(:,k) = s0;
+        Ym(:,k) = y0;
+        % never forget the minus sign
+        p = -getHg_lbfgs(g1,Sm(:,1:k),Ym(:,1:k),hdiag); 
+    elseif (k>m)
+        Sm(:,1:(m-1))=Sm(:,2:m);
+        Ym(:,1:(m-1))=Ym(:,2:m);
+        Sm(:,m) = s0;
+        Ym(:,m) = y0;    
+        % never forget the minus sign
+        p = -getHg_lbfgs(g1,Sm,Ym,hdiag);
+    end  
+
+    % line search
+    [alpha,fs,gs]= strongwolfe(myFx,p,x1,f1,g1);
+    x0 = x1;
+    g0 = g1;
+    x1 = x1 + alpha*p;
+    f1 = fs;
+    g1 = gs;
+    k =k + 1;  
 end
-% POST PROCESSING ###############################################
-visDeformed = true;
-visInitial = true;
-PostProcessing(Body,visDeformed,visInitial) 
-% volume check
-faces=Body.BodyFaces;
-vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
-vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
-
-V_after = VolumeViaFaces(vertices_after, faces);
-V_before = VolumeViaFaces(vertices_before, faces);
-
-fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
-CleanTemp(Body, true)
+% 
+% % 
+% % Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
+% % Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
+% % 
+% % titer=toc;
+% % titertot=titertot+titer;   
+% 

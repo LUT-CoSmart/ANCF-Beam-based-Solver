@@ -1,10 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions")
-addpath("MeshFunctions")
-addpath("InnerForceFunctions")
-addpath(genpath("Contact"))
-addpath("Postprocessing");
+addpath(genpath(pwd));
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 Body3.Name = "Body3";
@@ -13,16 +9,16 @@ Body3.Name = "Body3";
 Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");  
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
+% Geometry
+Body1 = Geometry(Body1,"ten_Sol_3","Poigen", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"ten_MG_3","Poigen", "Gauss");  % Itegration Scheme: Poigen, Standard
+Body3 = Geometry(Body3,"ten_LG_3","Poigen", "Gauss");  % Itegration Scheme: Poigen, Standard
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 Body1 = Materials(Body1,"Neo","Sol_old"); 
 Body2 = Materials(Body2,"Neo","MG_old"); 
 Body3 = Materials(Body3,'Neo',"LG_old");
-% Geometry
-Body1 = Geometry(Body1,"ten_Sol_3","Poigen");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"ten_MG_3","Poigen");  % Itegration Scheme: Poigen, Standard
-Body3 = Geometry(Body3,"ten_LG_3","Poigen");  % Itegration Scheme: Poigen, Standard
 % ########### Set Bodies positions ########################################
-angle = 10;
+angle = 45;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -58,7 +54,7 @@ Body3.Rotation.Y = 0;
 Body3.Rotation.Z = 0;
 % ########## Create FE Models #############################################
 
-ElemSlave = 1;
+ElemSlave = 4;
 ElemMaster = 4;
 Body1 = CreateFEM(Body1,ElemSlave);
 Body2 = CreateFEM(Body2,ElemMaster);
@@ -79,6 +75,19 @@ Body3.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
 Body3.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body3.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body3 = AddTensors(Body3);
+
+
+% ########## Visualization of initial situation ###########################
+figure;
+axis equal
+hold on
+xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+visualization(Body1,Body1.q0,'cyan',true);
+visualization(Body2,Body2.q0,'red',true);
+visualization(Body3,Body3.q0,'green',true);
+
 % ########## Boundary Conditions ##########################################
 % Force (applied locally, shift and curvature are accounted automaticaly)
 Force= 400;  

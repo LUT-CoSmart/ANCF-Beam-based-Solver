@@ -1,4 +1,4 @@
-function [u_bc,deltaf,Gap] = Newton_cont2Body_full(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext)
+function [u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext)
          
          bc = [Body1.bc Body2.bc];
 

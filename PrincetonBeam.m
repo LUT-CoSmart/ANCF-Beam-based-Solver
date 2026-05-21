@@ -1,10 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions");
-addpath("Postprocessing");
-addpath("MeshFunctions");
-addpath("InnerForceFunctions")
-addpath(genpath("Solvers"))
+addpath(genpath(pwd));
 CaseName =  string(mfilename);
 Body.Name = "Body";
 %% There are two options: Large & Small
@@ -16,7 +12,7 @@ Body = DefineElement(Body,"Beam","ANCF",3343,"None");  % 1 - BodyName, 2 - type 
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
 
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 2;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################

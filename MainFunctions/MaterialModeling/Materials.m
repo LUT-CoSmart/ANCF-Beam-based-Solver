@@ -8,6 +8,9 @@ function Body = Materials(Body, MaterialName, Subtype)
            case "Neo" % Neo-Hookean
                             
                switch  Subtype
+                    
+                   case "check"
+                       param.mu=103.1e6; 
                    case ""
                        param.mu=9e5;
                    

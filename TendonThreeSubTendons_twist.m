@@ -1,10 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions")
-addpath("MeshFunctions")
-addpath("InnerForceFunctions")
-addpath(genpath("Contact"))
-addpath("Postprocessing");
+addpath(genpath(pwd));
 Body1.Name = "Body1";
 Body2.Name = "Body2";
 Body3.Name = "Body3";
@@ -14,15 +10,15 @@ Body1 = DefineElement(Body1,"Beam","ANCF",3333,"None");
 Body2 = DefineElement(Body2,"Beam","ANCF",3333,"None");  
 Body3 = DefineElement(Body3,"Beam","ANCF",3333,"None"); 
 % Geometry
-Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen", "Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
-Body2 = Geometry(Body2,"MG_subj2_middle","Poigen", "Gaus");  % Itegration Scheme: Poigen, Standard
-Body3 = Geometry(Body3,"LG_subj2_middle","Poigen", "Gaus");  % Itegration Scheme: Poigen, Standard
+Body1 = Geometry(Body1,"Sol_subj2_middle","Poigen", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"MG_subj2_middle","Poigen", "Gauss");  % Itegration Scheme: Poigen, Standard
+Body3 = Geometry(Body3,"LG_subj2_middle","Poigen", "Gauss");  % Itegration Scheme: Poigen, Standard
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
-Body1 = Materials(Body1,"GOH"); 
-Body2 = Materials(Body2,"GOH"); 
-Body3 = Materials(Body3,'GOH');
+Body1 = Materials(Body1,"Neo", "optimized_SEE"); 
+Body2 = Materials(Body2,"Neo", "optimized_SEE"); 
+Body3 = Materials(Body3,'Neo', "optimized_SEE");
 % ########### Set Bodies positions ########################################
-angle = 0;
+angle = 50;
 % Tendon twist
 Center1 = [Body1.CSCenterY, Body1.CSCenterZ];
 Center2 = [Body2.CSCenterY, Body2.CSCenterZ];
@@ -160,14 +156,14 @@ Body2.ContactRole = "master";
 Body3.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
-% figure;
-% hold on
-% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-% visualization(Body1,Body1.q0,'cyan',true);
-% visualization(Body2,Body2.q0,'red',true);
-% visualization(Body3,Body3.q0,'blue',true);
+figure;
+hold on
+xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+visualization(Body1,Body1.q0,'cyan',true);
+visualization(Body2,Body2.q0,'red',true);
+visualization(Body3,Body3.q0,'green',true);
 % %####################### Solving ######################################## 
 steps = 5;  % sub-loading steps
 titertot=0;  

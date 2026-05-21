@@ -36,7 +36,7 @@ function Body = SubLoading(Body, currentStep, Nsteps, type)
                 end   
            case "mixed_Loadvise"
                 threshold = 0.5; % threshold by loads
-                power = 3;
+                power = 2;
 
                 x = currentStep / Nsteps;   % normalized step [0,1]                                                        
                 x_switch = threshold^(1/power);   % x where cubic reaches threshold                

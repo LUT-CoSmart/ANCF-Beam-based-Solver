@@ -1,6 +1,7 @@
-function [Kc,Fc,Gap,GapMax] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness)
+function [Kc,Fc,Gap] = ContactForceMatlabAuto(Body1,Body2,ContactType,ContactVariable,CalculateStiffness)
     
-    [Fc,Gap,GapMax] = ContactForce(Body1,Body2,ContactVariable,ContactType);
+
+    [Fc,Gap] = ContactForce(Body1,Body2,ContactVariable,ContactType);
     
     Kc = zeros(length(Fc));
 

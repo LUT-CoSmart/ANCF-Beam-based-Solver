@@ -31,60 +31,59 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         q0_targ = TargetBody.q0(DOFs_targ);
         phi_targ=TargetBody.phim(Element_targ,:)';
         q0PosDofs_targ = q0_targ(TargetBody.PosDofs);
-        F_targ = TargetBody.F(q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);        % Deformation gradient
+        F_targ = TargetBody.F(q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
         Sigma_targ_nn = TargetBody.Sigma_nn(F_targ, Normal_targ); 
-
 
         q_cont = ContactBody.q(DOFs_cont);
         u_cont = ContactBody.u(DOFs_cont);
         q0_cont = ContactBody.q0(DOFs_cont);
         phi_cont=ContactBody.phim(Element_cont,:)';
         q0PosDofs_cont = q0_cont(ContactBody.PosDofs);
-        F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);        % Deformation gradient
+        F_cont = ContactBody.F(q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
         Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_cont); 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Normal force difference
         difference = Sigma_cont_nn - Sigma_targ_nn; % Normal force difference
 
-        lambda = gap * abs(difference); 
+        lambda =  gap * abs(difference); % added division on penalty for the regularization
         
         Ftarg_loc = (penalty * gap + 2*lambda) * Normal_targ;
         Fcont_loc = (penalty * gap + 2*lambda) * Normal_cont; 
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-        if ContactType ~= "NitscheLin"
-           Multiplier = sign(difference)* gap^2;
-
-           Sigma_xi_targ = TargetBody.Sigma_xi;
-           Sigma_xi_cont = ContactBody.Sigma_xi;
-           
-           nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
-           nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
-
-           nabla_Sigma_nn_targ = Sigma_nnFD(Normal_targ,Sigma_xi_targ,nabla_r_xi_targ,q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
-           nabla_Sigma_nn_cont = Sigma_nnFD(Normal_cont,Sigma_xi_cont,nabla_r_xi_cont,q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
-  
-           lambda_2_targ =-Multiplier * nabla_Sigma_nn_targ;
-           lambda_2_cont = Multiplier * nabla_Sigma_nn_cont; 
-                  
-           Ftarg_loc = Ftarg_loc + lambda_2_targ;
-           Fcont_loc = Fcont_loc + lambda_2_cont; 
-        end    
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if (ContactType ~= "NitscheLin") && (ContactType ~= "NitscheRigid")
-
-           Force_cont = ContactBody.Sigma_n(F_cont,Normal_cont);
-           Force_targ = TargetBody.Sigma_n(F_targ,Normal_targ);
-           Force_total = Force_cont+Force_targ;
-        
-           nabla_N = (eye(3) - Normal_cont * Normal_cont')./gap; 
-        
-           lambda_3_targ =-Multiplier * ( 2* nabla_N' * Force_total);
-           lambda_3_cont = Multiplier * ( 2* nabla_N' * Force_total); 
-        
-           Ftarg_loc = Ftarg_loc + lambda_3_targ;
-           Fcont_loc = Fcont_loc + lambda_3_cont;  
-        end    
-        
+        % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        % if ContactType ~= "NitscheLin"
+        %    Multiplier = sign(difference)* gap^2; % added division on penalty for the regularization
+        % 
+        %    Sigma_xi_targ = TargetBody.Sigma_xi;
+        %    Sigma_xi_cont = ContactBody.Sigma_xi;
+        % 
+        %    nabla_r_xi_targ = TargetBody.nabla_r_xi(xi_targ,eta_targ,zeta_targ,q_targ);
+        %    nabla_r_xi_cont = ContactBody.nabla_r_xi(xi_cont,eta_cont,zeta_cont,q_cont);
+        % 
+        %    nabla_Sigma_nn_targ = Sigma_nnFD(Normal_targ,Sigma_xi_targ,nabla_r_xi_targ,q_targ,u_targ,q0PosDofs_targ,phi_targ,xi_targ,eta_targ,zeta_targ);
+        %    nabla_Sigma_nn_cont = Sigma_nnFD(Normal_cont,Sigma_xi_cont,nabla_r_xi_cont,q_cont,u_cont,q0PosDofs_cont,phi_cont,xi_cont,eta_cont,zeta_cont);
+        % 
+        %    lambda_2_targ =-Multiplier * nabla_Sigma_nn_targ;
+        %    lambda_2_cont = Multiplier * nabla_Sigma_nn_cont; 
+        % 
+        %    Ftarg_loc = Ftarg_loc + lambda_2_targ;
+        %    Fcont_loc = Fcont_loc + lambda_2_cont; 
+        % end    
+        % 
+        % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % if (ContactType ~= "NitscheLin") && (ContactType ~= "NitscheRigid")
+        % 
+        %    Force_cont = ContactBody.Sigma_n(F_cont,Normal_cont);
+        %    Force_targ = TargetBody.Sigma_n(F_targ,Normal_targ);
+        %    Force_total = (Force_cont+Force_targ);
+        % 
+        %    nabla_N = (eye(3) - Normal_cont * Normal_cont')./gap; 
+        % 
+        %    lambda_3_targ =-Multiplier * ( 2* nabla_N' * Force_total);
+        %    lambda_3_cont = Multiplier * ( 2* nabla_N' * Force_total); 
+        % 
+        %    Ftarg_loc = Ftarg_loc + lambda_3_targ;
+        %    Fcont_loc = Fcont_loc + lambda_3_cont;  
+        % end    
+        % 

@@ -65,10 +65,4 @@ function Body = BuildBeamFaces(Body)
         
         Body.BodyFaces = faces;
         Body.BodyFacesElements = faceElem;
-        % % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 
-        % % Option        
-        % SurfacePoints = BuildBeamSurface(Body,Body.q0);
-        % addpath(genpath("Contact"))
-        % [mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
-        % quiver3(mean_nodes(:,1), mean_nodes(:,2), mean_nodes(:,3),face_normals(:,1),  face_normals(:,2),  face_normals(:,3), 0.5, 'r', 'LineWidth', 0.01); 
-        % patch('Vertices',SurfacePoints,'Faces',faces,'FaceColor','cyan','EdgeColor','black');
+     

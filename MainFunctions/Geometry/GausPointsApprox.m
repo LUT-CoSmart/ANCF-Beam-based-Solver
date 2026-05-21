@@ -8,8 +8,8 @@ function Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoi
     if ApproximationScheme == "Poigen"
        addpath("CrossSections") 
        run(CSName); 
-       Deg=input('Input Approximation degree (1 or above): ');      % Approximation degree for Green's formula    
-           
+       % Deg=input('Input Approximation degree (1 or above): ');      % Approximation degree for Green's formula    
+       Deg = 1;    
        if  (CSName == "Rectangular") || (CSName== "Oval") % standard shapes
            [data, nu2, Body.CSCenterZ] = Binormalization(data_1); 
        else
