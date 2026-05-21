@@ -40,35 +40,7 @@ Body3.Twist.angle = angle;
 Body3.Twist.initial_rot = atan2d(RelCenter3(2),RelCenter3(1));
 Body3.Twist.ro = norm(Center2 - Center3);
 
-% % Shift of Body1
-% Body1.Shift.X = 0;
-% Body1.Shift.Y = Body1.CSCenterY;
-% Body1.Shift.Z = Body1.CSCenterZ;
-% 
-% Body2.Shift.X = 0;
-% Body2.Shift.Y = Body2.CSCenterY;
-% Body2.Shift.Z = Body2.CSCenterZ;
-% 
-% Body3.Shift.X = 0;
-% Body3.Shift.Y = Body3.CSCenterY;
-% Body3.Shift.Z = Body3.CSCenterZ;
-
-
-% Rotation (in degrees)
-Body1.Rotation.X = 0;
-Body1.Rotation.Y = 0;
-Body1.Rotation.Z = 0;
-
-Body2.Rotation.X = 0;
-Body2.Rotation.Y = 0;
-Body2.Rotation.Z = 0;
-
-Body3.Rotation.X = 0;
-Body3.Rotation.Y = 0;
-Body3.Rotation.Z = 0;
-
 % ########## Create FE Models #############################################
-
 ElementNumber1 = 1;
 Body1 = CreateFEM(Body1,ElementNumber1);
 ElementNumber2 = 1;
@@ -92,60 +64,32 @@ Body3.SolutionBase = "Position"; % Solution-based calculation: Position, Displac
 Body3.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body3 = AddTensors(Body3);
 
-Force = 1e0;
 % ########## Boundary Conditions ##########################################
+Force = 1e1;
 % Body1 
-% Force (applied locally, shift and curvature are accounted automaticaly)
+% Force (applied locally, shift and curvature are accounted automaticaly) 
 Force1.Maginutude.X =  Force;  % Elongation
-Force1.Maginutude.Y = 0;  
-Force1.Maginutude.Z = 0;  
-
 Force1.Position.X = Body1.Length.X;  % Elongation
-Force1.Position.Y = 0;  
-Force1.Position.Z = 0; 
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
-%Boundary1.Position = [];
-Boundary1.Position.X = 0;  
-Boundary1.Position.Y = 0;
-Boundary1.Position.Z = 0;
-
+Boundary1.Position = [];
 Boundary1.Type = "reduced"; % there are s1everal types: full, reduced, positions, none
 
 % Body2
 Force2.Maginutude.X = Force;  % Elongation
-Force2.Maginutude.Y = 0;  
-Force2.Maginutude.Z = 0;  
-
 Force2.Position.X = Body2.Length.X;  % Elongation
-Force2.Position.Y = 0;  
-Force2.Position.Z = 0; 
 
 % Boundaries
-%Boundary2.Position = [];
-Boundary2.Position.X = 0;  
-Boundary2.Position.Y = 0;
-Boundary2.Position.Z = 0;
-
+Boundary2.Position = [];
 Boundary2.Type = "reduced"; % there are several types: full, reduced, positions, none
 
 % Body3
- Force3.Maginutude.X = Force;  % Elongation
- Force3.Maginutude.Y = 0;  
- Force3.Maginutude.Z = 0;  
- 
- Force3.Position.X = Body3.Length.X;  % Elongation
- Force3.Position.Y = 0;  
- Force3.Position.Z = 0; 
+Force3.Maginutude.X = Force;  % Elongation
+Force3.Position.X = Body3.Length.X;  % Elongation
 
 % Boundaries
-%Boundary2.Position = [];
-Boundary3.Position.X = 0;  
-Boundary3.Position.Y = 0;
-Boundary3.Position.Z = 0;
-
+Boundary3.Position = [];
 Boundary3.Type = "reduced"; % there are several types: full, reduced, positions, none
-
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
@@ -156,36 +100,31 @@ Body2.ContactRole = "master";
 Body3.ContactRole = "master";
 
 % ########## Visualization of initial situation ###########################
-figure;
-hold on
-xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
-visualization(Body1,Body1.q0,'cyan',true);
-visualization(Body2,Body2.q0,'red',true);
-visualization(Body3,Body3.q0,'green',true);
-% %####################### Solving ######################################## 
-steps = 5;  % sub-loading steps
+% figure;
+% hold on
+% xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+% ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+% zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+% visualization(Body1,Body1.q0,'cyan',true);
+% visualization(Body2,Body2.q0,'red',true);
+% visualization(Body3,Body3.q0,'green',true);
+
+% ######################## Solving ######################################## 
+steps = 40;  % sub-loading steps
 titertot=0;  
-Re=10^(-4);                   % Stopping criterion for residual
-imax=15;                      % Maximum number of iterations for Newton's method 
-SolutionRegType = "off";  % Regularization type: off, penaltyK, penaltyKf, Tikhonov
-Results1 = [];
-Results2 = [];
-Results3 = [];
+Re=10^(-3);                   % Stopping criterion for residual
+imax=20;                      % Maximum number of iterations for Newton's method 
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 Body3 = CreateBC(Body3, Force3, Boundary3); % Application of Boundary conditions
-% profile on -historysize 2e9   % 20 million calls
+
 %START NEWTON'S METHOD   
 for i=1:steps
-    style = "cubic";
-    % style = "quadratic";
-    Body1 = SubLoading(Body1, i, steps, style); 
-    Body2 = SubLoading(Body2, i, steps, style); 
-    Body3 = SubLoading(Body3, i, steps, style); 
-
+    LoadingStyle = "cubic";
+    Body1 = SubLoading(Body1, i, steps, LoadingStyle); 
+    Body2 = SubLoading(Body2, i, steps, LoadingStyle); 
+    Body3 = SubLoading(Body3, i, steps, LoadingStyle); 
  
     Fext1 = Body1.Fext;
     Fext2 = Body2.Fext;
@@ -195,14 +134,13 @@ for i=1:steps
     for ii=1:imax
         tic;
         
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
+   
         [Kc1,Fc1,Gap1] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference);
         Fc1_extend = [Fc1; zeros(Body3.TotalDofs,1)];
         Kc1_extend = [Kc1 zeros(Body1.TotalDofs+Body2.TotalDofs, Body3.TotalDofs);
-                      zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];
-        
-            
+                      zeros(Body3.TotalDofs,Body1.TotalDofs+Body2.TotalDofs + Body3.TotalDofs)];                    
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Contact forces
         [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactFiniteDiference);
@@ -213,7 +151,7 @@ for i=1:steps
         
         Fc = Fc1_extend + Fc2_extend;     
         Kc = Kc1_extend + Kc2_extend;
-        Gap = Gap1 + Gap2;
+        Gap = Gap1.total + Gap2.total;
             
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % inner forces
@@ -238,7 +176,7 @@ for i=1:steps
         K_bc = K(bc,bc); 
         ff_bc = ff(bc);
         deltaf=ff_bc/norm(Fext(bc)); 
-        u_bc = Regularization(K_bc,ff_bc,SolutionRegType); 
+        u_bc = Solving(K_bc,ff_bc); 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Separation
@@ -259,20 +197,9 @@ for i=1:steps
 
     end
    
-
-
-    %Pick nodal displacements from result vector
-    xlocName1 = 'xloc' + Body1.ElementType;
-    uf1 = Body1.u(Body1.fextInd);
-    Results1 = [Results1; Body1.ElementNumber Body1.TotalDofs uf1'];
-
-    xlocName2 = 'xloc' + Body2.ElementType;
-    uf2 = Body2.u(Body2.fextInd); 
-    Results2 = [Results2; Body2.ElementNumber Body2.TotalDofs uf2'];
-
-    xlocName3 = 'xloc' + Body3.ElementType;
-    uf3 = Body3.u(Body3.fextInd); 
-    Results3 = [Results3; Body3.ElementNumber Body3.TotalDofs uf3'];
+    Body1 = SaveResults(Body1,i,"last"); % options: "all", "last", each by (number) 
+    Body2 = SaveResults(Body2,i,"last");
+    Body3 = SaveResults(Body3,i,"last");
 end    
 
 % POST PROCESSING ###############################################
@@ -281,12 +208,12 @@ xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
 ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
 zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
 visualization(Body1,Body1.q,'cyan',true);
-visualization(Body2,Body2.q,'red',true);
+visualization(Body2,Body2.q,'none',true);
 visualization(Body3,Body3.q,'blue',true);
 
-PostProcessing(Body1,Results1,false,false) 
-PostProcessing(Body2,Results2,false,false) 
-PostProcessing(Body3,Results3,false,false)
+PostProcessing(Body1,false,false) 
+PostProcessing(Body2,false,false) 
+PostProcessing(Body3,false,false)
 
 CleanTemp(Body1, true)
 CleanTemp(Body2, true)
