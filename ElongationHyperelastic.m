@@ -1,7 +1,7 @@
 clc,clear,close all;
 format long
 
-addpath("MainFunctions","MeshFunctions",'InnerForceFunctions',"Postprocessing");
+addpath("MainFunctions","MeshFunctions",'InnerForceFunctions',"ReportingFunctions");
 addpath(genpath("Solvers"))
 Body.Name = "Body";
 CaseName =  string(mfilename);

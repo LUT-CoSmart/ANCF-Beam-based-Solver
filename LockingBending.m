@@ -1,10 +1,6 @@
 clc,clear,close all;
 format long
-addpath("MainFunctions");
-addpath("MeshFunctions");
-addpath("Postprocessing");
-addpath("InnerForceFunctions")
-addpath(genpath("Solvers"))
+addpath(genpath(pwd));
 Body.Name = "Body";
 CaseName =  string(mfilename);
 CaseSubtype = "Large"; % there are two options: Large & Small

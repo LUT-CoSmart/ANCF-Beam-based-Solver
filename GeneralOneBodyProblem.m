@@ -1,6 +1,13 @@
 clc,clear,close all;
 format long
+<<<<<<< HEAD
 addpath(genpath(pwd));
+=======
+addpath(genpath("MainFunctions"));
+addpath("ReportingFunctions");
+addpath('MeshFunctions');
+addpath(genpath("Solvers"))
+>>>>>>> origin/main
 Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  

@@ -1,18 +1,14 @@
 clc,clear,close all;
 format long
 
-addpath("MainFunctions");
-addpath("MeshFunctions")
-addpath("Postprocessing");
-addpath('InnerForceFunctions');
-addpath(genpath("Solvers"))
+addpath(genpath(pwd));
 
 Body.Name = "Body";
 
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None"); % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103) 
-Body = Geometry(Body,"ten_Sol_3","Poigen", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
+Body = Geometry(Body,"ten_Sol_3","Standard", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
                                                       % Integration points of generating line: Gauss, Lobatto  
 Body = Materials(Body,"GOH", "optimized_SEE");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
                                                       % Integration Scheme: Poigen, Standard
@@ -34,7 +30,7 @@ Body.Twist.angle = 0; % in degrees
 Body.Twist.ro = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 2;
+ElementNumber = 1;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################
@@ -98,7 +94,7 @@ end
 % POST PROCESSING ###############################################
 visDeformed = true;
 visInitial = true;
-PostProcessing(Body,visDeformed,visInitial) 
+PostProcessing(Body,visDeformed,visInitial);
 % volume check
 faces=Body.BodyFaces;
 vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
