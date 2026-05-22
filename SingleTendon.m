@@ -44,7 +44,7 @@ Body.mex = false;
 
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 5e6;  % Elongation
+Force.Maginutude.X = 1e6;  % Elongation
 
 % Positioning applied locally to the Undefomred configuration
 % Shift and curvature are accounted automaticaly)
@@ -64,7 +64,7 @@ Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 steps = 300;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);           % Stopping criterion for residual
-imax=20;              % Maximum number of iterations for Newton's method 
+imax=800;              % Maximum number of iterations for Newton's method 
 
 %START NEWTON'S METHOD   
 for i=1:steps
@@ -76,8 +76,9 @@ for i=1:steps
     for ii=1:imax    
         tic; 
 
-        [u_bc,deltaf] = Newton_full(Body,Fext);
-
+        %[u_bc,deltaf] = Newton_full(Body,Fext);
+        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
         

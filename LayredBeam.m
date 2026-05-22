@@ -88,8 +88,7 @@ for i=1:steps
         tic;
         %[u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);
         [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
-        %[u_bc,deltaf,Gap] = Newton_Krylov_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext, Re, "CG");
-
+        
         % Separation
         Body1.u(Body1.bc) = Body1.u(Body1.bc) + u_bc(1:Body1.ndof);
         Body1.q(Body1.bc) = Body1.q(Body1.bc) + u_bc(1:Body1.ndof);

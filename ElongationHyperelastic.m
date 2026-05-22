@@ -21,7 +21,7 @@ Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
 % %####################### Solving ######################################## 
-steps = 100;  % sub-loading steps, a lot for non full Newton-based algorithms
+steps = 200;  % sub-loading steps, a lot for non full Newton-based algorithms
 titertot=0; 
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
@@ -40,7 +40,7 @@ for i=1:steps
         
         % [u_bc,deltaf] = Newton_full(Body,Fext);
         % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
-        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "CG"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions

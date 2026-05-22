@@ -1,8 +1,8 @@
 function [u_bc,deltaf] = Newton_Krylov(ii,Body,Fext,Re,name)
-    % Taken from (7):
+    % Based on:
     % J. Hales, S. Novascone, R. L. Williamson, D. Gaston, M. Tonks (2012). 
     % Solving Nonlinear Solid Mechanics Problems with the Jacobian-Free Newton Krylov Method.
-    % Computer Modeling in Engineering and Sciences. 84. 123. 
+    % Computer Modeling in Engineering and Sciences. 84(2), 123-153. 
     
     if nargin < 5
         name = "JF";
@@ -17,7 +17,7 @@ function [u_bc,deltaf] = Newton_Krylov(ii,Body,Fext,Re,name)
     
     if ii == 1
         [J,Fe] = InnerForce(Body);
-        r =  -(Fe - Fext);       % assembley    
+        r =  -(Fe - Fext);      
         s = zeros(size(r));
         v = r;
         u_bc =  zeros(size(r(bc)));
@@ -26,8 +26,7 @@ function [u_bc,deltaf] = Newton_Krylov(ii,Body,Fext,Re,name)
         u_bc =  zeros(size(r(bc)));
         nx = norm(q_backup(bc));        
         nv = norm(v(bc));
-        h = 1e-7 * (1 + nx) / max(nv, 1e-20);
-        
+        h = 1e-7 * (1 + nx) / max(nv, 1e-20); % this is allows better convergence
         r_bc = r(bc);
         v(~bc) = 0;
         v_bc = v(bc);
@@ -48,7 +47,9 @@ function [u_bc,deltaf] = Newton_Krylov(ii,Body,Fext,Re,name)
                 Body.u = u_backup; % restore
 
             otherwise
-                warning(' not correct Newton-Krylov algorithm, switched to JF');    
+                warning(' not correct Newton-Krylov algorithm, switched to JF');  
+                g = J*v;
+      
         end
 
         g_bc= g(bc);
