@@ -8,7 +8,7 @@ Body.Name = "Body";
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3333,"None"); % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103) 
-Body = Geometry(Body,"ten_Sol_3","Standard", "Gauss");  % Cross Sections: Rectangular, Oval, C, Tendon, etc.
+Body = Geometry(Body,"ten_Sol_3","Standard", "Gauss");% Cross Sections: Rectangular, Oval, C, Tendon, etc.
                                                       % Integration points of generating line: Gauss, Lobatto  
 Body = Materials(Body,"GOH", "optimized_SEE");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
                                                       % Integration Scheme: Poigen, Standard
@@ -30,7 +30,7 @@ Body.Twist.angle = 0; % in degrees
 Body.Twist.ro = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 5;
 Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################
@@ -44,7 +44,7 @@ Body.mex = false;
 
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e6;  % Elongation
+Force.Maginutude.X = 1e5;  % Elongation
 
 % Positioning applied locally to the Undefomred configuration
 % Shift and curvature are accounted automaticaly)
@@ -70,14 +70,14 @@ imax=800;              % Maximum number of iterations for Newton's method
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Body = SubLoading(Body, i, steps, "cubic"); 
+    Body = SubLoading(Body, i, steps, "quadratic"); 
     Fext = Body.Fext;    
                     
     for ii=1:imax    
         tic; 
 
-        %[u_bc,deltaf] = Newton_full(Body,Fext);
-        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        [u_bc,deltaf] = Newton_full(Body,Fext);
+        % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
