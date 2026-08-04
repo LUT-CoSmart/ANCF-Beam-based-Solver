@@ -29,8 +29,9 @@ Body.Twist.angle = 45; % in degrees
 Body.Twist.ro = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 10;
-Body = CreateFEM(Body,ElementNumber);
+ElementNumber = 2;
+Surfaces = "rectagulars"; % options: triangles, rectagulars
+Body = CreateFEM(Body,ElementNumber,Surfaces);
 
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen

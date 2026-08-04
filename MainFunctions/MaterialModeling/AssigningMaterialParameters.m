@@ -4,7 +4,7 @@ function  Body = AssigningMaterialParameters(Body,MaterialName,param, compressib
     
     % Define "bulk" module 
     if nargin < 4 || ~ismember(MaterialName, compressiblility)
-        %d = 1e-13;
+        % d = 1e-13;
         d = 1e-10 * Body.Volume; % emperical relation for incokmp. bodies with dependency of its size
     else
         d = [];

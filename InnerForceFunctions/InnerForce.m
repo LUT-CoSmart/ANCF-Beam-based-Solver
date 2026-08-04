@@ -1,5 +1,9 @@
-function [K,Fint] = InnerForce(Body)
-    
+function [K,Fint] = InnerForce(Body,CalculateStiffness)
+        
+        if nargin < 2 % some methods don't need to calculate stiffness matrix
+            CalculateStiffness = true;
+        end
+
         TotalDofs = Body.TotalDofs;
         xloc = Body.xloc;
         K=zeros(TotalDofs);
@@ -15,9 +19,8 @@ function [K,Fint] = InnerForce(Body)
             K_loc = zeros(ElementDofs);
             Fe = zeros(ElementDofs,1);
 
-            % if functionName == "BeamANCF"
             if strcmp(functionName, 'BeamANCF')
-                [K_loc, Fe] = BeamANCF(Body, ii);
+                [K_loc, Fe] = BeamANCF(Body, ii, CalculateStiffness);
             else
                 error('Inner function is not defined')
             end    

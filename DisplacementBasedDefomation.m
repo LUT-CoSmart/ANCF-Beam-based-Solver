@@ -15,8 +15,8 @@ Body = CreateFEM(Body,ElementNumber);
 
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
-Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
-Body.DeformationType = "Finite"; % Deformation type: Finite, Small
+Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
+Body.DeformationType = "Small"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
 % ########## Boundary Conditions ##########################################

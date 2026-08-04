@@ -13,7 +13,7 @@ Body = DefineElement(Body,"Beam","ANCF",3343,"None");  % 1 - BodyName, 2 - type 
 
 % ########## Create FE Model ##############################################
 ElementNumber = 2;
-Body = CreateFEM(Body,ElementNumber);
+Body = CreateFEM(Body,ElementNumber,"triangles");
 
 % ########## Calculation adjustments ######################################
 Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen

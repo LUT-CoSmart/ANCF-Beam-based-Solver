@@ -2,13 +2,17 @@ function [u_bc,deltaf] = Newton_Broyden(step, Body, Fext)
        
        persistent Bn_m1 ff_bc_old u_bc_old
         
-       [~,Fe] = InnerForce(Body);
+       CalculateStiffness = false;  
+
+       [~,Fe] = InnerForce(Body,CalculateStiffness);
        ff =  Fe - Fext;                 % assembley
        ff_bc=ff(Body.bc);               % Eliminate linear constraints from force vector 
         
        if step == 1  
+             
             [K,~] = InnerForce(Body);        
             Bn_m1 = inv( K(Body.bc,Body.bc) );
+            
        else   
             zn = ff_bc - ff_bc_old;
             s = u_bc_old;

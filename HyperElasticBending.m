@@ -12,13 +12,14 @@ Body = Geometry(Body,"Rectangular","Standard","Gaus");  % Cross Sections: Rectan
                                                       % Integration points of generating line : Gauss, Lobatto
 % Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 Body = Materials(Body,'Neo',"Sol_old"); 
+
 % ########## Create FE Model ##############################################
-ElementNumber = 32;
-Body = CreateFEM(Body,ElementNumber);
+ElementNumber = 10;
+Body = CreateFEM(Body,ElementNumber,"triangles");
 
 % % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
-Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
+Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 
 Body = AddTensors(Body);
@@ -40,18 +41,19 @@ titertot=0;
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
 %START NEWTON'S METHOD
+Re=10^(-5);                  % Stopping criterion for residual
+imax=40;                     % Maximum number of iterations for Newton's method 
+
 for i=1:steps
 
     % Update forces
-    Body = SubLoading(Body, i, steps, "linear"); 
-
-    Re=10^(-5);                   % Stopping criterion for residual
-    imax=40;                     % Maximum number of iterations for Newton's method 
+    Body = SubLoading(Body, i, steps, "linear");    
     Fext = Body.Fext;
+
     for ii=1:imax    
         tic; 
         
-        %[u_bc,deltaf] = Newton_full(Body,Fext);
+        % [u_bc,deltaf] = Newton_full(Body,Fext);
         [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
 
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one

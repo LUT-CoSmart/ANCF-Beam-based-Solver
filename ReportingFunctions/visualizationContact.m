@@ -2,8 +2,9 @@ function visualizationContact(Gap,Body1,Body2,Show)
     
 
 if Show  
-
+    
     figure();
+    axis equal 
     visualization(Body1,Body1.q,'none',Show);    
     visualization(Body2,Body2.q,'none',Show);
 

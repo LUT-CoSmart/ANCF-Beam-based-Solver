@@ -27,5 +27,6 @@ for i=1:length(basis)
     end    
 end
 if Call_shapeFunctions == true
+   N_x
    N_xi   % The presentation of shape functions in isoparametric coordinates 
 end    

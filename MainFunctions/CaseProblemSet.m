@@ -3,7 +3,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
     IntegrationPoints = "Gauss";    
     switch CaseName
            case {"LockingBendingLarge", "LockingBendingSmall"}
-                CSName = 'Rectangular';
+                CSName = "Rectangular";
                 Body.Length.X = 2; 
                 Body.Length.Y = 0.5;
                 Body.Length.Z = 0.1;
@@ -24,8 +24,10 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 Body.Length.X = 1; 
                 Body.Length.Y = 0.1;
                 Body.Length.Z = 0.1;
+
                 MaterialName = 'Neo';                
                 param.mu= 9 * 1e5;
+
                 Force.Maginutude.X = 9500;
                 Force.Position.X = Body.Length.X; 
                 Boundary.Position = [];
@@ -57,8 +59,7 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
     compressiblility= {'KS'};
     fibers= {'GOH'};
 
-    Body = AssigningMaterialParameters(Body,MaterialName,param, compressiblility, fibers);
-   
+    Body = AssigningMaterialParameters(Body,MaterialName,param,compressiblility, fibers);
     addpath('IntegrationPoints');
     Body = GausPointsApprox(Body,CSName,ApproximationScheme, IntegrationPoints);
    

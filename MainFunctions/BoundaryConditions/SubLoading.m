@@ -6,7 +6,18 @@ function Body = SubLoading(Body, currentStep, Nsteps, type)
     
    
     switch type
+           case "sigmoid"
+                x = currentStep / Nsteps;
             
+                k = 3;   % steepness
+                Loadstep = 1/(1+exp(-k*(x-0.5)));
+            
+                % normalize to [0,1]
+                y0 = 1/(1+exp(k/2));
+                y1 = 1/(1+exp(-k/2));
+            
+                Loadstep = (Loadstep-y0)/(y1-y0);
+
            case "linear"
                 Loadstep =  currentStep/Nsteps;
            case "exponential"     
@@ -35,11 +46,11 @@ function Body = SubLoading(Body, currentStep, Nsteps, type)
                     Loadstep = y_switch + slope * (x - threshold);
                 end   
            case "mixed_Loadvise"
-                threshold = 0.5; % threshold by loads
+                threshold = 0.75; % threshold by loads
                 power = 2;
 
                 x = currentStep / Nsteps;   % normalized step [0,1]                                                        
-                x_switch = threshold^(1/power);   % x where cubic reaches threshold                
+                x_switch = threshold^(1/power);   % x where reaches threshold                
                 if x <= x_switch
                     Loadstep = x^power;   % cubic part
                 else

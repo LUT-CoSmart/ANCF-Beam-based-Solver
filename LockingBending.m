@@ -2,26 +2,32 @@ clc,clear,close all;
 format long
 addpath(genpath(pwd));
 Body.Name = "Body";
-CaseName =  string(mfilename);
-CaseSubtype = "Large"; % there are two options: Large & Small
+
+% there are two options: Large & Small
+CaseSubtype = "Large"; 
 
 % ########### Problem data ################################################
 Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
-[Body,Force,Boundary] = CaseProblemSet(Body,mfilename + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
+[Body,Force,Boundary] = CaseProblemSet(Body,string(mfilename) + CaseSubtype,"Standard");  % Itegration Scheme: Poigen, Standard
+
+% Rotation (in degrees)
+Body.Rotation.X = 0;
+Body.Rotation.Y = 0;
+Body.Rotation.Z = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 16;
-Body = CreateFEM(Body,ElementNumber);
+ElementNumber = 64;
+Body = CreateFEM(Body,ElementNumber,"rectagulars");
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Matlab_automatic"; % Calculation of FD: Matlab, AceGen, Matlab_automatic
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
 % %####################### Solving ######################################## 
-steps = 20;  % sub-loading steps
+steps = 30;  % sub-loading steps
 titertot=0;  
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
@@ -30,7 +36,7 @@ for i=1:steps
     
     Body = SubLoading(Body, i, steps, "linear"); 
     
-    Re=10^(-4);                   % Stopping criterion for residual
+    Re=10^(-6);                   % Stopping criterion for residual
     imax=800;                     % Maximum number of iterations for Newton's method 
                                   % it is taken large for Krylov-based (CG) algorithm  
     Fext = Body.Fext;
@@ -39,7 +45,7 @@ for i=1:steps
         tic; 
         % [u_bc,deltaf] = Newton_full(Body,Fext);  
         [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
-        % [u_bc,deltaf] = Newton_BFGS(ii, Body, Fext)
+        % [u_bc,deltaf] = Newton_BFGS(ii, Body, Fext);
         % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
@@ -61,4 +67,4 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,visDeformed,visInitial) 
-% CleanTemp(Body, true)
+CleanTemp(Body, true)

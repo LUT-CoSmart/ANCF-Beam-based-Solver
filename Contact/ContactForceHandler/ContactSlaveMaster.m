@@ -15,7 +15,8 @@ function [Fcont, Ftarg, Gap] = ContactSlaveMaster(ContactBody,TargetBody,Contact
         
           %% TODO: adding the bounding boxing to check the contact at the first place  
 
-          % Projection
+          % ProjectionNitsche
+
           Outcome = FindProjection(ContactBody, TargetBody);
                   
           % Checking the contact presence

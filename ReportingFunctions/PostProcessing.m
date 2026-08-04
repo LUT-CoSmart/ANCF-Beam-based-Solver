@@ -16,9 +16,9 @@ function PostProcessing(Body,visDeformed,visInitial)
         axis equal
         set(gca, 'FontSize', [12], 'FontName','Times New Roman');
         set(text, 'FontSize', [12], 'FontName','Times New Roman');
-        xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
-        ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
-        zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+        xlabel('\it{X} [m]','FontName','Times New Roman','FontSize',[20])
+        ylabel('\it{Y} [m]','FontName','Times New Roman','FontSize',[20]),
+        zlabel('\it{Y} [m]','FontName','Times New Roman','FontSize',[20]);
         grid minor
         
         visualization(Body,Body.q0,'red',visInitial);

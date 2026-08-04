@@ -10,12 +10,11 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 
 % ########## Create FE Model ##############################################
-ElementNumber = 2;
-Body = CreateFEM(Body,ElementNumber);
-
+ElementNumber = 1;
+Body = CreateFEM(Body,ElementNumber,"rectagulars"); % options: triangles, rectagulars
 % % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
-Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
+Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 
 Body = AddTensors(Body);
@@ -27,20 +26,19 @@ titertot=0;
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
 %START NEWTON'S METHOD
+imax=800;                     % Maximum number of iterations for Newton's method 
+Re=10^(-5);                   % Stopping criterion for residual
 for i=1:steps
 
     % Update forces
     Body = SubLoading(Body, i, steps, "linear"); 
-
-    Re=10^(-5);                   % Stopping criterion for residual
-    imax=800;                     % Maximum number of iterations for Newton's method 
     Fext = Body.Fext;
     for ii=1:imax    
         tic; 
         
         % [u_bc,deltaf] = Newton_full(Body,Fext);
-        % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
-        [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "CG"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
+        [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
+        % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
         Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions

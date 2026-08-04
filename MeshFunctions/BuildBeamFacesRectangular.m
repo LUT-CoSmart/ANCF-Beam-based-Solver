@@ -1,0 +1,65 @@
+function Body = BuildBeamFacesRectangular(Body)
+         
+
+        faces = [];
+        faceElem = [];
+        switch Body.IntegrationType
+
+           case {"Standard", "Poigen"} % fixed CS   
+                
+                pointCS = Body.SurfaceXi.pointCS;  
+                Nxi = Body.SurfaceXi.Nxi;
+                NpointCS = size(pointCS,1);
+
+                % Creating faces with a triangle mesh      
+                CSNumber = Body.ElementNumber * (Nxi-1) + 1; % total number of "Cross Sections"
+                
+                for k = 1:CSNumber - 1
+                    element = ceil(k / (Nxi-1));
+                    offset1 = (k-1)*NpointCS;
+                    offset2 = k*NpointCS;
+                    for p = 1:NpointCS - 1                
+                        faces = [faces;
+                                 offset1+p, offset1+p+1, offset2+p+1, offset2+p];
+
+                        faceElem = [faceElem; element];
+                    end
+                    
+                    % closing
+                    faces = [faces;
+                             offset1+NpointCS, offset1+1, ...
+                             offset2+1, offset2+NpointCS];
+                    faceElem = [faceElem; element];                    
+                end    
+
+
+                % side surfaces
+                % All of it due to complex CS (like Tendon)
+                edges = [(1:NpointCS)' [2:NpointCS 1]'];  % closed loop of edges
+                dt = delaunayTriangulation(pointCS, edges); % creating nice triangulation to avoid collinearity for ending
+                pgon = polyshape(pointCS); % polyshape from boundary points
+
+                tri = dt.ConnectivityList;
+                centroids = (pointCS(tri(:,1), :) + pointCS(tri(:,2), :) + pointCS(tri(:,3), :)) / 3;               
+                in = isinterior(pgon, centroids(:,1), centroids(:,2)); % only triangles inside
+                tri = tri(in, :);  % filtered triangles, leaving only inside the polygon
+
+
+                startLayer = 1:NpointCS;
+                endLayer   = (CSNumber - 1) * NpointCS + (1:NpointCS);
+
+                facesStart = startLayer(tri);
+                facesEnd   = endLayer(tri);
+
+                facesStart = facesStart(:, [1 3 2]);  % inward at start
+                facesEnd   = facesEnd(:, [1 2 3]);    % inward at end (adjust if needed)
+
+            otherwise                  
+                error('****** Unkown Integration type for %s ******', Body.Name);
+        end
+        
+        Body.BodyFaces = faces;
+        Body.BodyFacesElements = faceElem;
+        
+        Body.BodyfacesStart = facesStart;
+        Body.BodyfacesEnd = facesEnd;

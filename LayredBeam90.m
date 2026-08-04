@@ -1,0 +1,161 @@
+clc,clear,close all;
+format long
+addpath(genpath(pwd));
+cleaningAfter =  false; 
+Body1.Name = "Body1";
+Body2.Name = "Body2";
+% ########### Problem data ################################################
+% ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)
+Body1 = DefineElement(Body1,"Beam","ANCF",3363,"None");  
+Body2 = DefineElement(Body2,"Beam","ANCF",3363,"None");  
+% Geometry
+Body1 = Geometry(Body1,"Rectangular","Standard","Gaus");  % Cross Sections: Rectangular, Oval, C, Tendon
+Body2 = Geometry(Body2,"Rectangular","Standard","Gaus");  % Integration Scheme: Poigen, Standard
+                                                          % Integration points of generating line : Gauss, Lobatto
+% Material models: GOH (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body1 = Materials(Body1,'KS'); 
+Body2 = Materials(Body2,'KS'); 
+% ########### Set Bodies positions ########################################
+% Shift of Body1
+Body1.Shift.X = Body1.Length.X/2;
+Body1.Shift.Y = Body1.Length.Y*2;
+Body1.Shift.Z = Body1.Length.Z;
+
+% Rotation (in degrees)
+Body1.Rotation.X = 0;
+Body1.Rotation.Y = 0;
+Body1.Rotation.Z = -90;
+% ########## Create FE Models ############################################
+Surfaces = "rectangulars"; % options: triangles, rectangulars
+
+ElementNumber1 = 1;
+Body1 = CreateFEM(Body1,ElementNumber1,Surfaces);
+ElementNumber2 = 1;
+Body2 = CreateFEM(Body2,ElementNumber2,Surfaces);
+
+% ########## Calculation adjustments ######################################
+Body1.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body1.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
+Body1.DeformationType = "Finite"; % Deformation type: Finite, Small
+Body1 = AddTensors(Body1);
+
+Body2.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body2.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
+Body2.DeformationType = "Finite"; % Deformation type: Finite, Small
+Body2 = AddTensors(Body2);
+
+
+% ########## Boundary Conditions ##########################################
+% Body1 
+% Force (applied locally, shift and curvature are accounted automaticaly)
+Force1.Maginutude.Z =-1e8;
+Force1.Position.X = Body1.Length.X;  % Elongation
+
+% Boundaries (applied locally, shift and curvature are accounted automaticaly)
+Boundary1.Position = [];
+Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
+
+% Body2
+Force2.Maginutude = [];
+Force2.Position.X = Body1.Length.X;  % Elongation
+
+% Boundaries
+Boundary2.Position = [];
+Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
+
+% ########## Contact characteristics ######################################
+ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
+% TODO: rotation affects Nitsche
+ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
+ContactVariable = 1e8;
+
+Body1.ContactRole = "slave"; % Options: "master", "slave"
+Body2.ContactRole = "master";
+
+% ####################### Solving ######################################## 
+steps = 10;  % sub-loading steps
+titertot=0;  
+Re= 10^(-4);                   % Stopping criterion for residual
+imax= 50;                     % Maximum number of iterations for Newton's method 
+
+Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
+Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
+
+LoadType ="cubic"; % "sigmoid", "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", etc.
+backtrack = true; % staring back track for the best solution to find an equlibrium
+
+if backtrack 
+   lambdaList  = [1.0, 0.5, 0.25, 0.125];   
+else
+   lambdaList = 1;
+end
+
+%START NEWTON'S METHOD   
+for i=1:steps
+
+    Body1 = SubLoading(Body1, i, steps, LoadType); 
+    Body2 = SubLoading(Body2, i, steps, LoadType); 
+
+    Fext1 = Body1.Fext;
+    Fext2 = Body2.Fext;
+
+    Fext = [Fext1; Fext2];
+
+    %  a * E*h mesh dependency 
+    % alpha = 1e-2;
+    % ContactVariable = alpha * min([max(Body1.Dvec) max(Body2.Dvec)]) * max([Body1.Length.Ln Body2.Length.Ln]); 
+
+    for lambda = lambdaList
+
+        if lambda < 1
+            fprintf("!!! Starting  Backtrack for lambda = %f !!!! \n",lambda)            
+        end    
+
+        for ii=1:imax
+            tic;
+            [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+
+            % Separation
+            Body1.u(Body1.bc) = Body1.u(Body1.bc) + lambda * u_bc(1:Body1.ndof);
+            Body1.q(Body1.bc) = Body1.q(Body1.bc) + lambda * u_bc(1:Body1.ndof);
+
+            Body2.u(Body2.bc) = Body2.u(Body2.bc) + lambda * u_bc(Body1.ndof + 1:end);        
+            Body2.q(Body2.bc) = Body2.q(Body2.bc) + lambda * u_bc(Body1.ndof + 1:end);
+
+            titer=toc;
+            titertot=titertot+titer;
+
+            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap.total)
+                break;  
+            end
+
+            [Body1,Body2] = BestStepTwoBodies(backtrack,lambda,Gap,Body1,Body2,deltaf,ii,imax); 
+
+        end
+
+        if ii < imax % it is needed for exit from the secon loop
+            break;
+        end
+
+    end
+
+
+    Body1 = SaveResults(Body1,i,"last"); % options: "all", "last", each by (number) 
+    Body2 = SaveResults(Body2,i,"last");
+end    
+
+% POST PROCESSING ###############################################
+hold on
+axis equal 
+xlabel('\it{X}','FontName','Times New Roman','FontSize',[20])
+ylabel('\it{Y}','FontName','Times New Roman','FontSize',[20]),
+zlabel('Z [m]','FontName','Times New Roman','FontSize',[20]);
+visualization(Body1,Body1.q0,'cyan',false);
+visualization(Body2,Body2.q0,'none',false);
+
+visualizationContact(Gap,Body1,Body2,true);
+PostProcessing(Body1,false,false) 
+PostProcessing(Body2,false,false) 
+
+CleanTemp(Body1, cleaningAfter)
+CleanTemp(Body2, cleaningAfter)

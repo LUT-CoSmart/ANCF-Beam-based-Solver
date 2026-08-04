@@ -3,15 +3,16 @@ function [PointsToProject,isoData,mask,Nodes,facesToProject,centersSelected,norm
     PointsToProject = BodyToProject.SurfacePoints;
     isoData = BodyToProject.IsoData;
     facesToProject = BodyToProject.BodyFaces; 
+    getFaceCenterAndNormals = BodyToProject.getFaceCenterAndNormals;
 
     % Findinding the closest node to a point 
     q = Body.q;    
     DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3); 
     Nodes = reshape(q(DofID), 3, []).'; % nodes positions, reorginized to NodeNumberx3        
-
+        
     [face_mean_projected,face_normals_projected]=getFaceCenterAndNormals(facesToProject,PointsToProject);
 
-    % closest target node to each face center
+    % closest node to each face center
     [NodeInx, Distance] = knnsearch(Nodes, face_mean_projected, 'K', 1);
     ClosestNodesFace  = Nodes(NodeInx,:);
 

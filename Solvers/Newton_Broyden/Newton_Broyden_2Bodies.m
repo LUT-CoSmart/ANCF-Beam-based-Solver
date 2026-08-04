@@ -2,12 +2,12 @@ function [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii, Body1,Body2,ContactType,
         
          bc = [Body1.bc Body2.bc];
          CalculateStiffness = false; 
-
+                           
          persistent Bn_m1 ff_bc_old u_bc_old
          
          % on each iteration we recalculate matrix
-         [~,Fe1] = InnerForce(Body1); 
-         [~,Fe2] = InnerForce(Body2); % inner forces of the second body
+         [~,Fe1] = InnerForce(Body1,CalculateStiffness); 
+         [~,Fe2] = InnerForce(Body2,CalculateStiffness); % inner forces of the second body
          [~,Fc,Gap] = Contact(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,CalculateStiffness); % Contact forces
          
          Fe = [Fe1; Fe2];

@@ -18,7 +18,7 @@ function SurfacePoints = BuildBeamSurface(Body,q)
             SurfacePoints(i,:) = r';
         end
         
-
+        
         
 
 

@@ -71,7 +71,7 @@ function Body = BeamANCFMesh(Body)
 
     if isfield(Body, 'Rotation')
        alpha = Body.Rotation.X;
-       beta = Body.Rotation.Y;
+       beta =  Body.Rotation.Y;
        gamma = Body.Rotation.Z;
 
        Rx = [1 0 0;
@@ -90,9 +90,7 @@ function Body = BeamANCFMesh(Body)
     else
        R = eye(3);
     end
-
-    %% TODO: In case of Cosserat add to drdx another vector
-
+   
     % Here, dependecy is phik = phi/L * xk;
     [Body.Length.Ln,drdx] = SplineLineAlongX(xk,yk,zk,ElementNumber); % Calculating elements' lengths and x-slopes
     if ~Body.Slope_x         

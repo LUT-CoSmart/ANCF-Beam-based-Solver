@@ -4,7 +4,7 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          Gap= NaN;
      end   
         
-      if  all(abs(deltaf) < Re)  %|| (norm(u_bc)<Re^2) 
+     if  all(abs(deltaf) < Re)  %|| (norm(u_bc)<Re^2) 
 
          if ~isnan(Gap)
              fprintf('Convergence: %10.4f, Displacements norm: %10.4f, Total gap: %10.7f\n', norm(abs(deltaf)), norm(u_bc), Gap);            
@@ -15,6 +15,7 @@ function status = printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Ga
          fprintf('Solution for %d / %d step  is found on %d iteration, Total CPU-time: %.2f\n', i, steps, ii, titertot);
          status = true;
      elseif ii==imax 
+         fprintf('Iteration: %d, Convergence: %10.4f, Displacements norm: %10.5f, Total gap: %10.7f\n', ii, norm(abs(deltaf)), norm(u_bc), Gap);
          fprintf('The solution for %d step is not found. The maximum number of iterations is reached. Total CPU-time: %.2f\n', i, titertot);
          status = false;   
      else     

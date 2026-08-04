@@ -1,4 +1,4 @@
-function Body = CreateFEM(Body,ElementNumber)
+function Body = CreateFEM(Body,ElementNumber,Surfaces)
     
     
     Body.ElementNumber = ElementNumber;
@@ -26,10 +26,17 @@ function Body = CreateFEM(Body,ElementNumber)
     Body = feval(functionName,Body);
 
     % creating faces and iso data of the whole body
-    functionName = "Build" + Body.ElementType + "Faces";     
+    if Surfaces == "triangles"
+        functionName = "Build" + Body.ElementType + "Faces"; 
+        Body.getFaceCenterAndNormals = @getFaceCenterAndNormals_tri;
+        Body.Point2Mesh = @fastPoint2TriMesh_opt;
+    else    
+        functionName = "Build" + Body.ElementType + "FacesRectangular";
+        Body.getFaceCenterAndNormals = @getFaceCenterAndNormals_quad;
+        Body.Point2Mesh = @Point2QuadMesh_opt;
+    end    
+    
+    Body.BodySurfaceType = Surfaces;
     Body = feval(functionName,Body); 
   
-    
-    
-    
     

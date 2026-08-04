@@ -1,12 +1,15 @@
 function Body = AddTensors(Body)
-    
+        
     path = 'TensorDerivations\' + Body.ElementType + '\' ;
     
     % Creation of temporal folder   
+    
     TempRoot = fullfile(pwd, 'Temp');
     % Create Temp root if missing
     if ~isfolder(TempRoot)
         mkdir(TempRoot);
+    else 
+
     end
     
     % Create folder for the specific body
@@ -20,9 +23,10 @@ function Body = AddTensors(Body)
     ShapeFunctionFolder = fullfile('TensorDerivations', Body.ElementType, 'Matlab', 'ShapeFunctions', Body.ElementName);
     copyfile(fullfile(ShapeFunctionFolder, '*'), bodyFolder, 'f');  % Copy all files from source to bodyFolder
     
-    % Add files for inner energy calculations based on AceGen
-    pathAceGen = path + 'AceGen';
-    
+    % 
+    pathAceGen = path + 'AceGen';    
+    pathMatlab = path + 'Matlab\ElementFunctions' + '\' + Body.ElementName;
+
     % Construct the function name
     function_name = 'ANCF'+Body.ElementName+Body.MaterialName;
             
@@ -53,7 +57,7 @@ function Body = AddTensors(Body)
          writelines(lines, destFile);
            
          else
-           warning('This element is not yet implemented in AceGen, substitude by the dummy');
+           warning('This element is not yet implemented in AceGen, substituded by the dummy');
            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
            fileName = 'AceGenForce.m';
            fullPath = fullfile(bodyFolder, fileName);
@@ -74,14 +78,7 @@ function Body = AddTensors(Body)
      srcFile = fullfile(srcFolder, Body.MaterialName + ".m"); 
      destFile = fullfile(bodyFolder, 'PiolaSecondTensor.m'); % Material check has already done in 'Materials.m'
      copyfile(srcFile, destFile, 'f'); % force overwrite
-
-     pathMatlab = path + 'Matlab' + '\' + Body.SolutionBase;
-     if Body.SolutionBase == "Position"
-        pathMatlab =  pathMatlab + '\' + Body.ElementName;
-     else
-        pathMatlab =  pathMatlab +  '\' + Body.DeformationType + '\' + Body.ElementName;
-     end
-     
+          
      files = dir(fullfile(pathMatlab, '*.*'));
      files = files(~[files.isdir]);
      
@@ -91,60 +88,73 @@ function Body = AddTensors(Body)
         copyfile(srcFile, destFile, 'f');  % 'f' to force overwrite
      end
 
+     % To be sure, the folders with files of the same names are removed  
+     rmpath(genpath(fullfile(pwd, 'TensorDerivations')));
 
-    switch Body.FiniteDiference 
+     switch Body.FiniteDiference 
        case "AceGen"   
-            disp("For chosen finite difference scheme, deformations are ony finite and displacement-based") 
-    
+            disp("For chosen finite difference scheme, deformations are ony finite and displacement-based")    
             Body.DeformationType = "Finite";
             Body.SolutionBase = "Displacement";
                     
-       case "Matlab"   
+       case {"Matlab", "Matlab_automatic"}   
 
             if Body.SolutionBase == "Position"
                disp("For chosen finite difference and solution-based scheme, deformations are only finite")
                Body.DeformationType = "Finite"; 
             end
-    
-       case "Matlab_automatic" 
-           if Body.SolutionBase == "Position"
-               disp("For chosen finite difference and solution-based scheme, deformations are only finite")
-               Body.DeformationType = "Finite"; 
-           end
            
        otherwise
             error('****** Choose correct Finite Diference scheme ******\n')
-    end        
-   
-    addpath(bodyFolder);    
-    Body.BodyFolder = bodyFolder;
+     end        
+    
+     addpath(bodyFolder);    
+     Body.BodyFolder = bodyFolder;
 
-    Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface"; 
+     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface"; 
         
-    L = Body.Length.Ln;
-    W = Body.Length.Z;
-    H = Body.Length.Y;
+     L = Body.Length.Ln;
+     W = Body.Length.Z;
+     H = Body.Length.Y;
     
-    Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);
-    Body.F = @(q,u,q0_PosDofs,phi,xi,eta,zeta) F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta);
-    Body.nabla_r_xi = @(xi,eta,zeta,q) [Shape_xi_(L,H,W,xi,eta,zeta)*q Shape_eta_(L,H,W,xi,eta,zeta)*q Shape_zeta_(L,H,W,xi,eta,zeta)*q];    
-    
-    Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
-    
-    % Attention to sigh, because we use it contact pressure
-    Sigma = @(F_) -(1/det(F_) ) * F_ * PiolaSecondTensor(F_, Body.const) * F_'; %  Cauchy Stresses 
-    %Sigma = @(F_) -PiolaSecondTensor(F_, Body.const); 
+     Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);       
+     
+     Shape_xi = @(xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
+     Shape_eta = @(xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
+     Shape_zeta = @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
 
-    Body.Sigma_nn = @(F_, N) N' * Sigma(F_) * N;    
-    Body.Sigma_n = @(F_, N) Sigma(F_) * N;        
-    Body.Sigma_xi = @(q,u,q0_PosDofs,phi,xi,eta,zeta) Sigma( F(q,u,q0_PosDofs,phi,L,H,W,xi,eta,zeta) );
-   
-    % if Body.mex 
-    %    CreateMex(create,Body);
-    %    InnerForce = @(Body) InnerForce_mex(Body);
-    % end
+     Body.Nm_xi_ = @(xi,eta,zeta) [Shape_xi(xi,eta,zeta); Shape_eta(xi,eta,zeta); Shape_zeta(xi,eta,zeta)];
+     Body.nabla_r_xi = @(xi,eta,zeta,q) [Shape_xi(xi,eta,zeta)*q Shape_eta(xi,eta,zeta)*q Shape_zeta(xi,eta,zeta)*q];        
+     
+     Body.F0 = @(q0,xi,eta,zeta) F0(q0,L,H,W,xi,eta,zeta);
+     Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,L,H,W,xi,eta,zeta);   
 
-    Body.Results = [];
+     if Body.Fibers
+        a0 = Body.Dvec(end-6:end-4)';
+        Body.a0_fib = @(q0,Phi,xi,eta,zeta) a0_fib(a0,q0,Phi,L,H,W,xi,eta,zeta)';
+     end
+        
+     if Body.Fibers
+        S = @(F_, a0_fib) PiolaSecondTensor(F_, Body.const, a0_fib);
+     else
+        S = @(F_) PiolaSecondTensor(F_, Body.const);         
+     end
+
+     Sigma = @(F_,S) 1/det(F_) * F_ * S * F_'; %  Cauchy Stresses 
+    
+     Body.S = S;
+     Body.Sigma = Sigma;
+     Body.Sigma_nn = @(F_, N, S) N' * Sigma(F_, S) * N;    
+
+           
+     Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
+     
+     % if Body.mex 
+     %    CreateMex(create,Body);
+     %    InnerForce = @(Body) InnerForce_mex(Body);
+     % end
+
+     Body.Results = [];
 
 
      % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 

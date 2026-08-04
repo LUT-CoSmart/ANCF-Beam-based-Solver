@@ -15,20 +15,28 @@ function Body = SurfaceBeamApprox(Body)
            case "Standard"   
 
                 Nxi = 5;     
-                Netazeta = 5; % used in standard CS (for Oval is multiplied x4 )
-            
+                
+                % Assume that Body.Length.x is the biggest dimension
+                % this allows the surface area splitting with more equally
+                Neta  = 1 + ceil(Nxi * Body.Length.Y / Body.Length.Ln);                 
+                Nzeta = 1 + ceil(Nxi * Body.Length.Z / Body.Length.Ln);
                 if CSName == "Rectangular"
                    % Surface data for contact and visualization 
-                   base = linspace(-1, 1, Netazeta); % equal spacing
-                   % base = [-1 gauleg2(-1, 1, Netazeta)' 1]; % spacing is more detailed near the edges
+                   base_eta = linspace(-1, 1, Neta); % equal spacing
+                   base_zeta = linspace(-1, 1, Nzeta); % equal spacing
+                   
+                   % Spacing is more detailed near the edges 
+                   % base_eta = [-1 gauleg2(-1, 1, Neta)' 1]; 
+                   % base_zeta = [-1 gauleg2(-1, 1, Nzeta)' 1]; 
 
-                   bottom = [base', -1*ones(length(base),1)];
-                   right  = [ones(length(base),1), base'];
-                   top    = [flip(base)', ones(length(base),1)];
-                   left   = [-1*ones(length(base),1), flip(base)'];
+                   bottom = [base_zeta', -1*ones(length(base_zeta),1)];
+                   right  = [ones(length(base_eta),1), base_eta'];
+                   top    = [flip(base_zeta)', ones(length(base_zeta),1)];
+                   left   = [-1*ones(length(base_eta),1), flip(base_eta)'];
                    surfaceCSZetaEta = [bottom(1:end-1,:); right(1:end-1,:); top(1:end-1,:); left];
                    
-                 elseif CSName == "Oval" 
+                 elseif CSName == "Oval"
+                   Netazeta = max(Neta,Nzeta);
                    % Surface data for contact and visualization
                    theta = linspace(0, 2*pi, 4*Netazeta);
                    surfaceCSZetaEta = [cos(theta)' sin(theta)'];
