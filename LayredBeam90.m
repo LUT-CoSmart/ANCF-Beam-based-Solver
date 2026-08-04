@@ -28,9 +28,9 @@ Body1.Rotation.Z = -90;
 % ########## Create FE Models ############################################
 Surfaces = "rectangulars"; % options: triangles, rectangulars
 
-ElementNumber1 = 1;
+ElementNumber1 = 4;
 Body1 = CreateFEM(Body1,ElementNumber1,Surfaces);
-ElementNumber2 = 1;
+ElementNumber2 = 8;
 Body2 = CreateFEM(Body2,ElementNumber2,Surfaces);
 
 % ########## Calculation adjustments ######################################
@@ -44,12 +44,11 @@ Body2.SolutionBase = "Position"; % Solution-based calculation: Position, Displac
 Body2.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body2 = AddTensors(Body2);
 
-
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
 Force1.Maginutude.Z =-1e8;
-Force1.Position.X = Body1.Length.X;  % Elongation
+Force1.Position.X = Body1.Length.X /2 ;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
 Boundary1.Position = [];
@@ -67,7 +66,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 % TODO: rotation affects Nitsche
 ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
-ContactVariable = 1e8;
+ContactVariable = 1e9;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";

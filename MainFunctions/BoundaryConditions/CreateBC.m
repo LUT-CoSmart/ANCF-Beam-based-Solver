@@ -9,6 +9,7 @@ function Body = CreateBC(Body, Force, Boundary) % Creates boundary conditions
     bc = true(1, TotalDofs); % Define vector of linear constraints  
     
     % Boundary position check
+
     if ~isfield(Boundary.Position, 'X')
        Boundary.Position.X = 0;
     end
@@ -18,9 +19,24 @@ function Body = CreateBC(Body, Force, Boundary) % Creates boundary conditions
     if ~isfield(Boundary.Position, 'Z')
        Boundary.Position.Z = 0;
     end 
-
-    NodalBC = FindNodalIDLocally(Body,Boundary.Position); 
+    
     Dofs = 1:DofsAtNode; % taking all DOFs (in the beginning)
+    
+    NodalBC = [];
+    if length(Boundary.Position.X) ~= length(Boundary.Position.Y) && ...
+       length(Boundary.Position.Z) ~= length(Boundary.Position.Y)  
+       error('Check the lengths of boundary conditions')
+    end
+
+    nPoints = numel(Boundary.Position.X);
+
+    for ii = 1:nPoints
+        Position.X = Boundary.Position.X(ii);
+        Position.Y = Boundary.Position.Y(ii);
+        Position.Z = Boundary.Position.Z(ii);
+    
+        NodalBC = [NodalBC, FindNodalIDLocally(Body, Position)];
+    end
 
     switch Boundary.Type            
            case "full" 
