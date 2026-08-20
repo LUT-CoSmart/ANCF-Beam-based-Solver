@@ -28,9 +28,9 @@ Body1.Rotation.Z = -90;
 % ########## Create FE Models ############################################
 Surfaces = "rectangulars"; % options: triangles, rectangulars
 
-ElementNumber1 = 4;
+ElementNumber1 = 16;
 Body1 = CreateFEM(Body1,ElementNumber1,Surfaces);
-ElementNumber2 = 8;
+ElementNumber2 = 16;
 Body2 = CreateFEM(Body2,ElementNumber2,Surfaces);
 
 % ########## Calculation adjustments ######################################
@@ -47,11 +47,17 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Z =-1e8;
-Force1.Position.X = Body1.Length.X /2 ;  % Elongation
+Force1.Maginutude.Z =-2e9;
+Force1.Position.X = Body1.Length.X / 2 ;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
-Boundary1.Position = [];
+% CurrentPosition1 = Body1.q(Body1.PosDofs(1:3));
+% CurrentPosition2 = Body1.q(Body1.PosDofs(end-2:end));
+
+Boundary1.Position.X = [0 Body1.Length.X];  
+Boundary1.Position.Y = [0 0];
+Boundary1.Position.Z = [0 0];
+
 Boundary1.Type = "full"; % there are several types: full, reduced, positions, none
 
 % Body2
@@ -59,20 +65,22 @@ Force2.Maginutude = [];
 Force2.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries
-Boundary2.Position = [];
+Boundary2.Position.X = [0 Body2.Length.X];  
+Boundary2.Position.Y = [0 0];
+Boundary2.Position.Z = [0 0];
 Boundary2.Type = "full"; % there are several types: full, reduced, positions, none
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 % TODO: rotation affects Nitsche
-ContactType = "NitscheLin"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
-ContactVariable = 1e9;
+ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
+ContactVariable = 2e9;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re= 10^(-4);                   % Stopping criterion for residual
 imax= 50;                     % Maximum number of iterations for Newton's method 

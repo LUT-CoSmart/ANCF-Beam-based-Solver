@@ -10,17 +10,17 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type 
 [Body,Force,Boundary] = CaseProblemSet(Body,mfilename,"Standard");  % Itegration Scheme: Poigen, Standard
 
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 10;
 Body = CreateFEM(Body,ElementNumber,"rectagulars"); % options: triangles, rectagulars
 % % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 
 Body = AddTensors(Body);
 
 % %####################### Solving ######################################## 
-steps = 200;  % sub-loading steps, a lot for non full Newton-based algorithms
+steps = 20;  % sub-loading steps, a lot for non full Newton-based algorithms
 titertot=0; 
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
@@ -36,8 +36,10 @@ for i=1:steps
     for ii=1:imax    
         tic; 
         
-        % [u_bc,deltaf] = Newton_full(Body,Fext);
-        [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
+        [u_bc,deltaf] = Newton_full(Body,Fext);
+
+        % these ones for this problem due to very small compressibility work poorly 
+        %[u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); % requires much more steps (~300) and "linear"   
         % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
         Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
@@ -66,7 +68,8 @@ vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
 
 V_after = VolumeViaFaces(vertices_after, faces);
 V_before = VolumeViaFaces(vertices_before, faces);
-
+visualizationSurfaceNormalStress(Body,true)
+visualizationVonMisesStress(Body,true)
 fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
 
 CleanTemp(Body, true)

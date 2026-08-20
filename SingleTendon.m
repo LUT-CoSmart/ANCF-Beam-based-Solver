@@ -44,7 +44,7 @@ Body.mex = false;
 
 % ########## Boundary Conditions ##########################################
 % Force 
-Force.Maginutude.X = 1e5;  % Elongation
+Force.Maginutude.X = 1e4;  % Elongation
 
 % Positioning applied locally to the Undefomred configuration
 % Shift and curvature are accounted automaticaly)
@@ -61,11 +61,11 @@ Boundary.Type = "reduced"; % there are several types: full, reduced, positions, 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
  
 % % %####################### Solving ######################################## 
-steps = 200;  % sub-loading steps
+steps = 10;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);           % Stopping criterion for residual
 imax=50;              % Maximum number of iterations for Newton's method 
-backtrack = false;     % staring back track for the best solution to find an equlibrium
+backtrack = true;     % staring back track for the best solution to find an equlibrium
 
 if backtrack 
    lambdaList  = [1.0, 0.5, 0.25, 0.125];   
@@ -77,7 +77,7 @@ end
 for i=1:steps
 
     % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-    Body = SubLoading(Body, i, steps, "cubic"); 
+    Body = SubLoading(Body, i, steps, "quartic"); 
     Fext = Body.Fext;    
     for lambda = lambdaList
         if lambda < 1
@@ -87,7 +87,7 @@ for i=1:steps
             tic; 
     
             [u_bc,deltaf] = Newton_full(Body,Fext);
-    
+
             Body.u(Body.bc) = Body.u(Body.bc)+u_bc;         % Add displacement to previous one
             Body.q(Body.bc) = Body.q(Body.bc)+u_bc;         % change the global positions
             
@@ -114,13 +114,13 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,visDeformed,visInitial);
+
 % volume check
 faces=Body.BodyFaces;
 vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
 vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
-
 V_after = VolumeViaFaces(vertices_after, faces);
 V_before = VolumeViaFaces(vertices_before, faces);
 
 fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
-% CleanTemp(Body, true)
+CleanTemp(Body, true)

@@ -38,5 +38,5 @@ function Body = CreateFEM(Body,ElementNumber,Surfaces)
     
     Body.BodySurfaceType = Surfaces;
     Body = feval(functionName,Body); 
-  
+    Body.xlocFunction = 'xloc' + Body.ElementType; 
     

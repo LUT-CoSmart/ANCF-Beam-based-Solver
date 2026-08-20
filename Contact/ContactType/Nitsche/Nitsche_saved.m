@@ -54,7 +54,7 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ, gap] = N
         else
             S_cont = ContactBody.S(F_cont);  
         end                
-        Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_targ, S_cont); 
+        Sigma_cont_nn = ContactBody.Sigma_nn(F_cont, Normal_cont, S_cont); 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Normal force difference

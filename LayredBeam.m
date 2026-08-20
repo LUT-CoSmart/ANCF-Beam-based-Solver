@@ -42,7 +42,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -5e8;
+Force1.Maginutude.Y = -1e8;
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -59,23 +59,22 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
-% TODO: rotation affects Nitsche
-ContactType = "Nitsche"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
-ContactVariable = 1e9;
+ContactType = "Nitsche"; % Options: "None", "Penalty", "Nitsche" 
+ContactVariable = 1e8;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ####################### Solving ######################################## 
-steps = 30;  % sub-loading steps
+steps = 20;  % sub-loading steps
 titertot=0;  
 Re= 10^(-4);                   % Stopping criterion for residual
-imax= 50;                     % Maximum number of iterations for Newton's method 
+imax= 40;                     % Maximum number of iterations for Newton's method 
 
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="cubic"; % "sigmoid", "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", "mixed_Loadvise", etc.
+LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", etc.
 backtrack = true; % staring back track for the best solution to find an equlibrium
 
 if backtrack 
@@ -107,8 +106,10 @@ for i=1:steps
         
         for ii=1:imax
             tic;
+
             [u_bc,deltaf,Gap] = Newton_Broyden_2Bodies(ii,Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
-    
+            %[u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,ContactVariable,ContactFiniteDiference,Fext);        
+                
             % Separation
             Body1.u(Body1.bc) = Body1.u(Body1.bc) + lambda * u_bc(1:Body1.ndof);
             Body1.q(Body1.bc) = Body1.q(Body1.bc) + lambda * u_bc(1:Body1.ndof);
@@ -119,7 +120,7 @@ for i=1:steps
             titer=toc;
             titertot=titertot+titer;
             
-            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap.total)
+            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap.Total)
                 break;  
             end
 

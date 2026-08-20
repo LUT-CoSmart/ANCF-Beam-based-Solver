@@ -5,7 +5,6 @@ function Body = BeamANCFMesh(Body)
     DIM = Body.DIM; 
     ElementNodes = Body.ElementNodes;
     ElementNumber = Body.ElementNumber;
-
      
     nodes = ElementNumber * (ElementNodes-1) + 1; % number of nodes
     Body.NodeNumber = nodes;
@@ -116,24 +115,19 @@ function Body = BeamANCFMesh(Body)
 
     % generate element and angles connectivity
     nloc = [];
-    phim = [];
     Phim = [];
     for i = 1:ElementNumber
         loc_n = []; % local element's node connectivity
-        loc_i = []; % local element's inner angles connectivity
         loc_o = []; % local element's outer angles connectivity
         for j = 1:ElementNodes
             loc_n = [loc_n (i-1)*(ElementNodes-1)+j];
-            loc_i = [loc_i phik((i-1)*(ElementNodes-1)+j)];
             loc_o = [loc_o Phik((i-1)*(ElementNodes-1)+j)];
         end
         nloc = [nloc; loc_n];
-        phim = [phim; loc_i];
         Phim = [Phim; loc_o];
     end
 
     Body.nloc = nloc;
-    Body.phim = phim;
     Body.Phim = Phim;
 
     % Creates mesh for an intially straight beam structure

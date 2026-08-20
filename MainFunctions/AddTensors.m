@@ -2,14 +2,17 @@ function Body = AddTensors(Body)
         
     path = 'TensorDerivations\' + Body.ElementType + '\' ;
     
-    % Creation of temporal folder   
     
-    TempRoot = fullfile(pwd, 'Temp');
+    
+    TempRoot = fullfile(pwd, 'Temp'); % Creation of temporal folder   
     % Create Temp root if missing
     if ~isfolder(TempRoot)
         mkdir(TempRoot);
     else 
-
+        bodyFolder = fullfile(TempRoot, Body.Name);
+        if isfolder(bodyFolder)
+           rmdir(bodyFolder,'s');
+        end   
     end
     
     % Create folder for the specific body
@@ -111,8 +114,8 @@ function Body = AddTensors(Body)
      addpath(bodyFolder);    
      Body.BodyFolder = bodyFolder;
 
-     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface"; 
-        
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface";         
      L = Body.Length.Ln;
      W = Body.Length.Z;
      H = Body.Length.Y;
@@ -123,29 +126,35 @@ function Body = AddTensors(Body)
      Shape_eta = @(xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
      Shape_zeta = @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
 
-     Body.Nm_xi_ = @(xi,eta,zeta) [Shape_xi(xi,eta,zeta); Shape_eta(xi,eta,zeta); Shape_zeta(xi,eta,zeta)];
-     Body.nabla_r_xi = @(xi,eta,zeta,q) [Shape_xi(xi,eta,zeta)*q Shape_eta(xi,eta,zeta)*q Shape_zeta(xi,eta,zeta)*q];        
+     Nm_xi_ = @(xi,eta,zeta) [Shape_xi(xi,eta,zeta); Shape_eta(xi,eta,zeta); Shape_zeta(xi,eta,zeta)];
      
-     Body.F0 = @(q0,xi,eta,zeta) F0(q0,L,H,W,xi,eta,zeta);
+     Body.nabla_r_xi = @(q,xi,eta,zeta) [Shape_xi(xi,eta,zeta)*q Shape_eta(xi,eta,zeta)*q Shape_zeta(xi,eta,zeta)*q];        
      Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,L,H,W,xi,eta,zeta);   
-
-     if Body.Fibers
-        a0 = Body.Dvec(end-6:end-4)';
-        Body.a0_fib = @(q0,Phi,xi,eta,zeta) a0_fib(a0,q0,Phi,L,H,W,xi,eta,zeta)';
-     end
+     Body.dF_dq = @(q0,xi,eta,zeta) pagemtimes(reshape(Nm_xi_(xi,eta,zeta),3,3,[]), F0(q0,L,H,W,xi,eta,zeta)^(-1));
         
-     if Body.Fibers
-        S = @(F_, a0_fib) PiolaSecondTensor(F_, Body.const, a0_fib);
+     % if Body.DeformationType == "Small"
+     %    Body.dEdq = @(dF_dq_vec,F) 0.5 * (dF_dq_vec' + dF_dq_vec);  
+     % else
+     %    Body.dEdq = @(dF_dq_vec,F) 0.5 * (dF_dq_vec' * F + F' * dF_dq_vec);
+     % end
+
+     % adjustment for vectorization
+     if Body.DeformationType == "Small"
+        Body.dEdq = @(dF,F) 0.5 * (pagetranspose(dF) + dF);
      else
-        S = @(F_) PiolaSecondTensor(F_, Body.const);         
+        Body.dEdq = @(dF,F) 0.5 * (pagemtimes(dF,'transpose',F,'none') + pagemtimes(F,'transpose',dF,'none'));
      end
 
-     Sigma = @(F_,S) 1/det(F_) * F_ * S * F_'; %  Cauchy Stresses 
-    
-     Body.S = S;
-     Body.Sigma = Sigma;
-     Body.Sigma_nn = @(F_, N, S) N' * Sigma(F_, S) * N;    
+     if Body.Fibers 
+        a0 = Body.Dvec(end-6:end-4)';
+        a0_fiber = @(q0,Phi,xi,eta,zeta) a0_fib(a0,q0,Phi,L,H,W,xi,eta,zeta)';
+        S = @(F_,q0,Phi,xi,eta,zeta) PiolaSecondTensor(F_, Body.const, a0_fiber(q0,Phi,xi,eta,zeta));
+     else % in the nonfiber version, the arguments are accepted but simply ignored
+        S = @(F_,q0,Phi,xi,eta,zeta) PiolaSecondTensor(F_, Body.const);         
+     end
 
+     Body.S = S; % 2nd Piola Stress tensor 
+     Body.Sigma = @(F_,S) 1/det(F_) * F_ * S * F_'; %  Cauchy Stress tensor
            
      Body.NodeSphere = feval("MaxNode" + Body.ElementType + "Dimension", Body); % space around node for possible contact check;
      

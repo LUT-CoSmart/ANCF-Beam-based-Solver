@@ -17,17 +17,17 @@ Body.Rotation.Y = 0;
 Body.Rotation.Z = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 64;
+ElementNumber = 20; 
 Body = CreateFEM(Body,ElementNumber,"rectagulars");
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab_automatic"; % Calculation of FD: Matlab, AceGen, Matlab_automatic
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen, Matlab_automatic
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
 % %####################### Solving ######################################## 
-steps = 30;  % sub-loading steps
+steps = 10;  % sub-loading steps
 titertot=0;  
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
@@ -64,7 +64,9 @@ for i=1:steps
 end
 
 % POST PROCESSING ###############################################
-visDeformed = true;
-visInitial = true;
+visDeformed = false;
+visInitial = false;
 PostProcessing(Body,visDeformed,visInitial) 
+visualizationVonMisesStress(Body,true)
+visualizationSurfaceNormalStress(Body,true)
 CleanTemp(Body, true)

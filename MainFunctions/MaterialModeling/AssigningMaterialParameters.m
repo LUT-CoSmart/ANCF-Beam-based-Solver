@@ -3,16 +3,15 @@ function  Body = AssigningMaterialParameters(Body,MaterialName,param, compressib
     Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
     
     % Define "bulk" module 
-    if nargin < 4 || ~ismember(MaterialName, compressiblility)
+    if ~ismember(MaterialName, compressiblility)
         % d = 1e-13;
-        d = 1e-10 * Body.Volume; % emperical relation for incokmp. bodies with dependency of its size
+        d = 1e-8 * Body.Volume; % emperical relation for incokmp. bodies with dependency of its size
     else
         d = [];
     end
 
     % Define fibers
-    if nargin < 5 || ~ismember(MaterialName, fibers) % material isotrtopic
-       param.a0 = [];
+    if ~ismember(MaterialName, fibers) % material isotrtopic
        Body.Fibers = false;
     else       
        Body.Fibers = true;

@@ -4,15 +4,16 @@ function visualization(Body,q,FaceColor,Show)
     if Show 
         vertices = feval(Body.SurfacefunctionName, Body, q);
  
-        DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3);
-        NodePositions = reshape(q(DofID), 3, []).'; % nodes positions
+        % DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3);
+        % NodePositions = reshape(q(DofID), 3, []).'; % nodes positions
+        
         
         % patching main surface
         hold on
         patch('Vertices', vertices, 'Faces', Body.BodyFaces, 'FaceColor', FaceColor, 'FaceAlpha', 0.2);
-        
+        % patching side surfaces
         if Body.BodySurfaceType == "rectagulars"
-            % patching side surfaces
+            
             % start face
             patch('Vertices', vertices, 'Faces', Body.BodyfacesStart, 'FaceColor', FaceColor, 'FaceAlpha', 0.2); 
     
@@ -22,7 +23,7 @@ function visualization(Body,q,FaceColor,Show)
         
         plot3(vertices(:,1), vertices(:,2), vertices(:,3), '.k')    
 
-        plot3(NodePositions(:,1), NodePositions(:,2), NodePositions(:,3), '-or','MarkerFaceColor', 'r', 'MarkerSize', 8)
+        % plot3(NodePositions(:,1), NodePositions(:,2), NodePositions(:,3), '-or','MarkerFaceColor', 'r', 'MarkerSize', 8)
         view(20, 15)
 
        

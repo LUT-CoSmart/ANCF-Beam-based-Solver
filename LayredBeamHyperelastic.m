@@ -44,7 +44,7 @@ Body2 = AddTensors(Body2);
 % ########## Boundary Conditions ##########################################
 % Body1 
 % Force (applied locally, shift and curvature are accounted automaticaly)
-Force1.Maginutude.Y = -2e5;
+Force1.Maginutude.Y = -1e5;
 Force1.Position.X = Body1.Length.X;  % Elongation
 
 % Boundaries (applied locally, shift and curvature are accounted automaticaly)
@@ -62,14 +62,14 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
 % TODO: rotation affects Nitsche
-ContactType = "Penalty"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
-ContactVariable = 3e6 * 3.25;
+ContactType = "Nitsche"; % Options: "None", "Penalty", "NitscheLin", "Nitsche" 
+ContactVariable = 0*1e6;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
 Body2.ContactRole = "master";
 
 % ####################### Solving ######################################## 
-steps = 50;  % sub-loading steps
+steps = 100;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);                   % Stopping criterion for residual
 imax= 50;                     % Maximum number of iterations for Newton's method 

@@ -8,7 +8,7 @@ if Show
     visualization(Body1,Body1.q,'none',Show);    
     visualization(Body2,Body2.q,'none',Show);
 
-    P = Gap.points;
+    P = Gap.Points;
 
     x = P(:,1);
     y = P(:,2);
@@ -20,7 +20,7 @@ if Show
 
     colormap jet
     colorbar
-    title(['Total gap: ' ,num2str(Gap.total) ,'  , Maximum gap ', num2str(Gap.maximum)],'FontName','Times New Roman','FontSize',20);  
+    title(['Total gap: ' ,num2str(Gap.Total) ,'  , Maximum gap ', num2str(Gap.Maximum)],'FontName','Times New Roman','FontSize',20);  
 
     plot3(x,y,z,'or') % checking contact points
 

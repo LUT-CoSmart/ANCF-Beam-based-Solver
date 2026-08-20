@@ -32,7 +32,7 @@ function [Body1,Body2,Gap] = BestStepTwoBodies(bestStep,lambda,Gap,Body1,Body2,d
           Body1 = Body1_best;
           Body2 = Body2_best;
           Gap =  Gap_best;    
-          warning('Chosen the following solution: Iteration: %d, Convergence: %10.4f, Total gap: %10.7f\n', iteration, deltaf_best, Gap.total); 
+          warning('Chosen the following solution: Iteration: %d, Convergence: %10.4f, Total gap: %10.7f\n', iteration, deltaf_best, Gap.Total); 
        end 
 
     end  

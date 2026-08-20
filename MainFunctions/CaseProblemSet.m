@@ -24,15 +24,13 @@ function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationSchem
                 Body.Length.X = 1; 
                 Body.Length.Y = 0.1;
                 Body.Length.Z = 0.1;
-
                 MaterialName = 'Neo';                
                 param.mu= 9 * 1e5;
-
                 Force.Maginutude.X = 9500;
                 Force.Position.X = Body.Length.X; 
                 Boundary.Position = [];
                 Boundary.Type = "reduced"; 
-           
+
            case {'PrincetonBeamSmall', 'PrincetonBeamLarge'}
                 CSName = 'Rectangular';
                 Body.Length.X = 0.508; 

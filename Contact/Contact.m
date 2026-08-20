@@ -13,16 +13,16 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactTypeName,ContactVariable,Conta
 
     if ContactTypeName ~= "None" 
         %% TODO: add boxing to identify the necessity of the contact, for now we always consider its existence
-        % Penalty approach        
-        if ContactTypeName == "Penalty"
-           ContactType = @Penalty;
-
-        % Nitshes approach           
-        elseif contains(ContactTypeName, "Nitsche")
-             ContactType = @(varargin)Nitsche(ContactTypeName,varargin{:});
-
-        else
-           error('****** Contact type is not implemneted ******')
+        switch ContactTypeName
+            
+            case "Penalty"
+                ContactType = @Penalty;
+        
+            case "Nitsche"
+                ContactType = @Nitsche;
+        
+            otherwise
+                error("Contact type '%s' is not implemented.", ContactTypeName);
         end
         
         % Collecting bodies' surface points

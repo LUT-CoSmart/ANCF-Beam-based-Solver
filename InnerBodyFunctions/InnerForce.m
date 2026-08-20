@@ -1,0 +1,53 @@
+function [K,Fint] = InnerForce(Body,CalculateStiffness)
+        
+        if nargin < 2 % some methods don't need to calculate stiffness matrix
+            CalculateStiffness = true;
+        end
+        
+        FiniteDiference = Body.FiniteDiference;
+
+        TotalDofs = Body.TotalDofs;
+        xloc = Body.xloc;
+        K=zeros(TotalDofs);
+        Fint=zeros(TotalDofs,1); 
+        ElementDofs = Body.ElementDofs;
+        functionName = Body.ElementType + Body.SubType;  
+
+        ElementNumber = Body.ElementNumber;
+        K_local_cell = cell(ElementNumber,1);
+        F_local_cell = cell(ElementNumber,1);
+
+        for ii = 1:ElementNumber  % parfor doesn't work yet, so for  
+            ElementDofs = Body.ElementDofs;
+            K_loc = zeros(ElementDofs);
+            Fe = zeros(ElementDofs,1);
+
+            if strcmp(functionName, 'BeamANCF')
+                [K_loc, Fe] = BeamANCF(Body, ii, CalculateStiffness,FiniteDiference);
+            else
+                error('Inner function is not defined')
+            end    
+            
+            K_local_cell{ii} = K_loc;
+            F_local_cell{ii} = Fe;
+        end
+
+        for ii = 1:ElementNumber
+            K_loc = K_local_cell{ii};
+            Fe = F_local_cell{ii};
+
+            for jj = 1:ElementDofs
+                ind01 = xloc(ii,jj); % global row
+                for kk = 1:ElementDofs
+                    ind02 = xloc(ii,kk); % global col
+                    K(ind01,ind02) = K(ind01,ind02) + K_loc(jj,kk);
+                end
+                Fint(ind01) = Fint(ind01) + Fe(jj);
+            end
+        end
+
+        if contains(FiniteDiference,"Matlab") % Adjustment related to the element size 
+            ElemDim = 0.5 * Body.Length.Ln * Body.detF0;
+            Fint = Fint*ElemDim;
+            K = K*ElemDim;
+        end    

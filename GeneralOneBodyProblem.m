@@ -57,7 +57,7 @@ Force.Position.Z = 0;
 Boundary.Position.X = 0;  
 Boundary.Position.Y = 0;
 Boundary.Position.Z = 0;
-Boundary.Type = "full"; % there are several types: full, reduced, positions, none
+Boundary.Type = "reduced"; % there are several types: full, reduced, positions, none
 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
 
