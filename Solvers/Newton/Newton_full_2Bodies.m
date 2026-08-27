@@ -15,7 +15,7 @@ function [u_bc,deltaf,Gap] = Newton_full_2Bodies(Body1,Body2,ContactType,Contact
          Ke = [Ke1 zeros(Body1.TotalDofs,Body2.TotalDofs);
                zeros(Body2.TotalDofs,Body1.TotalDofs) Ke2];   
          K = Kc + Ke;
-         ff =  Fe - Fext + Fc; 
+         ff =  Fe - Fext - Fc; % Fc as external force
 
          % Calculations
          K_bc = K(bc,bc); 

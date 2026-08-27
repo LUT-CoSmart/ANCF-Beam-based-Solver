@@ -20,7 +20,7 @@ function Body = SurfaceBeamApprox(Body)
                 % this allows the surface area splitting with more equally
                 Neta  = 1 + ceil(Nxi * Body.Length.Y / Body.Length.Ln);                 
                 Nzeta = 1 + ceil(Nxi * Body.Length.Z / Body.Length.Ln);
-                if CSName == "Rectangular"
+                if CSName == "Rectangular" || (CSName == "RectangularCheck")
                    % Surface data for contact and visualization 
                    base_eta = linspace(-1, 1, Neta); % equal spacing
                    base_zeta = linspace(-1, 1, Nzeta); % equal spacing

@@ -2,7 +2,8 @@ function visualization(Body,q,FaceColor,Show)
     
     
     if Show 
-        vertices = feval(Body.SurfacefunctionName, Body, q);
+        vertices = Body.SurfacePointsFunction(q);
+        %feval(Body.SurfacefunctionName, Body, q);
  
         % DofID = xlocBeam(Body.DofsAtNode,1:Body.NodeNumber,1:3);
         % NodePositions = reshape(q(DofID), 3, []).'; % nodes positions
@@ -10,6 +11,7 @@ function visualization(Body,q,FaceColor,Show)
         
         % patching main surface
         hold on
+        axis equal
         patch('Vertices', vertices, 'Faces', Body.BodyFaces, 'FaceColor', FaceColor, 'FaceAlpha', 0.2);
         % patching side surfaces
         if Body.BodySurfaceType == "rectagulars"

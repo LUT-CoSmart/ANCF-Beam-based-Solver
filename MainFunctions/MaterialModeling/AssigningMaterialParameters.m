@@ -5,7 +5,7 @@ function  Body = AssigningMaterialParameters(Body,MaterialName,param, compressib
     % Define "bulk" module 
     if ~ismember(MaterialName, compressiblility)
         % d = 1e-13;
-        d = 1e-8 * Body.Volume; % emperical relation for incokmp. bodies with dependency of its size
+        d = 1e-7 * Body.Volume; % emperical relation for incokmp. bodies with dependency of its size
     else
         d = [];
     end

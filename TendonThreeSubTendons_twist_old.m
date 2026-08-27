@@ -34,7 +34,7 @@ Body1.Twist.ro = norm(Center2 - Center1);
 
 Body2.Twist.angle = angle;
 Body2.Twist.initial_rot = atan2d(RelCenter2(2),RelCenter2(1));
-Body2.Twist.ro = 0;
+Body2.Twist.ro = 0; % distance to the center of rotation and mBody2
 
 Body3.Twist.angle = angle;
 Body3.Twist.initial_rot = atan2d(RelCenter3(2),RelCenter3(1));
@@ -135,7 +135,7 @@ for i=1:steps
         [Kc2,Fc2,Gap2] = Contact(Body2,Body3,ContactType,ContactVariable,ContactFiniteDiference);
         Fc2_extend = [zeros(Body1.TotalDofs,1); Fc2];
         Kc2_extend = [zeros(Body1.TotalDofs, Body1.TotalDofs + Body2.TotalDofs+Body3.TotalDofs);
-               zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
+                      zeros(Body2.TotalDofs+Body3.TotalDofs, Body1.TotalDofs) Kc2];    
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         Body1.ContactRole = "slave"; % Options: "master", "slave"
         Body3.ContactRole = "master";

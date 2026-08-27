@@ -59,7 +59,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
-ContactType = "Nitsche"; % Options: "None", "Penalty", "Nitsche" 
+ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche" 
 ContactVariable = 1e8;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
@@ -74,7 +74,7 @@ imax= 40;                     % Maximum number of iterations for Newton's method
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", etc.
+LoadType ="cubic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", etc.
 backtrack = true; % staring back track for the best solution to find an equlibrium
 
 if backtrack 
@@ -126,6 +126,7 @@ for i=1:steps
 
             [Body1,Body2] = BestStepTwoBodies(backtrack,lambda,Gap,Body1,Body2,deltaf,ii,imax); 
             
+        
         end
 
         if ii < imax % it is needed for exit from the secon loop
@@ -144,12 +145,18 @@ axis equal
 xlabel('\it{X}','FontName','Times New Roman','FontSize',20)
 ylabel('\it{Y}','FontName','Times New Roman','FontSize',20),
 zlabel('Z [m]','FontName','Times New Roman','FontSize',20);
-visualization(Body1,Body1.q0,'cyan',false);
-visualization(Body2,Body2.q0,'none',false);
+% visualization(Body1,Body1.q,'cyan',true);
+% visualization(Body2,Body2.q,'none',true);
 
 visualizationContact(Gap,Body1,Body2,true);
 PostProcessing(Body1,false,false) 
 PostProcessing(Body2,false,false) 
+
+figure();
+hold on
+visualization_StressRecovery(Body1,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
+visualization_StressRecovery(Body2,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
+
 
 CleanTemp(Body1, cleaningAfter)
 CleanTemp(Body2, cleaningAfter)

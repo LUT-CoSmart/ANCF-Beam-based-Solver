@@ -6,7 +6,6 @@ function [Kc,Fc,Gap] = ContactForceMatlab(Body1,Body2,ContactType,ContactVariabl
         TotalDofs2 = Body2.TotalDofs;
         TotalDofs = TotalDofs1 + TotalDofs2;
         
-
         % Initialize the global contact forces
         Kc = zeros(TotalDofs,TotalDofs);
         [Fc,Gap] = ContactForce(Body1,Body2,ContactVariable,ContactType);
@@ -33,15 +32,14 @@ function [Kc,Fc,Gap] = ContactForceMatlab(Body1,Body2,ContactType,ContactVariabl
     
                    Body1.q = q1_backup - h*I_vec(1:TotalDofs1); 
                    Body1.u = u1_backup - h*I_vec(1:TotalDofs1);
-                   Body1.SurfacePoints = feval(Body1.SurfacefunctionName + "Partly", Body1, Body1.q, ii); 
+                   Body1.SurfacePoints =  Body1.SurfacePointsFunction(Body1.q);
+                   
                    [Fch,~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
                    Body1.SurfacePoints = SurfacePoints1_backup;
                else   
-                   % h = max(sqrtEps * abs(q2_backup(ii-TotalDofs1)) , h1); 
-    
                    Body2.q = q2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
                    Body2.u = u2_backup - h*I_vec(1+TotalDofs1:TotalDofs);  
-                   Body2.SurfacePoints = feval(Body2.SurfacefunctionName + "Partly", Body2, Body2.q, ii - TotalDofs1); 
+                   Body2.SurfacePoints = Body2.SurfacePointsFunction(Body2.q);
                    [Fch,~] = ContactForce(Body1,Body2,ContactVariable, ContactType); % force due to variation            
                    Body2.SurfacePoints = SurfacePoints2_backup; 
                end

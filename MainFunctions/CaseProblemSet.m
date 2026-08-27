@@ -1,6 +1,6 @@
-function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationScheme)
+function [Body,Force,Boundary] = CaseProblemSet(Body,CaseName,ApproximationScheme,IntegrationPoints)
     
-    IntegrationPoints = "Gauss";    
+    
     switch CaseName
            case {"LockingBendingLarge", "LockingBendingSmall"}
                 CSName = "Rectangular";

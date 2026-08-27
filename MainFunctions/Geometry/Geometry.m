@@ -2,6 +2,12 @@ function Body = Geometry(Body,CSName,ApproximationScheme, IntegrationPoints)
     
         
     switch CSName
+        case "RectangularCheck"
+                Body.Length.X = 2; % Body length
+                Body.Length.Y = 0.5;
+                Body.Length.Z = 0.1;                
+                Body.Volume =  Body.Length.X *  Body.Length.Y  *  Body.Length.Z;
+
            case "Rectangular"
                 Body.Length.X = 1; % Body length
                 Body.Length.Y = 0.25;

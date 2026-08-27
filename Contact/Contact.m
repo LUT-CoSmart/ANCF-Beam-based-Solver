@@ -25,10 +25,10 @@ function [Kc,Fc,Gap] = Contact(Body1,Body2,ContactTypeName,ContactVariable,Conta
                 error("Contact type '%s' is not implemented.", ContactTypeName);
         end
         
-        % Collecting bodies' surface points
-        Body1.SurfacePoints = feval(Body1.SurfacefunctionName, Body1, Body1.q);         
-        Body2.SurfacePoints = feval(Body2.SurfacefunctionName, Body2, Body2.q);
-        
+        % Collecting bodies' surface points        
+        Body1.SurfacePoints = Body1.SurfacePointsFunction(Body1.q);       
+        Body2.SurfacePoints = Body2.SurfacePointsFunction(Body2.q);
+
         switch ContactFiniteDiference
             case "Matlab"
                 [Kc,Fc,Gap] = ContactForceMatlab(Body1,Body2,ContactType,ContactVariable,CalculateStiffness);

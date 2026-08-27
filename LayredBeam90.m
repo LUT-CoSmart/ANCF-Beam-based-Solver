@@ -28,9 +28,9 @@ Body1.Rotation.Z = -90;
 % ########## Create FE Models ############################################
 Surfaces = "rectangulars"; % options: triangles, rectangulars
 
-ElementNumber1 = 16;
+ElementNumber1 = 8;
 Body1 = CreateFEM(Body1,ElementNumber1,Surfaces);
-ElementNumber2 = 16;
+ElementNumber2 = 8;
 Body2 = CreateFEM(Body2,ElementNumber2,Surfaces);
 
 % ########## Calculation adjustments ######################################
@@ -132,7 +132,7 @@ for i=1:steps
             titer=toc;
             titertot=titertot+titer;
 
-            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap.total)
+            if printStatus(deltaf, u_bc, Re, i, ii, imax, steps, titertot, Gap.Total)
                 break;  
             end
 

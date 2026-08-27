@@ -25,3 +25,4 @@ function PostProcessing(Body,visDeformed,visInitial)
         visualization(Body,Body.q,'cyan',visDeformed);
     end    
 
+

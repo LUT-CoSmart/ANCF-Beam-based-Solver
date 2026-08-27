@@ -129,15 +129,10 @@ function Body = AddTensors(Body)
      Nm_xi_ = @(xi,eta,zeta) [Shape_xi(xi,eta,zeta); Shape_eta(xi,eta,zeta); Shape_zeta(xi,eta,zeta)];
      
      Body.nabla_r_xi = @(q,xi,eta,zeta) [Shape_xi(xi,eta,zeta)*q Shape_eta(xi,eta,zeta)*q Shape_zeta(xi,eta,zeta)*q];        
-     Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,L,H,W,xi,eta,zeta);   
+     Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,L,H,W,xi,eta,zeta);
+     Body.F0 = @(q0,u,xi,eta,zeta) F0(q0,L,H,W,xi,eta,zeta);
      Body.dF_dq = @(q0,xi,eta,zeta) pagemtimes(reshape(Nm_xi_(xi,eta,zeta),3,3,[]), F0(q0,L,H,W,xi,eta,zeta)^(-1));
         
-     % if Body.DeformationType == "Small"
-     %    Body.dEdq = @(dF_dq_vec,F) 0.5 * (dF_dq_vec' + dF_dq_vec);  
-     % else
-     %    Body.dEdq = @(dF_dq_vec,F) 0.5 * (dF_dq_vec' * F + F' * dF_dq_vec);
-     % end
-
      % adjustment for vectorization
      if Body.DeformationType == "Small"
         Body.dEdq = @(dF,F) 0.5 * (pagetranspose(dF) + dF);
@@ -164,7 +159,8 @@ function Body = AddTensors(Body)
      % end
 
      Body.Results = [];
-
+     SurfaceShape = BuildBeamSurfaceMatrixLocal(Body);    
+     Body.SurfacePointsFunction = @(q) reshape(SurfaceShape*q,3,[])';   
 
      % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 
      % Option: 

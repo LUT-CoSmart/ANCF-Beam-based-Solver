@@ -9,12 +9,12 @@ function [Sigma_nn,nabla_Sigma_nn] = ContactDataExtractionNitsche(Body,Element,D
          q0= Body.q0(DOFs);
          Phi = Body.Phim(Element,:);
 
-         F0 = Body.F(q,q0,u,xi,eta,zeta);    
-         S0 = Body.S(F0,q0,Phi,xi,eta,zeta);   
+         F = Body.F(q,q0,u,xi,eta,zeta);    
+         S = Body.S(F,q0,Phi,xi,eta,zeta);   
 
          Sigma = Body.Sigma;
 
-         Sigma_nn =  N' * Sigma(F0, S0) * N; 
+         Sigma_nn =  N' * Sigma(F, S) * N; 
          
          nabla_r_xi = Body.nabla_r_xi(q,xi,eta,zeta);  
 
