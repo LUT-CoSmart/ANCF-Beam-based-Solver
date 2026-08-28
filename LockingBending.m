@@ -7,23 +7,19 @@ Body.Name = "Body";
 CaseSubtype = "Large"; 
 
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"   
 [Body,Force,Boundary] = CaseProblemSet(Body,string(mfilename) + CaseSubtype,"Standard",...
                         IntegrationPoints);  % Itegration Scheme: Poigen, Standard
 
-% Rotation (in degrees)
-Body.Rotation.X = 0;
-Body.Rotation.Y = 0;
-Body.Rotation.Z = 0;
 
 % ########## Create FE Model ##############################################
-ElementNumber = 16; 
-Body = CreateFEM(Body,ElementNumber,"triangles");
+ElementNumber = 8; 
+Body = CreateFEM(Body,ElementNumber,"rectangulars");
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen, Matlab_automatic
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen, Matlab_automatic, Casadi
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -69,6 +65,7 @@ end
 visDeformed = true;
 visInitial = true;
 PostProcessing(Body,visDeformed,visInitial) 
-%visualization_StressRecovery(Body,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
+%% TODO: add F tensors for Casadi & AceGen
+% visualization_StressRecovery(Body,false,'Normal'); % Options: "Normal", "VM" ('Von Mises)
 % visualization_StressRecovery(Body,true,'VM'); 
 CleanTemp(Body, true)

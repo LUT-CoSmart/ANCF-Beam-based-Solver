@@ -34,7 +34,7 @@ Surfaces = "rectagulars"; % options: triangles, rectagulars
 Body = CreateFEM(Body,ElementNumber,Surfaces);
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen, Casadi
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -61,7 +61,7 @@ Boundary.Type = "reduced"; % there are several types: full, reduced, positions, 
 Body = CreateBC(Body, Force, Boundary); % Application of Boundary conditions
  
 % % %####################### Solving ######################################## 
-steps = 10;  % sub-loading steps
+steps = 50;  % sub-loading steps
 titertot=0;  
 Re=10^(-4);           % Stopping criterion for residual
 imax=50;              % Maximum number of iterations for Newton's method 
@@ -115,12 +115,14 @@ visDeformed = true;
 visInitial = true;
 PostProcessing(Body,visDeformed,visInitial);
 
-% volume check
-faces=Body.BodyFaces;
-vertices_before = feval(Body.SurfacefunctionName, Body, Body.q0);
-vertices_after  = feval(Body.SurfacefunctionName, Body, Body.q);
-V_after = VolumeViaFaces(vertices_after, faces);
-V_before = VolumeViaFaces(vertices_before, faces);
+% Volume change check
 
-fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
+if Surfaces == "triangles"
+   faces=Body.BodyFaces;
+   vertices_before = Body.SurfacePointsFunction(Body.q0); 
+   vertices_after  = Body.SurfacePointsFunction(Body.q); 
+   V_after = VolumeViaFaces(vertices_after, faces);
+   V_before = VolumeViaFaces(vertices_before, faces);
+   fprintf('Volume before: %10.12f; Volume after: %10.12f; Relative change: %10.12f \n', V_before, V_after, (V_after-V_before)/V_before)
+end
 CleanTemp(Body, true)

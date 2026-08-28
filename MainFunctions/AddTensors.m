@@ -25,92 +25,97 @@ function Body = AddTensors(Body)
     % Add shape function
     ShapeFunctionFolder = fullfile('TensorDerivations', Body.ElementType, 'Matlab', 'ShapeFunctions', Body.ElementName);
     copyfile(fullfile(ShapeFunctionFolder, '*'), bodyFolder, 'f');  % Copy all files from source to bodyFolder
-    
-    % 
-    pathAceGen = path + 'AceGen';    
-    pathMatlab = path + 'Matlab\ElementFunctions' + '\' + Body.ElementName;
 
     % Construct the function name
     function_name = 'ANCF'+Body.ElementName+Body.MaterialName;
-            
-    % Search recursively
-    files = dir(fullfile(pathAceGen, '**', function_name + '.m') );
-        
-    % Check 
-    if ~isempty(files)
-        srcFile = fullfile(files(1).folder, files(1).name);
-        destFile = fullfile(bodyFolder, 'AceGenForce.m');
-        copyfile(srcFile, destFile, 'f'); 
-            
-        % some modifications to AceGen file for MEX (surprisingly it also speed up AceGen)
-        lines = readlines(destFile);
-            
-        pattern_check = contains(lines(15), "persistent v") && contains(lines(16), "if size(v)<") && contains(lines(17), "v=zeros");
-            
-        if pattern_check
-           % Extract the number N from 'v=zeros(N,...'
-           n = regexp(lines(17), 'v\s*=\s*zeros\((\d+)', 'tokens', 'once');
-           if ~isempty(n)
-               lines(15) = "v=zeros(" + n{1} + ",'double');";
-               lines(16) = "";
-               lines(17) = "";
-               lines(18) = "";
-           end
-         end
-         writelines(lines, destFile);
-           
-         else
-           warning('This element is not yet implemented in AceGen, substituded by the dummy');
-           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-           fileName = 'AceGenForce.m';
-           fullPath = fullfile(bodyFolder, fileName);
-           dummyCode = [
-                    "function [q0f, q0, uu, D, K, F, GINT, nintpt] = AceGenForce(q0f, q0, uu, D, K, F, GINT, nintpt)"
-                    "K = zeros(" + Body.ElementDofs + ");"
-                    "F = zeros(" + Body.ElementDofs + ",1);"
-                    "end"];
-            fid = fopen(fullPath, 'w');
-            for i = 1:numel(dummyCode)
-                fprintf(fid, '%s\n', dummyCode(i));
-            end
-            fclose(fid);     
-     end
-
-     % Add files for inner energy calculations based on Matlab
-     srcFolder = fullfile(pwd, 'MaterialsSecondKirhhoff');
-     srcFile = fullfile(srcFolder, Body.MaterialName + ".m"); 
-     destFile = fullfile(bodyFolder, 'PiolaSecondTensor.m'); % Material check has already done in 'Materials.m'
-     copyfile(srcFile, destFile, 'f'); % force overwrite
-          
-     files = dir(fullfile(pathMatlab, '*.*'));
-     files = files(~[files.isdir]);
-     
-     for k = 1:length(files)
-        srcFile = fullfile(pathMatlab, files(k).name);
-        destFile = fullfile(bodyFolder, files(k).name);
-        copyfile(srcFile, destFile, 'f');  % 'f' to force overwrite
-     end
-
-     % To be sure, the folders with files of the same names are removed  
-     rmpath(genpath(fullfile(pwd, 'TensorDerivations')));
-
+    
      switch Body.FiniteDiference 
        case "AceGen"   
             disp("For chosen finite difference scheme, deformations are ony finite and displacement-based")    
             Body.DeformationType = "Finite";
             Body.SolutionBase = "Displacement";
+               
+
+            pathAceGen = path + 'AceGen'; 
+            files = dir(fullfile(pathAceGen, '**', function_name + '.m') );
+                
+            if ~isempty(files) % Check 
+                srcFile = fullfile(files(1).folder, files(1).name);
+                destFile = fullfile(bodyFolder, 'AceGenForce.m');
+                copyfile(srcFile, destFile, 'f'); 
                     
+                % some modifications to AceGen file for MEX
+                lines = readlines(destFile);
+                    
+                pattern_check = contains(lines(15), "persistent v") && contains(lines(16), "if size(v)<") && contains(lines(17), "v=zeros");
+                    
+                if pattern_check
+                   % Extract the number N from 'v=zeros(N,...'
+                   n = regexp(lines(17), 'v\s*=\s*zeros\((\d+)', 'tokens', 'once');
+                   if ~isempty(n)
+                       lines(15) = "v=zeros(" + n{1} + ",'double');";
+                       lines(16) = "";
+                       lines(17) = "";
+                       lines(18) = "";
+                   end
+                 end
+                 writelines(lines, destFile);
+                   
+            else
+                error('This element is not yet implemented in AceGen');  
+            end
+
        case {"Matlab", "Matlab_automatic"}   
+             
+                  
+             pathMatlab = path + 'Matlab\ElementFunctions' + '\' + Body.ElementName;
+             files = dir(fullfile(pathMatlab, '*.*'));
+             files = files(~[files.isdir]);
+             
+             for k = 1:length(files)
+                srcFile = fullfile(pathMatlab, files(k).name);
+                destFile = fullfile(bodyFolder, files(k).name);
+                copyfile(srcFile, destFile, 'f');  % 'f' to force overwrite
+             end
+            
+             % Add files for inner energy calculations based on Matlab
+             srcFolder = fullfile(pwd, 'MaterialsSecondKirhhoff');
+             srcFile = fullfile(srcFolder, Body.MaterialName + ".m"); 
+             destFile = fullfile(bodyFolder, 'PiolaSecondTensor.m'); % Material check has already done in 'Materials.m'
+             copyfile(srcFile, destFile, 'f'); % force overwrite
+             % To be sure, the folders with files of the same names are removed  
+             
+
 
             if Body.SolutionBase == "Position"
                disp("For chosen finite difference and solution-based scheme, deformations are only finite")
                Body.DeformationType = "Finite"; 
             end
            
+         case "Casadi"
+            import casadi.*
+            disp("For chosen finite difference scheme, deformations are ony finite and position-based")    
+            Body.DeformationType = "Finite";
+            Body.SolutionBase = "Position";
+            pathCasadi= path + 'Casadi';
+            files = dir(fullfile(pathCasadi, '**', function_name + '.casadi') );
+            if ~isempty(files) % Check 
+                srcFile = fullfile(files(1).folder, files(1).name);
+                destFile = fullfile(bodyFolder, 'Casadi.casadi');
+                copyfile(srcFile, destFile, 'f'); 
+                Body.CasadiForce = Function.load(char(destFile));
+
+            else
+                error('This element is not yet implemented with Casadi');  
+            end
+
+             
        otherwise
             error('****** Choose correct Finite Diference scheme ******\n')
-     end        
-    
+     end    
+
+     rmpath(genpath(fullfile(pwd, 'TensorDerivations')));
+
      addpath(bodyFolder);    
      Body.BodyFolder = bodyFolder;
 
@@ -161,11 +166,3 @@ function Body = AddTensors(Body)
      Body.Results = [];
      SurfaceShape = BuildBeamSurfaceMatrixLocal(Body);    
      Body.SurfacePointsFunction = @(q) reshape(SurfaceShape*q,3,[])';   
-
-     % For contact: in this way of the points' organization, the normals of the trimesh is directed to the inside volume 
-     % Option: 
-     % SurfacePoints = BuildBeamSurface(Body,Body.q0);
-     % faces = Body.BodyFaces;
-     % [mean_nodes,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
-     % quiver3(mean_nodes(:,1), mean_nodes(:,2), mean_nodes(:,3),face_normals(:,1),  face_normals(:,2),  face_normals(:,3), 0.5, 'r', 'LineWidth', 0.01); 
-     % patch('Vertices',SurfacePoints,'Faces',faces,'FaceColor','cyan','EdgeColor','black');

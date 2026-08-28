@@ -152,10 +152,10 @@ visualizationContact(Gap,Body1,Body2,true);
 PostProcessing(Body1,false,false) 
 PostProcessing(Body2,false,false) 
 
-figure();
-hold on
-visualization_StressRecovery(Body1,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
-visualization_StressRecovery(Body2,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
+% figure();
+% hold on
+% visualization_StressRecovery(Body1,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
+% visualization_StressRecovery(Body2,true,'Normal'); % Options: "Normal", "VM" ('Von Mises)
 
 
 CleanTemp(Body1, cleaningAfter)

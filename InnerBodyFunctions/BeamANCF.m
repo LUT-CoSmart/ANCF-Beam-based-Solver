@@ -4,19 +4,21 @@ function [K_loc,Fe] = BeamANCF(Body,k,CalculateStiffness,FiniteDiference)
     ElementDofs = Body.ElementDofs;
     
     K_loc = zeros(ElementDofs,ElementDofs);  % initialization of local stiffness matrix
-    uk=Body.u(xloc(k,:));              
+    Fe = zeros(ElementDofs,1);
+
+    uk=Body.u(xloc(k,:));  
+    qk = Body.q(xloc(k,:));
     qk0=Body.q0(xloc(k,:)); 
 
     Gint = Body.Gint;
-    Nint = Body.Nint;    
-    
+    Nint = Body.Nint;  
+
+    Dvec = Body.Dvec; 
     switch FiniteDiference
 
            case {"Matlab", "Matlab_automatic"}
                
                 sqrtEps = sqrt(eps);
-                
-                qk=Body.q(xloc(k,:));   
                 Phik=Body.Phim(k,:)';
                 
                 S = @(F_,xi,eta,zeta) Body.S(F_,qk0,Phik,xi,eta,zeta);  
@@ -56,15 +58,23 @@ function [K_loc,Fe] = BeamANCF(Body,k,CalculateStiffness,FiniteDiference)
                 end
                                 
            case "AceGen"
-                Dvec = Body.Dvec;                
-                Fe0 = K_loc(:,1);
+                               
                 DIM = Body.DIM;
                 DofsAtNode = Body.DofsAtNode;
                 qk0f=Body.q0f(xloc(k,:));
                 % Reshaping to adjust for AceGen
                 qk0f_DIM = reshape(qk0f, [DIM, DofsAtNode])';
                 qk0_DIM = reshape(qk0, [DIM, DofsAtNode])';
-                uk_DIM = reshape(uk, [DIM, DofsAtNode])'; 
-                [~,~,~,~,K_loc,Fe,~,~] = AceGenForce(qk0f_DIM,qk0_DIM,uk_DIM,Dvec,K_loc,Fe0,Gint',Nint);
-                Fe = - Fe; % taking into account the difference between AceGen and Fe_fun                                  
+                uk_DIM = reshape(uk, [DIM, DofsAtNode])';                
+                [~,~,~,~,K_loc,Fe,~,~] = AceGenForce(qk0f_DIM,qk0_DIM,uk_DIM,Dvec,K_loc,Fe,Gint',Nint);
+                Fe = - Fe; % taking into account the difference between AceGen and Fe_fun  
+                
+           case "Casadi"
+               
+                for ii=1:Nint    % integration all over the element's volume               
+                    w = Gint(ii,4);                    
+                    [K_loc_point,F_loc_point] = Body.CasadiForce(qk,qk0,Dvec,Gint(ii,1),Gint(ii,2),Gint(ii,3));
+                    Fe = Fe + full(F_loc_point) * w;
+                    K_loc = K_loc + full(K_loc_point) * w;
+                end
     end           

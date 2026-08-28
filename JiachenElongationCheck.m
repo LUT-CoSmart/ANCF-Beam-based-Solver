@@ -10,12 +10,12 @@ Body = Geometry(Body,'RectangularCheck',"Standard", "Gauss");  % Cross Sections:
                                                                  % Integration points of generating line: Gauss, Lobatto      
 Body = Materials(Body,'KS'); % Material models: Gas.-Ogd.-Hol. (GOH), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
 % ########## Create FE Model ##############################################
-ElementNumber = 1;
+ElementNumber = 4;
 Surfaces = "rectagulars"; % options: triangles, rectagulars
 Body = CreateFEM(Body,ElementNumber,Surfaces);
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Casadi"; % Calculation of FD: Matlab, AceGen, Casadi
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);

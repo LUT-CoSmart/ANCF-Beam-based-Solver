@@ -1,0 +1,113 @@
+clc, clear, close all;
+
+import casadi.*
+
+ElementName = 'ANCF3333';
+Material = 'GOH';
+
+if strcmp(Material, 'KS') || strcmp(Material, 'Neo')
+    Dvec = SX.sym('p', 5, 1); % Vector of parameters of KS: [E, nu, H, W, L]
+elseif strcmp(Material, 'GOH') 
+    Dvec = SX.sym('p', 11, 1); % Vector of parameters of KS: [c10, k1, k2, kappa, a0, d, H, W, L]    
+else
+
+end
+
+% Identity tensor
+DIM = 3;
+I = SX.eye(DIM);
+
+% Nodal coordinates (actual)
+q = SX.sym('q', 27, 1);
+
+% Nodal coordinates (initial)
+q0 = SX.sym('q0', 27, 1);
+
+% Local coordinates
+xi   = SX.sym('xi',1,1);
+eta  = SX.sym('eta',1,1);
+zeta = SX.sym('zeta',1,1);
+xiv = [xi; eta; zeta];
+
+% Geometrical parameters
+
+H = Dvec(end-2);
+W = Dvec(end-1);
+L = Dvec(end);
+
+% Shape functions 
+N_xi = SX.zeros(1,9);
+% 1 Node
+N_xi(1) = xi*(xi - 1)/2;
+N_xi(2) = H*eta*xi*(xi - 1)/4;
+N_xi(3) = W*xi*zeta*(xi - 1)/4;
+% 2 Node
+N_xi(4) = 1 - xi^2;
+N_xi(5) = -H*eta*(xi^2 - 1)/2;
+N_xi(6) = -W*zeta*(xi^2 - 1)/2;
+% 3 Node
+N_xi(7) = xi*(xi + 1)/2;
+N_xi(8) = H*eta*xi*(xi + 1)/4;
+N_xi(9) = W*xi*zeta*(xi + 1)/4;
+
+% Shape function matrix
+Smxi = [N_xi(1)*I N_xi(2)*I N_xi(3)*I ...
+        N_xi(4)*I N_xi(5)*I N_xi(6)*I ...
+        N_xi(7)*I N_xi(8)*I N_xi(9)*I];
+
+% Position vectors
+r0 = Smxi*q0;
+r  = Smxi*q;
+
+% Deformation gradient
+F = jacobian(r,xiv)*(jacobian(r0,xiv))^(-1);
+
+% Green-Lagrange strain
+E = 0.5*(F'*F-I);
+
+if strcmp(Material, 'KS')
+    Young = Dvec(1);
+    Poisson = Dvec(2);
+    
+    lambda = Young*Poisson/((1+Poisson)*(1-2*Poisson));
+    mu =  Young/(2*(1+Poisson));
+    Psi = 0.5*lambda*trace(E)^2 + mu*sumsqr(E);
+
+elseif strcmp(Material, 'Neo')
+    % Material  parameters
+    mu = Dvec(1);
+    d  = Dvec(2);    
+    I1  = trace(F'*F);
+    J  = det(F);
+    Psi = mu/2 * (I1 - 3) + 1/d*(J-1)^2;
+elseif strcmp(Material, 'GOH')   
+    c10 = Dvec(1);
+    k1 = Dvec(2);
+    k2 = Dvec(3);
+    kappa = Dvec(4);
+    a0 = Dvec(5:7);
+    d = Dvec(8);
+    
+    C = F'*F;
+    I1  = trace(C);
+    J  = det(F);
+    I4 = a0' * C * a0;
+    I4 = kappa*I1 + (1 - 3*kappa) * I4 - 1; 
+    Psi = c10/2 * (I1 - 3) + k1/(2*k2) * (exp(k2*I4^2) - 1) + 1/d*(J-1)^2; 
+else    
+
+end
+
+Ke = hessian(Psi,q);
+Fe = gradient(Psi,q);
+
+% Saving
+FunctionName = [ElementName Material];
+ElementFun = Function(FunctionName, {q,q0,Dvec,xi,eta,zeta}, {Ke,Fe},{'q','q0','p','xi','eta','zeta'},{'Ke','Fe'});
+SaveName = [FunctionName '.casadi'];
+ElementFun.save(SaveName);
+
+%% TODO: consider this option after adding mex generator to the code
+% options = struct('mex',true);
+% ElementFun.generate('Element54_codegen.c',options);
+% mex Element54_codegen.c -largeArrayDims

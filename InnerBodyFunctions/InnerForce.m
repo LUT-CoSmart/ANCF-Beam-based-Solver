@@ -51,3 +51,9 @@ function [K,Fint] = InnerForce(Body,CalculateStiffness)
             Fint = Fint*ElemDim;
             K = K*ElemDim;
         end    
+
+        if contains(FiniteDiference,"Casadi") % Adjustment related to the element size 
+            ElemDim = 0.5 * Body.Length.Ln * Body.detF0;
+            Fint = Fint*ElemDim;
+            K = K*ElemDim;
+        end    

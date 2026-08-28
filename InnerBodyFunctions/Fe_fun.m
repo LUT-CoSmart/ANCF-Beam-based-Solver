@@ -12,21 +12,9 @@ for ii=1:Nint    % integration all over the element's volume
     F_ = F(q,u,xi,eta,zeta); % Deformation gradient
     SS = S(F_,xi,eta,zeta);
 
-    % vectorized way
     dF_dq_ = dF_dq(xi,eta,zeta);
     dEdq_ = dEdq(dF_dq_,F_);
     Fe = Fe + reshape(dEdq_,9,ElemDofs).' * SS(:) * w;
-    
-
-    % Svec  = SS(:)';
-    % dF_dq_ = dF_dq(xi,eta,zeta);
-    % 
-    % % Inner force calculations
-    % for kk=1:ElemDofs 
-    %     dF_dq_vec = dF_dq_(:,:,kk);
-    %     dEdq_  = dEdq(dF_dq_vec,F_);
-    %     Fe(kk) = Fe(kk) + Svec  * dEdq_(:) * w;
-    % end    
-
+ 
 end
 

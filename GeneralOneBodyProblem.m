@@ -34,7 +34,7 @@ Surfaces = "rectagulars"; % options: triangles, rectagulars
 Body = CreateFEM(Body,ElementNumber,Surfaces);
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen
+Body.FiniteDiference= "Casadi"; % Calculation of FD: Matlab, AceGen, Casadi 
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);

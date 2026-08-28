@@ -37,10 +37,12 @@ function visualization_StressRecovery(Body,Show,name)
             qk=Body.q(xloc(Element,:)); 
             qk0=Body.q0(xloc(Element,:)); 
             Phik=Body.Phim(Element,:)';
-            F0 = @(xi,eta,zeta) Body.F0(qk0,xi,eta,zeta); 
+
+            Body.F(qk,qk0,uk,1,1,1)
+
             F = @(xi,eta,zeta) Body.F(qk,qk0,uk,xi,eta,zeta);
-            S = @(F_,xi,eta,zeta) Body.S(F_,q0,Phi,xi,eta,zeta); 
-            Stress = StressRecovery(Body,S,F,F0,qk0,Phik,Xi_points(:,1),Xi_points(:,2),Xi_points(:,3));
+            
+            Stress = StressRecovery(Body,F,qk0,Phik,Xi_points(:,1),Xi_points(:,2),Xi_points(:,3));
             
             for ii = 1:n               
                 Sigma = Stress(:,:,ii);
