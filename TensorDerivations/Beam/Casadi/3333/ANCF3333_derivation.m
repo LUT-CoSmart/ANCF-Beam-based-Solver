@@ -3,13 +3,15 @@ clc, clear, close all;
 import casadi.*
 
 ElementName = 'ANCF3333';
-Material = 'GOH';
+Material = 'TOM';
 
 if strcmp(Material, 'KS') || strcmp(Material, 'Neo')
     Dvec = SX.sym('p', 5, 1); % Vector of parameters of KS: [E, nu, H, W, L]
 elseif strcmp(Material, 'GOH') 
-    Dvec = SX.sym('p', 11, 1); % Vector of parameters of KS: [c10, k1, k2, kappa, a0, d, H, W, L]    
-else
+    Dvec = SX.sym('p', 11, 1); % Vector of parameters of GOH: [c10, k1, k2, kappa, a0, d, H, W, L]    
+elseif strcmp(Material, 'TOM') 
+    Dvec = SX.sym('p', 12, 1);  
+else    
 
 end
 
@@ -94,6 +96,71 @@ elseif strcmp(Material, 'GOH')
     I4 = a0' * C * a0;
     I4 = kappa*I1 + (1 - 3*kappa) * I4 - 1; 
     Psi = c10/2 * (I1 - 3) + k1/(2*k2) * (exp(k2*I4^2) - 1) + 1/d*(J-1)^2; 
+elseif  strcmp(Material, 'TOM')   
+    muphi = Dvec(1);
+    Ephi  = Dvec(2);
+    a     = Dvec(3);
+    b     = Dvec(4);
+    c     = Dvec(5);
+    a0    = Dvec(6:8);
+    d     = Dvec(9);
+    
+    C  = F.' * F;
+    I1 = trace(C);
+    J  = det(F);
+    I4 = a0.' * C * a0;
+    
+    % Region 1: a^2 <= I4 <= c^2
+    denom1 = (b - a) * (c - a);
+    
+    A1 = -a^2 / denom1;
+    B1 =  2*a*log(a) / denom1;
+    C1 =  1 / denom1;
+    D1 = -2*a / denom1;
+    
+    % Region 2: c^2 < I4 <= b^2
+    A2 = c^2 / ((c-a)*(b-c)) ...
+       - a^2 / ((b-a)*(c-a));
+    
+    B2 = 2*a*log(a) / ((b-a)*(c-a)) ...
+       - 2*c*log(c) / ((c-a)*(b-c));
+    
+    C2 = -1 / ((b-a)*(b-c));
+    D2 =  2*b / ((b-a)*(b-c));
+    
+    % Region 3: I4 > b^2
+    A3 = -1;
+    
+    B3 = 2*a*log(a) / ((b-a)*(c-a)) ...
+       + 2*b*log(b) / ((b-a)*(b-c)) ...
+       - 2*c*log(c) / ((c-a)*(b-c));
+    
+    C3 = 0;
+    D3 = 0;
+    
+    % Energy expressions in each region
+    Phi1 = A1/2 * log(I4) ...
+         + (B1-D1) * sqrt(I4) ...
+         + C1/2 * I4 ...
+         + D1/2 * sqrt(I4) * log(I4);
+    
+    Phi2 = A2/2 * log(I4) ...
+         + (B2-D2) * sqrt(I4) ...
+         + C2/2 * I4 ...
+         + D2/2 * sqrt(I4) * log(I4);
+    
+    Phi3 = A3/2 * log(I4) ...
+         + (B3-D3) * sqrt(I4) ...
+         + C3/2 * I4 ...
+         + D3/2 * sqrt(I4) * log(I4);
+    
+    % Symbolic piecewise fiber energy
+    Psi_fiber = if_else(I4 < a^2, 0, ...
+                        if_else(I4 <= c^2, Ephi * Phi1, ...
+                                if_else(I4 <= b^2, Ephi * Phi2,  Ephi * Phi3)));
+    
+    % Total energy
+    Psi = muphi/2 * (I1 - 3) + Psi_fiber + 1/d * (J - 1)^2;
 else    
 
 end

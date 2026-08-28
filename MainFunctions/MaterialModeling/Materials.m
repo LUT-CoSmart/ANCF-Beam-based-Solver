@@ -43,6 +43,40 @@ function Body = Materials(Body, MaterialName, Subtype)
                 param.c11 = 1.03e6;
                 param.c20 = -2.7e5;
                 param.c02 = -5.9e5;
+                
+
+        case "TOM" % Fibre-length Distribution Model (TOM Model)
+
+               switch  Subtype
+                   case "" % 5-contant Mooney-Rivlin 
+                    
+                    param.muphi = 29.69e6;
+                    param.Ephi = 5185.2e6;
+                    param.a = 1.000426;
+                    param.b = 1.108502;
+                    param.c = 1.009634;
+                    param.a0 = [1 0 0]';
+                    Body.FiberTwist = 0;
+
+                   case "TOMD" % Double distibution length
+                    param.muphi = 29.68e6;
+                    param.Ephi = 5185.2e6;
+                    param.a = 1.0008520;
+                    param.b =  1.2170040;
+                    param.c = 1.0192680;
+                    param.a0 = [1 0 0]';
+                    Body.FiberTwist = 0;
+
+                  case "TOMH" % Double distibution length
+                   param.muphi = 29.68e6;
+                   param.Ephi = 5185.2e6;
+                   param.a =  1.0002130;
+                   param.b =  1.0542510;
+                   param.c = 1.00481700;
+                   param.a0 = [1 0 0]';
+                   Body.FiberTwist = 0;
+
+               end                
                  
            case "GOH" % Gasser-Ogden-Holzaphel material  
 
@@ -85,7 +119,7 @@ function Body = Materials(Body, MaterialName, Subtype)
                        param.k2 = 23.926;      
                        param.kappa = 0;      % fiber dipersion
                        param.a0 = [1 0 0]';   % fiber direction 
-                       Body.FiberTwist = 0; % inner (fiber) pre-twist 
+                       Body.FiberTwist = 0; % inner (fiber) pre-twist
 
                end
                  
@@ -100,7 +134,7 @@ function Body = Materials(Body, MaterialName, Subtype)
     
 
     compressiblility= {'KS'};
-    fibers= {'GOH'};
+    fibers= {'GOH','TOM'};
 
     Body = AssigningMaterialParameters(Body,MaterialName, param, compressiblility, fibers);
     

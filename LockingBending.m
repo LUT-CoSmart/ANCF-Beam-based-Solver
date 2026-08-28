@@ -68,4 +68,7 @@ PostProcessing(Body,visDeformed,visInitial)
 %% TODO: add F tensors for Casadi & AceGen
 % visualization_StressRecovery(Body,false,'Normal'); % Options: "Normal", "VM" ('Von Mises)
 % visualization_StressRecovery(Body,true,'VM'); 
-CleanTemp(Body, true)
+
+RecoveryMain(Body)
+
+%CleanTemp(Body, true)
