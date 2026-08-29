@@ -1,4 +1,4 @@
-function xi_eta_zeta_result = FindIsoCoord(Shape,nabla_r_xi,qk,Point)
+function xi_eta_zeta_result = FindIsoCoord(Shape,nabla_by_xi,qk,Point)
     
     point = Point';
     
@@ -8,8 +8,8 @@ function xi_eta_zeta_result = FindIsoCoord(Shape,nabla_r_xi,qk,Point)
 
     while norm(r - point) > 1e-5
         
-          Jac = nabla_r_xi(qk,Xi(1),Xi(2),Xi(3));
-          Xi = Xi - Jac^-1 * (r - point);  
+          F_xi = nabla_by_xi(qk,Xi(1),Xi(2),Xi(3)); % 
+          Xi = Xi - F_xi^-1 * (r - point);  
           r =Shape(Xi(1),Xi(2),Xi(3)) * qk;  
     end    
     

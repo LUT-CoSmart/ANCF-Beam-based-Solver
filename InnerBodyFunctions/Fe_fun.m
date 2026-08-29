@@ -3,7 +3,7 @@ function Fe = Fe_fun(q,u,F,dF_dq,dEdq,S,ElemDofs,Gint,Nint)
 Fe = zeros(ElemDofs,1);
 
 for ii=1:Nint    % integration all over the element's volume
-
+    
     xi = Gint(ii,1);
     eta = Gint(ii,2);
     zeta = Gint(ii,3);

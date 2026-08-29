@@ -13,7 +13,7 @@ function Outcome = FindProjection(BodyToProject, Body)
             q = Body.q;
             xloc = Body.xloc;           
             Shape = Body.Shape;
-            nabla_r_xi = Body.nabla_r_xi;
+            nabla_by_xi = Body.nabla_by_xi;
             distancesInside = distances(Inside);
             idxInside = projected_el(Inside); % suitable elements DOFs the face on which s projected 
 
@@ -41,7 +41,7 @@ function Outcome = FindProjection(BodyToProject, Body)
             for i = 1:n        
                 qk=q(xloc(idxInside(i),:)); % current element number
           
-                isoCoordinates = FindIsoCoord(Shape,nabla_r_xi,qk,project_pts(i,:));
+                isoCoordinates = FindIsoCoord(Shape,nabla_by_xi,qk,project_pts(i,:));
 
                 % patch area where the point is projected to (to calculate contact stresses?)                
                 % A =  SurfacePoints(Face(i,1),:)';

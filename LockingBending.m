@@ -7,7 +7,7 @@ Body.Name = "Body";
 CaseSubtype = "Large"; 
 
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"   
 [Body,Force,Boundary] = CaseProblemSet(Body,string(mfilename) + CaseSubtype,"Standard",...
@@ -15,12 +15,12 @@ IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"
 
 
 % ########## Create FE Model ##############################################
-ElementNumber = 8; 
+ElementNumber = 1; 
 Body = CreateFEM(Body,ElementNumber,"rectangulars");
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen, Matlab_automatic, Casadi
-Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
+Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen, Matlab_automatic, Casadi
+Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
 
@@ -62,13 +62,17 @@ for i=1:steps
 end
 
 % POST PROCESSING ###############################################
-visDeformed = true;
-visInitial = true;
+visDeformed = false;
+visInitial = false;
 PostProcessing(Body,visDeformed,visInitial) 
 %% TODO: add F tensors for Casadi & AceGen
 % visualization_StressRecovery(Body,false,'Normal'); % Options: "Normal", "VM" ('Von Mises)
 % visualization_StressRecovery(Body,true,'VM'); 
 
-RecoveryMain(Body)
+
+Recovery_f = RecoveryMain(Body);
+
+
+[Body.Fe Body.Fext Recovery_f]
 
 %CleanTemp(Body, true)

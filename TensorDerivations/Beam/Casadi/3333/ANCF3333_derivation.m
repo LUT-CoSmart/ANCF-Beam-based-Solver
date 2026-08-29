@@ -3,7 +3,7 @@ clc, clear, close all;
 import casadi.*
 
 ElementName = 'ANCF3333';
-Material = 'TOM';
+Material = 'Neo';
 
 if strcmp(Material, 'KS') || strcmp(Material, 'Neo')
     Dvec = SX.sym('p', 5, 1); % Vector of parameters of KS: [E, nu, H, W, L]
@@ -24,6 +24,9 @@ q = SX.sym('q', 27, 1);
 
 % Nodal coordinates (initial)
 q0 = SX.sym('q0', 27, 1);
+
+% Nodal coordinates of pre-twisted fibers (initial)
+q0f = SX.sym('q0f', 27, 1);
 
 % Local coordinates
 xi   = SX.sym('xi',1,1);
@@ -59,11 +62,11 @@ Smxi = [N_xi(1)*I N_xi(2)*I N_xi(3)*I ...
 
 % Position vectors
 r0 = Smxi*q0;
+r0f = Smxi*q0f; % pretwist of fibers from measured rectangular configuration
 r  = Smxi*q;
-
 % Deformation gradient
 F = jacobian(r,xiv)*(jacobian(r0,xiv))^(-1);
-
+F0f = jacobian(r0f,xiv) * [2/L 0 0; 0 2/H 0; 0 0 2/W]; % Gradient of brick (dF_00/d_xi)^-1 used for fibers adjustments 
 % Green-Lagrange strain
 E = 0.5*(F'*F-I);
 
@@ -87,13 +90,14 @@ elseif strcmp(Material, 'GOH')
     k1 = Dvec(2);
     k2 = Dvec(3);
     kappa = Dvec(4);
-    a0 = Dvec(5:7);
+    a0 = Dvec(5:7);     % fibers measured in a straght brick sample, 
+    a0_fib = F0f*a0(:); % adjustments in the possible pre-twist 
     d = Dvec(8);
     
     C = F'*F;
     I1  = trace(C);
     J  = det(F);
-    I4 = a0' * C * a0;
+    I4 = a0_fib' * C * a0_fib;
     I4 = kappa*I1 + (1 - 3*kappa) * I4 - 1; 
     Psi = c10/2 * (I1 - 3) + k1/(2*k2) * (exp(k2*I4^2) - 1) + 1/d*(J-1)^2; 
 elseif  strcmp(Material, 'TOM')   
@@ -103,12 +107,14 @@ elseif  strcmp(Material, 'TOM')
     b     = Dvec(4);
     c     = Dvec(5);
     a0    = Dvec(6:8);
+    a0_fib = F0f*a0(:);
+
     d     = Dvec(9);
     
     C  = F.' * F;
     I1 = trace(C);
     J  = det(F);
-    I4 = a0.' * C * a0;
+    I4 = a0_fib.' * C * a0_fib;
     
     % Region 1: a^2 <= I4 <= c^2
     denom1 = (b - a) * (c - a);
@@ -170,7 +176,7 @@ Fe = gradient(Psi,q);
 
 % Saving
 FunctionName = [ElementName Material];
-ElementFun = Function(FunctionName, {q,q0,Dvec,xi,eta,zeta}, {Ke,Fe},{'q','q0','p','xi','eta','zeta'},{'Ke','Fe'});
+ElementFun = Function(FunctionName, {q,q0,q0f,Dvec,xi,eta,zeta}, {Ke,Fe},{'q','q0','q0f','p','xi','eta','zeta'},{'Ke','Fe'});
 SaveName = [FunctionName '.casadi'];
 ElementFun.save(SaveName);
 

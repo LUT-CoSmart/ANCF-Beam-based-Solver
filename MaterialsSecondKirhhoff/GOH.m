@@ -1,11 +1,13 @@
 function SS=GOH(F,const,a0)
     
-    % a0 is a row-vector    
+      
 
     c10 = const(1);
     k1 = const(2);
     k2 = const(3);
     kappa = const(4);
+    a0 = a0(:); % to be sure that it is a column vector
+    a0 = a0/norm(a0);
     d = const(8);
     
     II=eye(3);
@@ -15,9 +17,7 @@ function SS=GOH(F,const,a0)
     C_dash = J_inv23*C; 
     Cinv = C^(-1);
     C_dash_inv = C_dash^(-1);
-    
-    A0 = a0' * a0; 
-    
+    A0 = a0 * a0.';
     I1=trace(C_dash);
     I4=trace(C_dash*A0');  % double contraction operaiton ":";
     

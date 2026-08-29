@@ -132,12 +132,11 @@ function Body = AddTensors(Body)
      Shape_zeta = @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
 
      Nm_xi_ = @(xi,eta,zeta) [Shape_xi(xi,eta,zeta); Shape_eta(xi,eta,zeta); Shape_zeta(xi,eta,zeta)];
+     nabla_by_xi = @(var,xi,eta,zeta) [Shape_xi(xi,eta,zeta)*var Shape_eta(xi,eta,zeta)*var Shape_zeta(xi,eta,zeta)*var];      
+     Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,xi,eta,zeta,nabla_by_xi);
+     Body.dF_dq = @(q,xi,eta,zeta) pagemtimes(reshape(Nm_xi_(xi,eta,zeta),3,3,[]), nabla_by_xi(q,xi,eta,zeta)^(-1));
+     Body.nabla_by_xi = nabla_by_xi;
      
-     Body.nabla_r_xi = @(q,xi,eta,zeta) [Shape_xi(xi,eta,zeta)*q Shape_eta(xi,eta,zeta)*q Shape_zeta(xi,eta,zeta)*q];        
-     Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,L,H,W,xi,eta,zeta);
-     Body.F0 = @(q0,u,xi,eta,zeta) F0(q0,L,H,W,xi,eta,zeta);
-     Body.dF_dq = @(q0,xi,eta,zeta) pagemtimes(reshape(Nm_xi_(xi,eta,zeta),3,3,[]), F0(q0,L,H,W,xi,eta,zeta)^(-1));
-        
      % adjustment for vectorization
      if Body.DeformationType == "Small"
         Body.dEdq = @(dF,F) 0.5 * (pagetranspose(dF) + dF);
@@ -146,11 +145,14 @@ function Body = AddTensors(Body)
      end
 
      if Body.Fibers 
-        a0 = Body.Dvec(end-6:end-4)';
-        a0_fiber = @(q0,Phi,xi,eta,zeta) a0_fib(a0,q0,Phi,L,H,W,xi,eta,zeta)';
-        S = @(F_,q0,Phi,xi,eta,zeta) PiolaSecondTensor(F_, Body.const, a0_fiber(q0,Phi,xi,eta,zeta));
+        % Here is assumed that fibers are measured in a straght brick sample, 
+        % which makes the identification of their direction easier. 
+        a0 = Body.Dvec(end-6:end-4)';               % measured in brick-formed sample      
+        F0f = @(q0f,xi,eta,zeta) nabla_by_xi(q0f,xi,eta,zeta)*[2/L 0 0; 0 2/H 0; 0 0 2/W]; % Gradient of brick used for fibers adjustments 
+        a0_fib=@(q0f,xi,eta,zeta) F0f(q0f,xi,eta,zeta)*a0(:);% Reshaping the fibers         
+        S = @(F_,q0,q0f,xi,eta,zeta) PiolaSecondTensor(F_, Body.const, a0_fib(q0f,xi,eta,zeta));
      else % in the nonfiber version, the arguments are accepted but simply ignored
-        S = @(F_,q0,Phi,xi,eta,zeta) PiolaSecondTensor(F_, Body.const);         
+        S = @(F_,q0,q0f,xi,eta,zeta) PiolaSecondTensor(F_, Body.const);         
      end
 
      Body.S = S; % 2nd Piola Stress tensor 

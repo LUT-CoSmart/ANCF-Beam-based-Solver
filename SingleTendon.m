@@ -10,7 +10,7 @@ Body = DefineElement(Body,"Beam","ANCF",3333,"None"); % 1 - BodyName, 2 - type (
                                                       % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103) 
 Body = Geometry(Body,"ten_Sol_3","Standard", "Gauss");% Cross Sections: Rectangular, Oval, C, Tendon, etc.
                                                       % Integration points of generating line: Gauss, Lobatto  
-Body = Materials(Body,"TOM", "");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
+Body = Materials(Body,"GOH", "");        % Material models: GOH (GOH, Amir), Neo-Hookean (Neo), 2- and 5- constant Mooney-Rivlin (Mooney2, Mooney5),  Kirhhoff-Saint-Venant (KS).
                                                       % Integration Scheme: Poigen, Standard                                                
 % ########### Complicate geometry ######################§##################
 % Shift
@@ -34,7 +34,7 @@ Surfaces = "rectagulars"; % options: triangles, rectagulars
 Body = CreateFEM(Body,ElementNumber,Surfaces);
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, Matlab_automatic, AceGen, Casadi
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, Matlab_automatic, AceGen, Casadi
 Body.SolutionBase = "Position"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);

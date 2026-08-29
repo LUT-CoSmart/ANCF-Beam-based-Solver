@@ -1,11 +1,11 @@
-function F = DeformationGradient(SolutionBase,q,q0,u,L,H,W,xi,eta,zeta)
+function F = DeformationGradient(SolutionBase,q,q0,u,xi,eta,zeta,nabla_by_xi)
 
-        F0_ = F0(q0,L,H,W,xi,eta,zeta);
+        F0_ = nabla_by_xi(q0,xi,eta,zeta);
         F0_rev = F0_^(-1); 
         I = eye(3);
         
         if SolutionBase == "Position"
-           F = F_xi(q,L,H,W,xi,eta,zeta) * F0_rev;        
+           F = nabla_by_xi(q,xi,eta,zeta) * F0_rev;        
         else
-           F = I + F_xi(u,L,H,W,xi,eta,zeta) * F0_rev;
+           F = I + nabla_by_xi(u,xi,eta,zeta) * F0_rev;
         end
