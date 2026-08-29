@@ -1,39 +1,37 @@
-function Recovery = RecoveryMain(Body)
+function [Recovery_S1,Recovery_S2] = RecoveryMain(Body)
  
     Shape_        = Body.Shape;
     xloc          = Body.xloc;
     TotalDofs     = Body.TotalDofs;
     ElementNumber = Body.ElementNumber;
     q             = Body.q;
-    q0            = Body.q0; 
+    q0            = Body.q0;
+    q0f           = Body.q0f;
     u             = Body.u;     
     Gint          = Body.Gint;
     Nint          = Body.Nint;
+    Sigma         = Body.Sigma;
     ElementDofs   = Body.ElementDofs;
-    ElemDim       = 0.5 * Body.Length.Ln * Body.detF0;    
-    Phim          = Body.Phim;
+    ElemDim       = 0.5 * Body.Length.Ln * Body.detF0; 
+    
     M = zeros(TotalDofs, TotalDofs);
     b = zeros(TotalDofs, 1);
 
-    b_fx = zeros(TotalDofs, 1);
-    b_fy = zeros(TotalDofs, 1);
-    b_fz = zeros(TotalDofs, 1);
-    b_f  = zeros(TotalDofs, 1);
+    b_S1 = zeros(TotalDofs, 1);
+    b_S2 = zeros(TotalDofs, 1);
     for ii = 1:ElementNumber
 
         edofs = xloc(ii, :);
         qk    = q(edofs);
         qk0   = q0(edofs);
+        qk0f  = q0f(edofs);
         uk    = u(edofs);
-        Phik  = Phim(ii,:)';
 
         Mlocal = zeros(ElementDofs);
         blocal_q = zeros(ElementDofs, 1);
 
-        blocal_fx = zeros(ElementDofs, 1);
-        blocal_fy = zeros(ElementDofs, 1);
-        blocal_fz = zeros(ElementDofs, 1);
-        blocal_f = zeros(ElementDofs, 1);
+        blocal_S1 = zeros(ElementDofs, 1);
+        blocal_S2 = zeros(ElementDofs, 1);
         
         for j = 1:Nint
 
@@ -51,35 +49,26 @@ function Recovery = RecoveryMain(Body)
             
             % for q_f
             F_ = Body.F(qk,qk0,uk,xi,eta,zeta);
+            S =  Body.S(F_,qk0,qk0f,xi,eta,zeta); 
+            S_m = Sigma(F_,S);
+            Sigma_vec = [S_m(1,1) S_m(2,2) S_m(3,3) S_m(1,2) S_m(2,3) S_m(1,3)]'; 
 
-            S =  Body.S(F_,qk0,Phik,xi,eta,zeta); 
-
-            fx = S * [1; 0; 0];
-            fy = S * [0; 1; 0];
-            fz = S * [0; 0; 1];
-
-            blocal_fx = blocal_fx + N' * fx * w * ElemDim;
-            blocal_fy = blocal_fy + N' * fy * w * ElemDim;
-            blocal_fz = blocal_fz + N' * fz * w * ElemDim;
-            blocal_f = blocal_f + N' * (fx + fy + fz) * w * ElemDim;
+            blocal_S1 = blocal_S1 + N' * Sigma_vec(1:3) * w * ElemDim;
+            blocal_S2 = blocal_S2 + N' * Sigma_vec(4:6) * w * ElemDim;
         end
 
         M(edofs, edofs) = M(edofs, edofs) + Mlocal;
         b(edofs)        = b(edofs)        + blocal_q;
-        b_fx(edofs)     = b_fx(edofs)     + blocal_fx;
-        b_fy(edofs)     = b_fy(edofs)     + blocal_fy;
-        b_fz(edofs)     = b_fz(edofs)     + blocal_fz;
-        b_f(edofs)      = b_f(edofs)      + blocal_f;
+        b_S1(edofs)     = b_S1(edofs)     + blocal_S1;
+        b_S2(edofs)     = b_S2(edofs)     + blocal_S2;
     end
 
     Recovery_q  = M \ b;
-    Recovery_f  = M \ b_f;
-    Recovery_fx = M \ b_fy;
-    Recovery_fy = M \ b_fy;
-    Recovery_fz = M \ b_fz;
-
     fprintf('q relative recovery error: %.3e\n', norm(q - Recovery_q) / max(norm(q), eps));
 
-    Recovery = Recovery_f;
+    Recovery_S1  = M \ b_S1;
+    Recovery_S2  = M \ b_S2;
 
-    % fprintf('F comparison error: %.3e\n', norm(Body.Fe - Recovery_f) / max(norm(q), eps));
+    
+
+ 

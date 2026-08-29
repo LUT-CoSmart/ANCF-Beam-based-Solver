@@ -1,10 +1,10 @@
-function Stress = StressRecovery(Body,F,q0,Phi,xi_interest,eta_interest,zeta_interest)
+function Stress = StressRecovery(Body,F,q0,q0f,xi_interest,eta_interest,zeta_interest)
       
     DIM = Body.DIM;  
     ShapeFunctionNumber = Body.ElementDofs/DIM;
     Shape = Body.Shape;
     Gint = Body.Gint;        
-    S = @(F_,xi,eta,zeta) Body.S(F_,q0,Phi,xi,eta,zeta);  
+    S = @(F_,xi,eta,zeta) Body.S(F_,q0,q0f,xi,eta,zeta);  
 
     % Transform to recovery coordinates
     xi_min   = min(Gint(:,1));

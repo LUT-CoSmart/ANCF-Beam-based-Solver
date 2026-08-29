@@ -7,7 +7,7 @@ Body.Name = "Body";
 CaseSubtype = "Large"; 
 
 % ########### Problem data ################################################
-Body = DefineElement(Body,"Beam","ANCF",3333,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
+Body = DefineElement(Body,"Beam","ANCF",3363,"None");  % 1 - BodyName, 2 - type (beam, plate, etc.), 3 - element name, 4 - modification name (None, EDG, etc.)  
                                                        % ANCF Beam: 3243, 3333, 3343, 3353, 3363, 34X3 (34103)    
 IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"   
 [Body,Force,Boundary] = CaseProblemSet(Body,string(mfilename) + CaseSubtype,"Standard",...
@@ -15,11 +15,11 @@ IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"
 
 
 % ########## Create FE Model ##############################################
-ElementNumber = 1; 
-Body = CreateFEM(Body,ElementNumber,"rectangulars");
+ElementNumber = 9; 
+Body = CreateFEM(Body,ElementNumber,"rectangulars"); % Options: triangles, rectangulars
 
 % ########## Calculation adjustments ######################################
-Body.FiniteDiference= "Matlab"; % Calculation of FD: Matlab, AceGen, Matlab_automatic, Casadi
+Body.FiniteDiference= "AceGen"; % Calculation of FD: Matlab, AceGen, Matlab_automatic, Casadi
 Body.SolutionBase = "Displacement"; % Solution-based calculation: Position, Displacement
 Body.DeformationType = "Finite"; % Deformation type: Finite, Small
 Body = AddTensors(Body);
@@ -42,7 +42,7 @@ for i=1:steps
         
         tic; 
         % [u_bc,deltaf] = Newton_full(Body,Fext);  
-        [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
+        [u_bc,deltaf,Body] = Newton_Broyden(ii, Body, Fext); 
         % [u_bc,deltaf] = Newton_BFGS(ii, Body, Fext);
         % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
@@ -65,14 +65,21 @@ end
 visDeformed = false;
 visInitial = false;
 PostProcessing(Body,visDeformed,visInitial) 
-%% TODO: add F tensors for Casadi & AceGen
-% visualization_StressRecovery(Body,false,'Normal'); % Options: "Normal", "VM" ('Von Mises)
-% visualization_StressRecovery(Body,true,'VM'); 
+ 
+% visualization_StressRecovery(Body,true,'VM');  % Options: "Normal", "VM" ('Von Mises)
+% visualization_StressRecovery_v3(Body,true,'VM'); 
+% 
+% [Recovery_S1,Recovery_S2] = RecoveryMain(Body);
+% Body.Recovery_S1 = Recovery_S1;
+% Body.Recovery_S2 = Recovery_S2;
+% 
+% visualization_StressRecovery_v2(Body,true,'VM'); 
 
 
-Recovery_f = RecoveryMain(Body);
+Recovery = RecoveryMain_v2(Body);
+
+%[Recovery Body.Fe Body.Fext]
 
 
-[Body.Fe Body.Fext Recovery_f]
 
 %CleanTemp(Body, true)

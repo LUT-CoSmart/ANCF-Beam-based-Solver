@@ -29,6 +29,13 @@ function Body = AddTensors(Body)
     % Construct the function name
     function_name = 'ANCF'+Body.ElementName+Body.MaterialName;
     
+    % Add files for inner energy calculations based on Matlab
+    srcFolder = fullfile(pwd, 'MaterialsSecondKirhhoff');
+    srcFile = fullfile(srcFolder, Body.MaterialName + ".m"); 
+    destFile = fullfile(bodyFolder, 'PiolaSecondTensor.m');
+    copyfile(srcFile, destFile, 'f'); % force overwrite
+
+
      switch Body.FiniteDiference 
        case "AceGen"   
             disp("For chosen finite difference scheme, deformations are ony finite and displacement-based")    
@@ -66,31 +73,11 @@ function Body = AddTensors(Body)
             end
 
        case {"Matlab", "Matlab_automatic"}   
-             
-                  
-             pathMatlab = path + 'Matlab\ElementFunctions' + '\' + Body.ElementName;
-             files = dir(fullfile(pathMatlab, '*.*'));
-             files = files(~[files.isdir]);
-             
-             for k = 1:length(files)
-                srcFile = fullfile(pathMatlab, files(k).name);
-                destFile = fullfile(bodyFolder, files(k).name);
-                copyfile(srcFile, destFile, 'f');  % 'f' to force overwrite
+                                            
+             if Body.SolutionBase == "Position"
+                disp("For chosen finite difference and solution-based scheme, deformations are only finite")
+                Body.DeformationType = "Finite"; 
              end
-            
-             % Add files for inner energy calculations based on Matlab
-             srcFolder = fullfile(pwd, 'MaterialsSecondKirhhoff');
-             srcFile = fullfile(srcFolder, Body.MaterialName + ".m"); 
-             destFile = fullfile(bodyFolder, 'PiolaSecondTensor.m'); % Material check has already done in 'Materials.m'
-             copyfile(srcFile, destFile, 'f'); % force overwrite
-             % To be sure, the folders with files of the same names are removed  
-             
-
-
-            if Body.SolutionBase == "Position"
-               disp("For chosen finite difference and solution-based scheme, deformations are only finite")
-               Body.DeformationType = "Finite"; 
-            end
            
          case "Casadi"
             import casadi.*
@@ -120,13 +107,13 @@ function Body = AddTensors(Body)
      Body.BodyFolder = bodyFolder;
 
      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface";         
+     Body.SurfacefunctionName = "Build" + Body.ElementType + "Surface";     
+     
      L = Body.Length.Ln;
      W = Body.Length.Z;
      H = Body.Length.Y;
     
-     Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);       
-     
+     Body.Shape = @(xi,eta,zeta) Shape_(L,H,W,xi,eta,zeta);           
      Shape_xi = @(xi,eta,zeta) Shape_xi_(L,H,W,xi,eta,zeta);
      Shape_eta = @(xi,eta,zeta) Shape_eta_(L,H,W,xi,eta,zeta);
      Shape_zeta = @(xi,eta,zeta) Shape_zeta_(L,H,W,xi,eta,zeta);
@@ -136,6 +123,7 @@ function Body = AddTensors(Body)
      Body.F = @(q,q0,u,xi,eta,zeta) DeformationGradient(Body.SolutionBase,q,q0,u,xi,eta,zeta,nabla_by_xi);
      Body.dF_dq = @(q,xi,eta,zeta) pagemtimes(reshape(Nm_xi_(xi,eta,zeta),3,3,[]), nabla_by_xi(q,xi,eta,zeta)^(-1));
      Body.nabla_by_xi = nabla_by_xi;
+     Body.Nm_xi = Nm_xi_;
      
      % adjustment for vectorization
      if Body.DeformationType == "Small"

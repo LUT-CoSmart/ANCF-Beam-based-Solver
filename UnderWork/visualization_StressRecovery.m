@@ -35,14 +35,12 @@ function visualization_StressRecovery(Body,Show,name)
             Element = Xi_points(1,4); % all face points belong to one element 
             uk=Body.u(xloc(Element,:));  
             qk=Body.q(xloc(Element,:)); 
-            qk0=Body.q0(xloc(Element,:)); 
-            Phik=Body.Phim(Element,:)';
-
-            Body.F(qk,qk0,uk,1,1,1)
+            qk0=Body.q0(xloc(Element,:));
+            qk0f=Body.q0f(xloc(Element,:));
 
             F = @(xi,eta,zeta) Body.F(qk,qk0,uk,xi,eta,zeta);
             
-            Stress = StressRecovery(Body,F,qk0,Phik,Xi_points(:,1),Xi_points(:,2),Xi_points(:,3));
+            Stress = StressRecovery(Body,F,qk0,qk0f,Xi_points(:,1),Xi_points(:,2),Xi_points(:,3));
             
             for ii = 1:n               
                 Sigma = Stress(:,:,ii);
