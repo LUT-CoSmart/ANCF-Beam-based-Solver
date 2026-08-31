@@ -1,4 +1,4 @@
-function [u_bc,deltaf,Body] = Newton_Broyden(step, Body, Fext)
+function [u_bc,deltaf] = Newton_Broyden(step, Body, Fext)
        
        persistent Bn_m1 ff_bc_old u_bc_old
         
@@ -28,5 +28,3 @@ function [u_bc,deltaf,Body] = Newton_Broyden(step, Body, Fext)
        % Saving for the next iteration
        ff_bc_old = ff_bc;
        u_bc_old = u_bc;
-
-       Body.Fe = Fe; 

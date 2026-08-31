@@ -15,6 +15,7 @@ function [K_loc,Fe] = BeamANCF(Body,k,CalculateStiffness,FiniteDiference)
     Nint = Body.Nint;  
 
     Dvec = Body.Dvec; 
+
     switch FiniteDiference
 
            case {"Matlab", "Matlab_automatic"}
