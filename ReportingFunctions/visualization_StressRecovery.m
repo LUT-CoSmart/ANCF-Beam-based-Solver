@@ -1,17 +1,20 @@
-function visualization_StressRecovery(Body,Show,name)
+function visualization_StressRecovery(Body,Show,name,FromGausElement)
     
     
     if Show 
         figure();
         axis equal
         visualization(Body,Body.q,'none',Show); 
-
+        NameGaus = '';
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+        [Recovery_S1,Recovery_S2] = GeneralizeCoorStress(Body);
+
         xloc = Body.xloc;
         faces = Body.BodyFaces;
         IsoData = Body.IsoData;
+        Shape        = Body.Shape;
         SurfacePoints = Body.SurfacePointsFunction(Body.q); 
-        
+           
         getFaceCenterAndNormals = Body.getFaceCenterAndNormals;
         [~,face_normals]=getFaceCenterAndNormals(faces,SurfacePoints);
         
@@ -26,30 +29,40 @@ function visualization_StressRecovery(Body,Show,name)
         else
             error("This stress type is not implemneted!")
         end 
+         
+        if FromGausElement
+            IsoData = GausElement(Body,IsoData); % recovering from Gaus element  
+            NameGaus = ' from Gaus Element';
+        end
 
         for k = 1:size(faces,1)  
             
             normal = face_normals(k,:)';
             Xi_points = IsoData(faces(k,:),:);
             n = size(Xi_points, 1); % Determine the number of surface points (3 or 4)
-            Element = Xi_points(1,4); % all face points belong to one element 
-            uk=Body.u(xloc(Element,:));  
-            qk=Body.q(xloc(Element,:)); 
-            qk0=Body.q0(xloc(Element,:));
-            qk0f=Body.q0f(xloc(Element,:));
+            Element = Xi_points(1,4); % all face points belong to one element        
+            
+            Generalize_S1_k = Recovery_S1(xloc(Element,:));
+            Generalize_S2_k = Recovery_S2(xloc(Element,:));
+                        
+            for ii = 1:n          
 
-            F = @(xi,eta,zeta) Body.F(qk,qk0,uk,xi,eta,zeta);
-            
-            Stress = StressRecovery(Body,F,qk0,qk0f,Xi_points(:,1),Xi_points(:,2),Xi_points(:,3));
-            
-            for ii = 1:n               
-                Sigma = Stress(:,:,ii);
+                Stress_S1 = Shape(Xi_points(ii,1),Xi_points(ii,2),Xi_points(ii,3)) * Generalize_S1_k;
+                Stress_S2 = Shape(Xi_points(ii,1),Xi_points(ii,2),Xi_points(ii,3)) * Generalize_S2_k;
+
+                s_recovered = [Stress_S1; Stress_S2];
+
+                Sigma = [s_recovered(1), s_recovered(4), s_recovered(6);
+                         s_recovered(4), s_recovered(2), s_recovered(5);
+                         s_recovered(6), s_recovered(5), s_recovered(3)];
+
                 Stress_value  = Interested_stress(Sigma,normal);
                     
                 point_number = faces(k,ii);
                 points(point_number,4) = points(point_number,4) + Stress_value ;
                 counter(point_number) = counter(point_number) + 1;
             end
+
         end
         points(:,4) = points(:,4)./counter;
 
@@ -58,8 +71,8 @@ function visualization_StressRecovery(Body,Show,name)
 
         colormap(turbo);
         cb = colorbar;
-        cb.Label.String = [name ' stress'];
-        title([name ' stress']);
+        cb.Label.String = [name ' stress '];
+        title([name ' stress via Generalize stress coordinates and shape funciton' NameGaus]);
 
     else
         disp('No visualization')

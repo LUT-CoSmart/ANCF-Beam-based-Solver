@@ -15,7 +15,7 @@ IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"
 
 
 % ########## Create FE Model ##############################################
-ElementNumber = 9; 
+ElementNumber = 12; 
 Body = CreateFEM(Body,ElementNumber,"rectangulars"); % Options: triangles, rectangulars
 
 % ########## Calculation adjustments ######################################
@@ -37,12 +37,12 @@ for i=1:steps
     Re=10^(-6);                   % Stopping criterion for residual
     imax=800;                     % Maximum number of iterations for Newton's method 
                                   % it is taken large for Krylov-based (CG) algorithm  
-    Fext = Body.Fext;
+    Fext = Body.Fext; 
     for ii=1:imax    
         
         tic; 
-        % [u_bc,deltaf] = Newton_full(Body,Fext);  
-        [u_bc,deltaf,Body] = Newton_Broyden(ii, Body, Fext); 
+        [u_bc,deltaf] = Newton_full(Body,Fext);  
+        % [u_bc,deltaf] = Newton_Broyden(ii, Body, Fext); 
         % [u_bc,deltaf] = Newton_BFGS(ii, Body, Fext);
         % [u_bc,deltaf] = Newton_Krylov(ii, Body, Fext, Re, "JF"); % options: CG - Conjugate Gradient, JF - Jacobian Free  
         
@@ -65,21 +65,10 @@ end
 visDeformed = false;
 visInitial = false;
 PostProcessing(Body,visDeformed,visInitial) 
- 
-% visualization_StressRecovery(Body,true,'VM');  % Options: "Normal", "VM" ('Von Mises)
-% visualization_StressRecovery_v3(Body,true,'VM'); 
-% 
-% [Recovery_S1,Recovery_S2] = RecoveryMain(Body);
-% Body.Recovery_S1 = Recovery_S1;
-% Body.Recovery_S2 = Recovery_S2;
-% 
-% visualization_StressRecovery_v2(Body,true,'VM'); 
 
+FromGausElement = true; 
+visualization_StressRecovery(Body,true,'VM',FromGausElement); 
 
-Recovery = RecoveryMain_v2(Body);
-
-%[Recovery Body.Fe Body.Fext]
-
-
-
+FromGausElement = false; 
+visualization_StressRecovery(Body,true,'VM',FromGausElement); 
 %CleanTemp(Body, true)
