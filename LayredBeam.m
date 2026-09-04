@@ -59,7 +59,7 @@ Boundary2.Type = "full"; % there are several types: full, reduced, positions, no
 
 % ########## Contact characteristics ######################################
 ContactFiniteDiference = "Matlab_automatic";  % Options: "Matlab", "Matlab_automatic"
-ContactType = "Penalty"; % Options: "None", "Penalty", "Nitsche" 
+ContactType = "Nitsche"; % Options: "None", "Penalty", "Nitsche" 
 ContactVariable = 1e8;
 
 Body1.ContactRole = "slave"; % Options: "master", "slave"
@@ -74,7 +74,7 @@ imax= 40;                     % Maximum number of iterations for Newton's method
 Body1 = CreateBC(Body1, Force1, Boundary1); % Application of Boundary conditions
 Body2 = CreateBC(Body2, Force2, Boundary2); % Application of Boundary conditions
 
-LoadType ="cubic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", etc.
+LoadType ="quadratic"; % "linear", "quadratic", "cubic", "quartic", "mixed_Stepvise", etc.
 backtrack = true; % staring back track for the best solution to find an equlibrium
 
 if backtrack 

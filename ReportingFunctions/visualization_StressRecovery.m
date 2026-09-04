@@ -12,7 +12,7 @@ function visualization_StressRecovery(Body,Show,name,FromGausElement)
         xloc = Body.xloc;
         faces = Body.BodyFaces;
         IsoData = Body.IsoData;
-        Shape        = Body.Shape;
+        Shape   = Body.Shape;
         SurfacePoints = Body.SurfacePointsFunction(Body.q); 
            
         getFaceCenterAndNormals = Body.getFaceCenterAndNormals;
@@ -65,9 +65,7 @@ function visualization_StressRecovery(Body,Show,name,FromGausElement)
 
         end
         points(:,4) = points(:,4)./counter;
-
-        h = patch('Faces',faces,'Vertices',points(:,1:3),'FaceVertexCData',points(:,4), ...
-            'FaceColor','interp','EdgeColor','k');
+        h = patch('Faces',faces,'Vertices',points(:,1:3),'FaceVertexCData',points(:,4),'FaceColor','interp','EdgeColor','k');
 
         colormap(turbo);
         cb = colorbar;

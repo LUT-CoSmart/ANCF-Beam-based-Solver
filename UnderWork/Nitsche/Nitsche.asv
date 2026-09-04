@@ -13,7 +13,11 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ] = Nitsch
 
         Normal_targ =  Data.NormalProjected';
         Normal_cont =  Data.ContactPointNormals';      
-     
+
+
+        
+
+
         % Penalty
         % Ftarg_loc =  penalty * gap * Normal_targ; % normal outward, but gap is negative
         % Fcont_loc =  penalty * gap * Normal_cont; % normal outward, but gap is negative 
@@ -22,6 +26,7 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ] = Nitsch
         % h_targ = max(struct2array(TargetBody.Length));
         % nabla_gap = Data.nabla_Gap;
         % nabla_Normal = Data.nabla_Normals;
+
                 
         q_targ= TargetBody.q(DOFs_targ);
         q0_targ= TargetBody.q0(DOFs_targ);
@@ -41,17 +46,18 @@ function [Fcont_loc, Ftarg_loc, DOFs_cont, DOFs_targ, Xi_cont, Xi_targ] = Nitsch
         Sigma_cont = ContactBody.Sigma(F_cont,S_cont);
         Sigma_cont_nn = Normal_cont' * Sigma_cont * Normal_cont;    
               
-        PointSurface = Data.ContactBodyPointSurface;
-        Sigma_nn_avg = 0.5 * (Sigma_cont_nn + Sigma_targ_nn)* PointSurface;
+        Sigma_nn_avg = 0.5 * (Sigma_targ_nn + Sigma_cont_nn);
+        
+        % [Sigma_targ_nn Sigma_cont_nn Sigma_nn_avg gap*penalty]
         
         % Nitsche contact-pressure trial value.
-        trial = Sigma_nn_avg+ penalty*gap;
-        %trial =  Sigma_nn_avg - penalty*gap;
+        trial = -Sigma_nn_avg+ penalty*gap;
         %trial =   penalty*gap;
         if trial < 0
             p_contact = trial;        
             Fcont_loc = p_contact * Normal_cont;
             Ftarg_loc = p_contact * Normal_targ;
+
         end
                 
 

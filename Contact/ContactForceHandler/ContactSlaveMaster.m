@@ -17,19 +17,24 @@ function [Fcont, Ftarg, Gap] = ContactSlaveMaster(ContactBody,TargetBody,Contact
 
           % ProjectionNitsche
 
-          Outcome = FindProjection(ContactBody, TargetBody);
-          
+          [Outcome,Inside] = FindProjection(ContactBody, TargetBody);
 
           % Checking the contact presence
           if ~isempty(Outcome)
-
-             if isequal(ContactType, @Nitsche)                 
+                
+             
+             if isequal(ContactType, @Nitsche)    
+               ContactBodyPointSurface = SurfacePointArea(ContactBody, ContactBody.q); 
+               ContactBodyPointSurface= ContactBodyPointSurface(Inside);
                Outcome  = GapGradient(TargetBody, Outcome);  
-             end
+               for i = 1:numel(Outcome)
+                    Outcome(i).ContactBodyPointSurface = ContactBodyPointSurface(i);
+               end
+            end
 
              for i = 1:numel(Outcome)  % loop over all points
+                 
                  Data  = Outcome(i);   
-
                  if Data.Gap > 0
                     error('gap is not correctly defined')
                  end       

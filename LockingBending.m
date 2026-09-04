@@ -13,9 +13,8 @@ IntegrationPoints = "Gaus"; % Options: "Gaus", "Lobatto"
 [Body,Force,Boundary] = CaseProblemSet(Body,string(mfilename) + CaseSubtype,"Standard",...
                         IntegrationPoints);  % Itegration Scheme: Poigen, Standard
 
-
 % ########## Create FE Model ##############################################
-ElementNumber = 12; 
+ElementNumber = 20; 
 Body = CreateFEM(Body,ElementNumber,"rectangulars"); % Options: triangles, rectangulars
 
 % ########## Calculation adjustments ######################################
@@ -62,13 +61,16 @@ for i=1:steps
 end
 
 % POST PROCESSING ###############################################
-visDeformed = false;
-visInitial = false;
-PostProcessing(Body,visDeformed,visInitial) 
+% visDeformed = true;
+% visInitial = true;
+% PostProcessing(Body,visDeformed,visInitial) 
+% 
+% FromGausElement = false; 
+% visualization_StressRecovery(Body,true,'VM',FromGausElement); 
 
-FromGausElement = true; 
-visualization_StressRecovery(Body,true,'VM',FromGausElement); 
+SurfacePointArea = SurfacePointArea(Body, Body.q);
 
-FromGausElement = false; 
-visualization_StressRecovery(Body,true,'VM',FromGausElement); 
+sum(SurfacePointArea)
+
+
 %CleanTemp(Body, true)

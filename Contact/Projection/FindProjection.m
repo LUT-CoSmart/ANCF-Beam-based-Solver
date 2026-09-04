@@ -1,4 +1,4 @@
-function Outcome = FindProjection(BodyToProject, Body)
+function [Outcome,Inside] = FindProjection(BodyToProject, Body)
         
         Outcome = [];
         tol = 2*sqrt(eps);                
@@ -38,6 +38,9 @@ function Outcome = FindProjection(BodyToProject, Body)
             % Surfaces = Body.BodySurfaceType;
             % highlight_face = faces(projected_faces, :); % Get the vertex indices of the selected face
             % Face = highlight_face(Inside,:);
+
+            
+
             for i = 1:n        
                 qk=q(xloc(idxInside(i),:)); % current element number
           
@@ -64,5 +67,6 @@ function Outcome = FindProjection(BodyToProject, Body)
                 Outcome(i).Gap                 = distancesInside(i);
                 Outcome(i).NormalProjected     = FaceNormal(i,:); 
                 Outcome(i).ContactPointNormals = PointInsideNormals(i,:); 
-            end 
+            
+            end
         end

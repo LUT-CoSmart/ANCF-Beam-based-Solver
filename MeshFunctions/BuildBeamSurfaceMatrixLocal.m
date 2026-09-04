@@ -40,3 +40,6 @@ function SurfaceShape = BuildBeamSurfaceMatrixLocal(Body)
     end
 
     SurfaceShape = sparse(I,J,V,Body.DIM*N_points,TotalDofs);
+
+
+    
